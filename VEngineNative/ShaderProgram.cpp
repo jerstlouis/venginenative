@@ -3,7 +3,7 @@
 #include "Media.h"
 
 
-ShaderProgram::ShaderProgram(string vertex, string fragment, string geometry = "", string tesscontrol = "", string tesseval = "")
+ShaderProgram::ShaderProgram(string vertex, string fragment, string geometry, string tesscontrol, string tesseval)
 {
     vertexFile = vertex;
     fragmentFile = fragment;
