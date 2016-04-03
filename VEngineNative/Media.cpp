@@ -42,17 +42,19 @@ void Media::loadFileMap(string path)
 
 string Media::readString(string key)
 {
-    return string(get_file_contents(mediaMap[key].c_str()));
+    return string(get_file_contents(getPath(key).c_str()));
 }
 
 string Media::getPath(string key)
 {
-    return mediaMap[key];
+    if (mediaMap.find(key) == mediaMap.end()) 
+        throw sprintf("File %s not found in media map", key.c_str());
+    return mediaMap.at(key);
 }
 
 int Media::readBinary(string key, char** out_bytes)
 {
-    return get_file_contents_binary(out_bytes, mediaMap[key].c_str());
+    return get_file_contents_binary(out_bytes, getPath(key).c_str());
 } 
 
 void Media::searchRecursive(string path)

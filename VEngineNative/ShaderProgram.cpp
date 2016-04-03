@@ -3,7 +3,7 @@
 #include "Media.h"
 
 
-ShaderProgram::ShaderProgram(string vertex, string fragment, string geometry = "", string tesscontrol = "", string tesseval = "")
+ShaderProgram::ShaderProgram(string vertex, string fragment, string geometry, string tesscontrol, string tesseval)
 {
     vertexFile = vertex;
     fragmentFile = fragment;
@@ -15,13 +15,184 @@ ShaderProgram::ShaderProgram(string vertex, string fragment, string geometry = "
 
 ShaderProgram::~ShaderProgram()
 {
+    glDeleteProgram(handle);
 }
 
 void ShaderProgram::use()
 {
     if (!generated)
         compile();
+    current = this;
     glUseProgram(handle);
+}
+
+void ShaderProgram::setUniform(string name, GLint value)
+{
+    glUniform1i(getUniformLocation(name), value);
+}
+
+void ShaderProgram::setUniform(string name, GLuint value)
+{
+    glUniform1ui(getUniformLocation(name), value);
+}
+
+void ShaderProgram::setUniform(string name, float value)
+{
+    glUniform1f(getUniformLocation(name), value);
+}
+
+void ShaderProgram::setUniform(string name, bool value)
+{
+    glUniform1i(getUniformLocation(name), value ? 1 : 0);
+}
+
+void ShaderProgram::setUniform(string name, glm::vec2 value)
+{
+    glUniform2f(getUniformLocation(name), value.x, value.y);
+}
+
+void ShaderProgram::setUniform(string name, glm::vec3 value)
+{
+    glUniform3f(getUniformLocation(name), value.x, value.y, value.z);
+}
+
+void ShaderProgram::setUniform(string name, glm::vec4 value)
+{
+    glUniform4f(getUniformLocation(name), value.x, value.y, value.z, value.w);
+}
+
+void ShaderProgram::setUniform(string name, glm::quat value)
+{
+    glUniform4f(getUniformLocation(name), value.x, value.y, value.z, value.w);
+}
+
+void ShaderProgram::setUniform(string name, glm::mat3 value)
+{
+    glUniformMatrix3fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
+}
+
+void ShaderProgram::setUniform(string name, glm::mat4 value)
+{
+    glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
+}
+
+void ShaderProgram::setUniformVector(string name, vector<GLint> value)
+{
+    glUniform1iv(getUniformLocation(name), value.size(), value.data());
+}
+
+void ShaderProgram::setUniformVector(string name, vector<GLuint> value)
+{
+    glUniform1uiv(getUniformLocation(name), value.size(), value.data());
+}
+
+void ShaderProgram::setUniformVector(string name, vector<float> value)
+{
+    glUniform1fv(getUniformLocation(name), value.size(), value.data());
+}
+
+void ShaderProgram::setUniformVector(string name, vector<glm::vec2> value)
+{
+    vector<float> floats;
+    for (int i = 0; i < value.size; i++) {
+        floats.push_back(value[i].x);
+        floats.push_back(value[i].y);
+    }
+    glUniform2fv(getUniformLocation(name), value.size(), floats.data());
+}
+
+void ShaderProgram::setUniformVector(string name, vector<glm::vec3> value)
+{
+    vector<float> floats;
+    for (int i = 0; i < value.size; i++) {
+        floats.push_back(value[i].x);
+        floats.push_back(value[i].y);
+        floats.push_back(value[i].z);
+    }
+    glUniform3fv(getUniformLocation(name), value.size(), floats.data());
+}
+
+void ShaderProgram::setUniformVector(string name, vector<glm::vec4> value)
+{
+    vector<float> floats;
+    for (int i = 0; i < value.size; i++) {
+        floats.push_back(value[i].x);
+        floats.push_back(value[i].y);
+        floats.push_back(value[i].z);
+        floats.push_back(value[i].w);
+    }
+    glUniform4fv(getUniformLocation(name), value.size(), floats.data());
+}
+
+void ShaderProgram::setUniformVector(string name, vector<glm::quat> value)
+{
+    vector<float> floats;
+    for (int i = 0; i < value.size; i++) {
+        floats.push_back(value[i].x);
+        floats.push_back(value[i].y);
+        floats.push_back(value[i].z);
+        floats.push_back(value[i].w);
+    }
+    glUniform4fv(getUniformLocation(name), value.size(), floats.data());
+}
+
+void ShaderProgram::setUniformVector(string name, vector<glm::mat3> value)
+{
+    vector<float> floats;
+    for (int i = 0; i < value.size; i++) {
+        floats.push_back(value[i][0][0]);
+        floats.push_back(value[i][0][1]);
+        floats.push_back(value[i][0][2]);
+
+        floats.push_back(value[i][1][0]);
+        floats.push_back(value[i][1][1]);
+        floats.push_back(value[i][1][2]);
+
+        floats.push_back(value[i][2][0]);
+        floats.push_back(value[i][2][1]);
+        floats.push_back(value[i][2][2]);
+    }
+    glUniformMatrix3fv(getUniformLocation(name), value.size(), GL_FALSE, floats.data());
+}
+
+void ShaderProgram::setUniformVector(string name, vector<glm::mat4> value)
+{
+    vector<float> floats;
+    for (int i = 0; i < value.size; i++) {
+        floats.push_back(value[i][0][0]);
+        floats.push_back(value[i][0][1]);
+        floats.push_back(value[i][0][2]);
+        floats.push_back(value[i][0][3]);
+
+        floats.push_back(value[i][1][0]);
+        floats.push_back(value[i][1][1]);
+        floats.push_back(value[i][1][2]);
+        floats.push_back(value[i][1][3]);
+
+        floats.push_back(value[i][2][0]);
+        floats.push_back(value[i][2][1]);
+        floats.push_back(value[i][2][2]);
+        floats.push_back(value[i][2][3]);
+
+        floats.push_back(value[i][3][0]);
+        floats.push_back(value[i][3][1]);
+        floats.push_back(value[i][3][2]);
+        floats.push_back(value[i][3][3]);
+    }
+    glUniformMatrix4fv(getUniformLocation(name), value.size(), GL_FALSE, floats.data());
+}
+
+GLint ShaderProgram::getUniformLocation(string name)
+{
+    if (!generated) return -1;
+    if (uniformLocationsMap.find(name) == uniformLocationsMap.end()) {
+        GLuint location = glGetUniformLocation(handle, name.c_str());
+        uniformLocationsMap[name] = location;
+        return location;
+    }
+    else {
+        return uniformLocationsMap.at(name);
+    }
 }
 
 void ShaderProgram::compile()
@@ -46,7 +217,7 @@ void ShaderProgram::compile()
         GLuint tesseHandle = compileSingleShader(GL_TESS_EVALUATION_SHADER, tessEvalFile, Media::readString(tessEvalFile));
         glAttachShader(handle, tesseHandle);
     }
-    glLinkProgram(handle); 
+    glLinkProgram(handle);
     GLint status;
     glGetProgramiv(handle, GL_LINK_STATUS, &status);
     if (status != 1) {
