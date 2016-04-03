@@ -36,6 +36,8 @@ using namespace std;
 #include "glm/mat4x4.hpp" // glm::mat4
 #include "glm/gtc/matrix_transform.hpp" // glm::translate, glm::rotate, glm::scale, glm::perspective
 #include "glm/gtc/constants.hpp" // glm::pi 
+#include "glm/gtc/quaternion.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 #define PI 3.14159265358979323846
 #define rad2deg(a) (a * (180.0 / PI))
