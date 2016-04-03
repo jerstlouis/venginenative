@@ -1,17 +1,26 @@
 #pragma once
+#include "glfw.h";
 
 class Game
 {
 public:
 
-    GLFWwindow* window;
+    GLFWwindow *window;
 
-    Game(string title, int width, int height);
+
+    int width;
+    int height;
+
+    Game(int windowwidth, int windowheight);
     ~Game();
-
-private:
+    void start();
+    void invoke(const function<void(void)> &func);
     bool shouldClose;
 
+private:
+
+    queue<function<void(void)>> invokeQueue;
+    void renderThread();
     void onRenderFrame();
 };
 

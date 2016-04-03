@@ -21,12 +21,16 @@
 #include <map>
 #include <unordered_set>
 #include <functional>
-//#include <thread>
+#include <thread>
 #include <algorithm>
+#include <queue>
 #include <regex>
 
 using namespace std;
 #include "../VEngineNative/Media.h";
+
+#include "../VEngineNative/Game.h";
+
 
 
 // TODO: reference additional headers your program requires here
