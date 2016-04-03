@@ -1,0 +1,84 @@
+#include "stdafx.h"
+#include "Media.h"
+#include "tinydir.h"
+
+map<string, string> Media::mediaMap = {};
+
+static int fsize(FILE* fh) {
+    int prev = ftell(fh);
+    fseek(fh, 0L, SEEK_END);
+    int sz = ftell(fh);
+    fseek(fh, prev, SEEK_SET);
+    return sz;
+}
+
+char* get_file_contents(const char* path) {
+    FILE* fh = fopen(path, "r");
+    int size = fsize(fh);
+    char* content = (char*)calloc(size + 1, sizeof(char));
+    int sz = fread(content, sizeof(char), size, fh);
+    content = (char*)realloc(content, sizeof(char) * sz + 1);
+    content[sz] = 0;
+    fclose(fh);
+    return content;
+}
+
+int get_file_contents_binary(char** out_bytes, const char* path) {
+    FILE* fh = fopen(path, "rb");
+    int size = fsize(fh);
+    char* content = (char*)calloc(size, 1);
+    int sz = fread(content, 1, size, fh);
+    fclose(fh);
+    *out_bytes = content;
+    return size;
+}
+
+
+void Media::loadFileMap(string path)
+{
+    mediaMap = {};
+    searchRecursive(path);
+}
+
+string Media::readString(string key)
+{
+    return string(get_file_contents(mediaMap[key].c_str()));
+}
+
+string Media::getPath(string key)
+{
+    return mediaMap[key];
+}
+
+int Media::readBinary(string key, char** out_bytes)
+{
+    return get_file_contents_binary(out_bytes, mediaMap[key].c_str());
+} 
+
+void Media::searchRecursive(string path)
+{
+    vector<string> foundDirs;
+    tinydir_dir dir;
+    int i;
+    tinydir_open_sorted(&dir, path.c_str());
+
+    for (i = 0; i < dir.n_files; i++)
+    {
+        tinydir_file file;
+        tinydir_readfile_n(&dir, &file, i);
+
+        if (file.name[0] != '.' && (file.name[0] != '/' && file.name[1] != '.')) {
+            if (file.is_dir)
+            {
+                foundDirs.push_back(file.path);
+            }
+            else {
+                mediaMap[file.name] = file.path;
+            }
+        }
+    }
+    tinydir_close(&dir);
+    for (int i = 0; i < foundDirs.size(); i++)
+        searchRecursive(foundDirs[i]);
+    foundDirs.clear();
+}
