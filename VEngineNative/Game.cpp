@@ -6,6 +6,8 @@ Game::Game(int windowwidth, int windowheight)
 {
     width = windowwidth;
     height = windowheight;
+    invokeQueue = {};
+    onRenderFrame = {};
 }
 
 
@@ -22,6 +24,11 @@ void Game::start()
 void Game::invoke(const function<void(void)> &func)
 {
     invokeQueue.push(func);
+}
+
+void Game::addOnRenderFrame(const function<void(void)>& func)
+{
+    onRenderFrame.push_back(func);
 }
 
 void Game::renderThread()
@@ -48,7 +55,7 @@ void Game::renderThread()
     shouldClose = false;
     while (!glfwWindowShouldClose(window) && !shouldClose)
     {
-        onRenderFrame();
+        onRenderFrameFunc();
 
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -56,11 +63,14 @@ void Game::renderThread()
     shouldClose = true;
 }
 
-void Game::onRenderFrame()
+void Game::onRenderFrameFunc()
 {
     while (invokeQueue.size() > 0) {
         invokeQueue.front()();
         invokeQueue.pop();
+    }
+    for (int i = 0; i < onRenderFrame.size; i++) {
+        onRenderFrame[i]();
     }
 
 }

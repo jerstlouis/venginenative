@@ -1,7 +1,6 @@
 #pragma once
 #include "AbsTransformable.h"
 #include "FrustumCone.h"
-using namespace glm;
 class Camera : AbsTransformable
 {
 public:
@@ -12,7 +11,9 @@ public:
     float brightness;
     float farplane;
     FrustumCone *cone;
-    mat4 projectionMatrix;
+    glm::mat4 projectionMatrix;
+
+    void createProjectionPerspective(float fov, float aspectRatio, float nearpl, float farpl);
 
 };
 

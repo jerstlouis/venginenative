@@ -1,17 +1,16 @@
 #pragma once
-using namespace glm;
 class FrustumCone
 {
 public:
     FrustumCone();
     ~FrustumCone();
-    vec3 origin;
-    vec3 leftBottom;
-    vec3 leftTop;
-    vec3 rightBottom;
-    vec3 rightTop;
-    void update(vec3 origin, mat4 viewmatrix, mat4 projmatrix);
+    glm::vec3 origin;
+    glm::vec3 leftBottom;
+    glm::vec3 leftTop;
+    glm::vec3 rightBottom;
+    glm::vec3 rightTop;
+    void update(glm::vec3 origin, glm::mat4 viewmatrix, glm::mat4 projmatrix);
 private:
-    vec3 getDir(vec3 origin, vec2 uv, mat4 inv);
+    glm::vec3 getDir(glm::vec3 origin, glm::vec2 uv, glm::mat4 inv);
 };
 

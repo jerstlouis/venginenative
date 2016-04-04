@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "TransformationManager.h"
 
+using namespace glm;
 
 TransformationManager::TransformationManager()
 {

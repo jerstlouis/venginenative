@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "FrustumCone.h"
 
+using namespace glm;
 
 FrustumCone::FrustumCone()
 {

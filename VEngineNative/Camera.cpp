@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Camera.h"
 
+using namespace glm;
 
 Camera::Camera()
 {
@@ -13,4 +14,10 @@ Camera::Camera()
 
 Camera::~Camera()
 {
+}
+
+void Camera::createProjectionPerspective(float fov, float aspectRatio, float nearpl, float farpl)
+{
+    farplane = farpl;
+    projectionMatrix = perspective(fov, aspectRatio, nearpl, farpl);
 }

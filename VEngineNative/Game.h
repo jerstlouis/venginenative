@@ -15,12 +15,14 @@ public:
     ~Game();
     void start();
     void invoke(const function<void(void)> &func);
+    void addOnRenderFrame(const function<void(void)> &func);
     bool shouldClose;
 
 private:
 
     queue<function<void(void)>> invokeQueue;
+    vector<function<void(void)>> onRenderFrame;
     void renderThread();
-    void onRenderFrame();
+    void onRenderFrameFunc();
 };
 
