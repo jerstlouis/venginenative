@@ -15,4 +15,3 @@ int main()
     while (!game->shouldClose);
     return 0;
 }
-
