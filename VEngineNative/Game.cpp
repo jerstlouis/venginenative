@@ -130,8 +130,17 @@ void Game::renderThread()
     glDepthFunc(GL_LEQUAL);
 
     shouldClose = false;
+    double lastTime = glfwGetTime();
+    int nbFrames = 0;
     while (!glfwWindowShouldClose(window) && !shouldClose)
     {
+        double currentTime = glfwGetTime();
+        nbFrames++;
+        if (currentTime - lastTime >= 1.0) {
+            printf("%f ms/frame = Frames %d\n", 1.0 / double(nbFrames), nbFrames);
+            nbFrames = 0;
+            lastTime = currentTime;
+        }
         onRenderFrameFunc();
 
         glfwSwapBuffers(window);

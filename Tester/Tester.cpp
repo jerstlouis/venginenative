@@ -46,9 +46,10 @@ int main()
     glm::quat rot = glm::quat_cast(glm::lookAt(cam->transformation->position, glm::vec3(0), glm::vec3(0, 1, 0)));
     cam->transformation->setOrientation(rot);
 
-    game->addOnRenderFrame([teapot, cam]() {
+    game->addOnRenderFrame([]() {
        // teapot->getInstance(0)->transformation->rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
         //cam->transformation->rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
+
     });
     
     game->world->scene->addMesh(teapot);
@@ -61,16 +62,7 @@ int main()
 
     game->setCursorMode(GLFW_CURSOR_DISABLED);
 
-    double lastTime = 0;
-    int nbFrames = 0;
     while (!game->shouldClose) {
-        double currentTime = glfwGetTime();
-        nbFrames++;
-        if (currentTime - lastTime >= 1.0) {
-            printf("%f ms/frame = %f FPS\n", 1000.0 / double(nbFrames), 1.0 / (1000.0 / double(nbFrames)));
-            nbFrames = 0;
-            lastTime += 1.0;
-        }
 
         // process logic - on another thread
         if (game->getKeyStatus(GLFW_KEY_W) == GLFW_PRESS) {
