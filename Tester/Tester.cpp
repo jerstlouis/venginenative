@@ -19,8 +19,15 @@ int main()
     Game *game = new Game(1366, 768);
     game->start();
     game->invoke([]() {
-        printf("abc");
     });
+
+    Camera *cam = new Camera();
+    cam->createProjectionPerspective(deg2rad(90.0), 1366.0 / 768.0, 0.01, 1000);
+    cam->transformation->translate(glm::vec3(0, 0, 4));
+    glm::quat rot = glm::quat_cast(glm::lookAt(cam->transformation->position, glm::vec3(0), glm::vec3(0, 1, 0)));
+    cam->transformation->setOrientation(rot);
+    game->world->mainDisplayCamera = cam;
+    game->world->currentCamera = cam;
 
     Material *mat = new Material();
     mat->diffuseTexture = new Texture("1a.jpg");
@@ -38,13 +45,9 @@ int main()
     game->invoke([teapot]() {
         teapot->updateBuffers();
     });
-    
 
-    Camera *cam = new Camera();
-    cam->createProjectionPerspective(deg2rad(90.0), 1366.0 / 768.0, 0.01, 1000);
-    cam->transformation->translate(glm::vec3(0, 0, 4));
-    glm::quat rot = glm::quat_cast(glm::lookAt(cam->transformation->position, glm::vec3(0), glm::vec3(0, 1, 0)));
-    cam->transformation->setOrientation(rot);
+    game->world->scene->addMesh(teapot);
+
 
     game->addOnRenderFrame([]() {
        // teapot->getInstance(0)->transformation->rotate(glm::angleAxis(0.01f, glm::vec3(0, 1, 0)));
@@ -52,9 +55,6 @@ int main()
 
     });
     
-    game->world->scene->addMesh(teapot);
-    game->world->mainDisplayCamera = cam;
-    game->world->currentCamera = cam;
 
     float yaw = 0.0f, pitch = 0.0f;
     float lastcx = 0.0f, lastcy = 0.0;
@@ -67,19 +67,19 @@ int main()
         // process logic - on another thread
         if (game->getKeyStatus(GLFW_KEY_W) == GLFW_PRESS) {
             glm::vec3 dir = cam->transformation->orientation * glm::vec3(0, 0, -1);
-            cam->transformation->translate(dir * 0.0001f);
+            cam->transformation->translate(dir * 0.00001f);
         }
         if (game->getKeyStatus(GLFW_KEY_S) == GLFW_PRESS) {
             glm::vec3 dir = cam->transformation->orientation * glm::vec3(0, 0, 1);
-            cam->transformation->translate(dir * 0.0001f);
+            cam->transformation->translate(dir * 0.00001f);
         }
         if (game->getKeyStatus(GLFW_KEY_A) == GLFW_PRESS) {
             glm::vec3 dir = cam->transformation->orientation * glm::vec3(-1, 0, 0);
-            cam->transformation->translate(dir * 0.0001f);
+            cam->transformation->translate(dir * 0.00001f);
         }
         if (game->getKeyStatus(GLFW_KEY_D) == GLFW_PRESS) {
             glm::vec3 dir = cam->transformation->orientation * glm::vec3(1, 0, 0);
-            cam->transformation->translate(dir * 0.0001f);
+            cam->transformation->translate(dir * 0.00001f);
         }
         if (game->getKeyStatus(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             game->shouldClose = true;
@@ -94,8 +94,8 @@ int main()
         float dy = lastcy - cursor.y;
         lastcx = cursor.x;
         lastcy = cursor.y;
-        yaw += dy * 0.1f;
-        pitch += dx * 0.1f;
+        yaw += dy * 0.2f;
+        pitch += dx * 0.2f;
         if (yaw < -90.0) yaw = -90;
         if (yaw > 90.0) yaw = 90;
         if (pitch < -360.0) pitch += 360.0;

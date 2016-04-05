@@ -5,13 +5,15 @@ Game * Game::instance = nullptr;
 
 Game::Game(int windowwidth, int windowheight)
 {
+    instance = this;
     width = windowwidth;
     height = windowheight;
     invokeQueue = {};
     onRenderFrame = {};
     world = new World();
+    renderer = new Renderer();
     shaders = new GenericShaders();
-    instance = this;
+    screenFbo = new Framebuffer(width, height, 0);
 }
 
 
@@ -159,8 +161,6 @@ void Game::onRenderFrameFunc()
         onRenderFrame[i]();
     }
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    world->draw();
+    renderer->renderToFramebuffer(screenFbo);
 }
 

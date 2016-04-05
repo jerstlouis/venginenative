@@ -1,6 +1,7 @@
 #pragma once
 #include "glfw.h";
 #include "World.h";
+#include "Renderer.h";
 #include "GenericShaders.h";
 
 class Game
@@ -10,6 +11,8 @@ public:
     GLFWwindow *window;
     World *world;
     GenericShaders *shaders;
+    Renderer *renderer;
+    Framebuffer *screenFbo;
     static Game *instance;
 
     int width;

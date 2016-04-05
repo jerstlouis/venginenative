@@ -162,6 +162,7 @@
     <ClInclude Include="Mesh3dLodLevel.h" />
     <ClInclude Include="Object3dInfo.h" />
     <ClInclude Include="Object3dManager.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="ShaderProgram.h" />
     <ClInclude Include="ShaderStorageBuffer.h" />
@@ -188,6 +189,7 @@
     <ClCompile Include="Mesh3dLodLevel.cpp" />
     <ClCompile Include="Object3dInfo.cpp" />
     <ClCompile Include="Object3dManager.cpp" />
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ShaderProgram.cpp" />
     <ClCompile Include="ShaderStorageBuffer.cpp" />
