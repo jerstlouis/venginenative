@@ -13,12 +13,13 @@ public:
     void addLodLevel(Mesh3dLodLevel *level);
     void clearInstances();
     void clearLodLevels();
-    vector<Mesh3dInstance> getInstances();
-    vector<Mesh3dLodLevel> getLodLevels();
+    vector<Mesh3dInstance*>& getInstances();
+    vector<Mesh3dLodLevel*>& getLodLevels();
     Mesh3dInstance *getInstance(int index);
     Mesh3dLodLevel *getLodLevel(int index);
-    void removeInstance(Mesh3dInstance instance);
-    void removeLodLevel(Mesh3dLodLevel level);
+    void removeInstance(Mesh3dInstance* instance);
+    void removeLodLevel(Mesh3dLodLevel* level);
+    void updateBuffers();
     void draw();
 private:
     vector<Mesh3dInstance*> instances;

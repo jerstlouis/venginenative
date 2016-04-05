@@ -2,13 +2,13 @@
 #include "TransformationManager.h"
 class AbsTransformable
 {
-protected:
-    void initTransformation();
 public:
-    TransformationManager *Transformation;
+    TransformationManager *transformation;
     virtual ~AbsTransformable()
     {
-        delete Transformation;
+        delete transformation;
     }
+protected:
+    void initTransformation();
 };
 

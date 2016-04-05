@@ -1,13 +1,12 @@
 #pragma once
 #include "AbsTransformable.h"
 #include "FrustumCone.h"
-class Camera : AbsTransformable
+class Camera : public AbsTransformable
 {
 public:
     Camera();
     ~Camera();
 
-    static Camera *current;
     float brightness;
     float farplane;
     FrustumCone *cone;

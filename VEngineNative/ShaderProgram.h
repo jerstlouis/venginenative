@@ -48,6 +48,7 @@ private:
 
     GLint getUniformLocation(string name);
     void compile();
+    string resolveIncludes(string source);
     GLuint compileSingleShader(GLenum type, string filename, string source);
 };
 

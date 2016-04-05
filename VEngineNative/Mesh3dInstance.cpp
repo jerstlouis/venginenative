@@ -9,7 +9,7 @@ Mesh3dInstance::Mesh3dInstance()
 
 Mesh3dInstance::Mesh3dInstance(TransformationManager * transmgr)
 {
-    Transformation = transmgr;
+    transformation = transmgr;
 }
 
 

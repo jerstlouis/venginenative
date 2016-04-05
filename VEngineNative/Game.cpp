@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Game.h"
 
+Game * Game::instance = nullptr;
 
 Game::Game(int windowwidth, int windowheight)
 {
@@ -8,6 +9,9 @@ Game::Game(int windowwidth, int windowheight)
     height = windowheight;
     invokeQueue = {};
     onRenderFrame = {};
+    world = new World();
+    shaders = new GenericShaders();
+    instance = this;
 }
 
 
@@ -29,6 +33,23 @@ void Game::invoke(const function<void(void)> &func)
 void Game::addOnRenderFrame(const function<void(void)>& func)
 {
     onRenderFrame.push_back(func);
+}
+
+int Game::getKeyStatus(int key)
+{
+    return glfwGetKey(window, key);
+}
+
+void Game::setCursorMode(int mode)
+{
+    glfwSetInputMode(window, GLFW_CURSOR, mode);
+}
+
+glm::dvec2 Game::getCursorPosition()
+{
+    double xpos, ypos;
+    glfwGetCursorPos(window, &xpos, &ypos);
+    return glm::dvec2(xpos, ypos);
 }
 
 void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
@@ -83,6 +104,7 @@ void Game::renderThread()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     window = glfwCreateWindow(width, height, "VENGINE", NULL, NULL);
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, 1);
     if (!window)
     {
         printf("ERROR: Cannot create window or context!\n");
@@ -101,6 +123,11 @@ void Game::renderThread()
     glDebugMessageCallback(&debugCallback, NULL);
 
     printf("VERSION: %s\nVENDOR: %s", glGetString(GL_VERSION), glGetString(GL_VENDOR));
+
+    glClearColor(1, 1, 1, 0);
+    glClearDepth(1);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
 
     shouldClose = false;
     while (!glfwWindowShouldClose(window) && !shouldClose)
@@ -123,5 +150,8 @@ void Game::onRenderFrameFunc()
         onRenderFrame[i]();
     }
 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    world->draw();
 }
 

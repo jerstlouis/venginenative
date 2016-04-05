@@ -2,6 +2,7 @@
 #include "ShaderProgram.h"
 #include "Media.h"
 
+ShaderProgram * ShaderProgram::current = nullptr;
 
 ShaderProgram::ShaderProgram(string vertex, string fragment, string geometry, string tesscontrol, string tesseval)
 {
@@ -232,11 +233,30 @@ void ShaderProgram::compile()
     generated = true;
 }
 
+string ShaderProgram::resolveIncludes(string source)
+{
+    string src = source;
+    regex includeregex("\\#include (.+)\n");
+    smatch match;
+    while (regex_search(src, match, includeregex)) {
+        int pos = match.position();
+        int len = match.length();
+        string group = match[1];
+        string includedSrc = resolveIncludes(Media::readString(group));
+        stringstream ss;
+        ss << src.substr(0, pos) << "\n" << includedSrc << "\n" << src.substr(pos + len);
+        src = ss.str();
+    }
+    return src;
+}
+
 GLuint ShaderProgram::compileSingleShader(GLenum type, string filename, string source)
 {
     printf("Compiling shader %s\n", filename.c_str());
+    string resolved = resolveIncludes(source);
+    printf("Compiling source %s\n", resolved.c_str());
     GLuint shader = glCreateShader(type);
-    const char* cstr = source.c_str();
+    const char* cstr = resolved.c_str();
     glShaderSource(shader, 1, &cstr, NULL);
     glCompileShader(shader);
     GLint status;

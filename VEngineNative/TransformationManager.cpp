@@ -52,3 +52,11 @@ mat4 TransformationManager::getWorldTransform()
     mat4 scalemat = glm::scale(mat4(1), size);
     return transmat * rotmat * scalemat;
 }
+
+mat4 TransformationManager::getInverseWorldTransform()
+{
+    mat4 rotmat = glm::mat4_cast(inverse(orientation));
+    mat4 scalemat = glm::scale(mat4(1), size);
+    mat4 transmat = glm::translate(mat4(1), -position);
+    return rotmat * scalemat * transmat;
+}

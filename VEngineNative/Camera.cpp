@@ -11,7 +11,6 @@ Camera::Camera()
     farplane = 1000.0;
 }
 
-
 Camera::~Camera()
 {
 }

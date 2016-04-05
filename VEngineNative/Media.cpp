@@ -23,10 +23,10 @@ char* get_file_contents(const char* path) {
     return content;
 }
 
-int get_file_contents_binary(char** out_bytes, const char* path) {
+int get_file_contents_binary(unsigned char** out_bytes, const char* path) {
     FILE* fh = fopen(path, "rb");
     int size = fsize(fh);
-    char* content = (char*)calloc(size, 1);
+    unsigned char* content = (unsigned char*)calloc(size, 1);
     int sz = fread(content, 1, size, fh);
     fclose(fh);
     *out_bytes = content;
@@ -36,7 +36,6 @@ int get_file_contents_binary(char** out_bytes, const char* path) {
 
 void Media::loadFileMap(string path)
 {
-    mediaMap = {};
     searchRecursive(path);
 }
 
@@ -52,7 +51,7 @@ string Media::getPath(string key)
     return mediaMap.at(key);
 }
 
-int Media::readBinary(string key, char** out_bytes)
+int Media::readBinary(string key, unsigned char** out_bytes)
 {
     return get_file_contents_binary(out_bytes, getPath(key).c_str());
 } 

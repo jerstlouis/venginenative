@@ -3,14 +3,14 @@ class Texture
 {
 public:
     Texture(GLuint ihandle);
-    Texture(string filekey, int channels);
+    Texture(string filekey);
     ~Texture();
     GLuint handle;
     int components;
     unsigned char* data;
     int width, height;
     bool generated;
-    void use(GLenum unit);
+    void use(int unit);
 private:
     void generate();
 };

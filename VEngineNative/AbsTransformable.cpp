@@ -3,5 +3,5 @@
 
 void AbsTransformable::initTransformation()
 {
-    Transformation = new TransformationManager();
+    transformation = new TransformationManager();
 }

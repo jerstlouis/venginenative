@@ -18,5 +18,6 @@ public:
     void rotate(glm::quat value);
 
     glm::mat4 getWorldTransform();
+    glm::mat4 getInverseWorldTransform();
 };
 
