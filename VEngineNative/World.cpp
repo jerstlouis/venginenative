@@ -21,7 +21,7 @@ void World::draw(ShaderProgram *shader, Camera *camera)
     glm::mat4 cameraViewMatrix = camera->transformation->getInverseWorldTransform();
     glm::mat4 vpmatrix = camera->projectionMatrix * cameraViewMatrix;
     camera->cone->update(camera->transformation->position, vpmatrix);
-    shader->setUniform("VPMatrix", camera->projectionMatrix * cameraViewMatrix);
+    shader->setUniform("VPMatrix", vpmatrix);
     shader->setUniform("Resolution", glm::vec2(Game::instance->width, Game::instance->height));
     shader->setUniform("CameraPosition", camera->transformation->position);
     scene->draw();

@@ -10,7 +10,10 @@ Light::Light()
     shadowMappingEnabled = false;
     shadowMapWidth = 1;
     shadowMapHeight = 1;
+    cutOffDistance = 10000;
+    angle = deg2rad(90);
     lightCamera = new Camera();
+    delete lightCamera->transformation;
 }
 
 Light::~Light()

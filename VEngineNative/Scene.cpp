@@ -23,3 +23,18 @@ void Scene::addMesh(Mesh3d * mesh)
 {
     meshes.push_back(mesh);
 }
+
+void Scene::addLight(Light * light)
+{
+    lights.push_back(light);
+}
+
+vector<Mesh3d*>& Scene::getMeshes()
+{
+    return meshes;
+}
+
+vector<Light*>& Scene::getLights()
+{
+    return lights;
+}

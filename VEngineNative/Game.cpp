@@ -126,7 +126,7 @@ void Game::renderThread()
 
     printf("VERSION: %s\nVENDOR: %s", glGetString(GL_VERSION), glGetString(GL_VENDOR));
 
-    glClearColor(1, 1, 1, 0);
+    glClearColor(0, 0, 0, 0);
     glClearDepth(1);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);

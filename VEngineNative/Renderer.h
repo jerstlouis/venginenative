@@ -14,8 +14,17 @@ private:
     Texture *mrtNormalMetalnessTex;
     Texture *mrtDistanceTexture;
     Texture *depthTexture;
+
     Framebuffer *fbo;
+
+    Framebuffer *deferredFbo;
+    Texture *deferredTexture;
+    ShaderProgram *deferredShader;
+
     ShaderProgram *outputShader;
+
     Object3dInfo *quad3dInfo;
+
+    void deferred();
 };
 

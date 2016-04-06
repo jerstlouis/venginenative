@@ -32,6 +32,8 @@ using namespace std;
 #include "glad.h"
 #include "glfw.h"
 
+#define glAssert() {if(glGetError() != GL_NO_ERROR) printf("ERROR ON LINE [%d] %s", __LINE__, __FILE__);}
+
 #include "glm/vec3.hpp" // glm::vec3
 #include "glm/vec4.hpp" // glm::vec4
 #include "glm/mat4x4.hpp" // glm::mat4

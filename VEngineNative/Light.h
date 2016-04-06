@@ -2,6 +2,7 @@
 #include "AbsTransformable.h"
 #include "Texture.h"
 #include "Framebuffer.h"
+#include "Camera.h"
 class Light : public AbsTransformable
 {
 public:
@@ -14,14 +15,14 @@ public:
     void switchShadowMapping(bool value);
     void bindShadowMap(int index);
     void refreshShadowMap();
-private:
+    Camera *lightCamera;
     bool shadowMappingEnabled;
+private:
     int shadowMapWidth;
     int shadowMapHeight;
     Texture *depthMap;
     Framebuffer *mapper;
     void recreateFbo();
     void destroyFbo();
-    Camera *lightCamera;
 };
 

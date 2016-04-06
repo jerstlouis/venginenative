@@ -29,92 +29,124 @@ void ShaderProgram::use()
 
 void ShaderProgram::setUniform(string name, GLint value)
 {
-    glUniform1i(getUniformLocation(name), value);
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
+    glUniform1i(location, value);
 }
 
 void ShaderProgram::setUniform(string name, GLuint value)
 {
-    glUniform1ui(getUniformLocation(name), value);
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
+    glUniform1ui(location, value);
 }
 
 void ShaderProgram::setUniform(string name, float value)
 {
-    glUniform1f(getUniformLocation(name), value);
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
+    glUniform1f(location, value);
 }
 
 void ShaderProgram::setUniform(string name, bool value)
 {
-    glUniform1i(getUniformLocation(name), value ? 1 : 0);
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
+    glUniform1i(location, value ? 1 : 0);
 }
 
 void ShaderProgram::setUniform(string name, glm::vec2 value)
 {
-    glUniform2f(getUniformLocation(name), value.x, value.y);
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
+    glUniform2f(location, value.x, value.y);
 }
 
 void ShaderProgram::setUniform(string name, glm::vec3 value)
 {
-    glUniform3f(getUniformLocation(name), value.x, value.y, value.z);
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
+    glUniform3f(location, value.x, value.y, value.z);
 }
 
 void ShaderProgram::setUniform(string name, glm::vec4 value)
 {
-    glUniform4f(getUniformLocation(name), value.x, value.y, value.z, value.w);
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
+    glUniform4f(location, value.x, value.y, value.z, value.w);
 }
 
 void ShaderProgram::setUniform(string name, glm::quat value)
 {
-    glUniform4f(getUniformLocation(name), value.x, value.y, value.z, value.w);
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
+    glUniform4f(location, value.x, value.y, value.z, value.w);
 }
 
 void ShaderProgram::setUniform(string name, glm::mat3 value)
 {
-    glUniformMatrix3fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
+    glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
 void ShaderProgram::setUniform(string name, glm::mat4 value)
 {
-    glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE, glm::value_ptr(value));
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
 void ShaderProgram::setUniformVector(string name, vector<GLint> value)
 {
-    glUniform1iv(getUniformLocation(name), (GLsizei)value.size(), value.data());
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
+    glUniform1iv(location, (GLsizei)value.size(), value.data());
 }
 
 void ShaderProgram::setUniformVector(string name, vector<GLuint> value)
 {
-    glUniform1uiv(getUniformLocation(name), (GLsizei)value.size(), value.data());
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
+    glUniform1uiv(location, (GLsizei)value.size(), value.data());
 }
 
 void ShaderProgram::setUniformVector(string name, vector<float> value)
 {
-    glUniform1fv(getUniformLocation(name), (GLsizei)value.size(), value.data());
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
+    glUniform1fv(location, (GLsizei)value.size(), value.data());
 }
 
 void ShaderProgram::setUniformVector(string name, vector<glm::vec2> value)
 {
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
     vector<float> floats;
     for (int i = 0; i < value.size(); i++) {
         floats.push_back(value[i].x);
         floats.push_back(value[i].y);
     }
-    glUniform2fv(getUniformLocation(name), (GLsizei)value.size(), floats.data());
+    glUniform2fv(location, (GLsizei)value.size(), floats.data());
 }
 
 void ShaderProgram::setUniformVector(string name, vector<glm::vec3> value)
 {
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
     vector<float> floats;
     for (int i = 0; i < value.size(); i++) {
         floats.push_back(value[i].x);
         floats.push_back(value[i].y);
         floats.push_back(value[i].z);
     }
-    glUniform3fv(getUniformLocation(name), (GLsizei)value.size(), floats.data());
+    glUniform3fv(location, (GLsizei)value.size(), floats.data());
 }
 
 void ShaderProgram::setUniformVector(string name, vector<glm::vec4> value)
 {
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
     vector<float> floats;
     for (int i = 0; i < value.size(); i++) {
         floats.push_back(value[i].x);
@@ -122,11 +154,13 @@ void ShaderProgram::setUniformVector(string name, vector<glm::vec4> value)
         floats.push_back(value[i].z);
         floats.push_back(value[i].w);
     }
-    glUniform4fv(getUniformLocation(name), (GLsizei)value.size(), floats.data());
+    glUniform4fv(location, (GLsizei)value.size(), floats.data());
 }
 
 void ShaderProgram::setUniformVector(string name, vector<glm::quat> value)
 {
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
     vector<float> floats;
     for (int i = 0; i < value.size(); i++) {
         floats.push_back(value[i].x);
@@ -134,11 +168,13 @@ void ShaderProgram::setUniformVector(string name, vector<glm::quat> value)
         floats.push_back(value[i].z);
         floats.push_back(value[i].w);
     }
-    glUniform4fv(getUniformLocation(name), (GLsizei)value.size(), floats.data());
+    glUniform4fv(location, (GLsizei)value.size(), floats.data());
 }
 
 void ShaderProgram::setUniformVector(string name, vector<glm::mat3> value)
 {
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
     vector<float> floats;
     for (int i = 0; i < value.size(); i++) {
         floats.push_back(value[i][0][0]);
@@ -153,11 +189,13 @@ void ShaderProgram::setUniformVector(string name, vector<glm::mat3> value)
         floats.push_back(value[i][2][1]);
         floats.push_back(value[i][2][2]);
     }
-    glUniformMatrix3fv(getUniformLocation(name), (GLsizei)value.size(), GL_FALSE, floats.data());
+    glUniformMatrix3fv(location, (GLsizei)value.size(), GL_FALSE, floats.data());
 }
 
 void ShaderProgram::setUniformVector(string name, vector<glm::mat4> value)
 {
+    GLint location = getUniformLocation(name);
+    if (location < 0) return;
     vector<float> floats;
     for (int i = 0; i < value.size(); i++) {
         floats.push_back(value[i][0][0]);
@@ -180,7 +218,7 @@ void ShaderProgram::setUniformVector(string name, vector<glm::mat4> value)
         floats.push_back(value[i][3][2]);
         floats.push_back(value[i][3][3]);
     }
-    glUniformMatrix4fv(getUniformLocation(name), (GLsizei)value.size(), GL_FALSE, floats.data());
+    glUniformMatrix4fv(location, (GLsizei)value.size(), GL_FALSE, floats.data());
 }
 
 GLint ShaderProgram::getUniformLocation(string name)
@@ -252,9 +290,9 @@ string ShaderProgram::resolveIncludes(string source)
 
 GLuint ShaderProgram::compileSingleShader(GLenum type, string filename, string source)
 {
-    printf("Compiling shader %s\n", filename.c_str());
+  //  printf("Compiling shader %s\n", filename.c_str());
     string resolved = resolveIncludes(source);
-    printf("Compiling source %s\n", resolved.c_str());
+ //   printf("Compiling source %s\n", resolved.c_str());
     GLuint shader = glCreateShader(type);
     const char* cstr = resolved.c_str();
     glShaderSource(shader, 1, &cstr, NULL);

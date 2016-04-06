@@ -41,7 +41,7 @@ Mesh3dLodLevel::~Mesh3dLodLevel()
 
 void Mesh3dLodLevel::draw()
 {
-    ShaderProgram *shader = Game::instance->shaders->materialShader;
+    ShaderProgram *shader = ShaderProgram::current;
     shader->setUniform("Roughness", material->roughness);
     shader->setUniform("Metalness", material->metalness);
     shader->setUniform("DiffuseColor", material->diffuseColor);
@@ -66,7 +66,7 @@ void Mesh3dLodLevel::draw()
 
 void Mesh3dLodLevel::updateBuffer(const vector<Mesh3dInstance*> &instances)
 {
-    vec3 cameraPos = Game::instance->world->currentCamera->transformation->position;
+    vec3 cameraPos = Game::instance->world->mainDisplayCamera->transformation->position;
     vector<Mesh3dInstance*> filtered;
     for (int i = 0; i < instances.size(); i++) {
         float dst = distance(cameraPos, instances[i]->transformation->position);
