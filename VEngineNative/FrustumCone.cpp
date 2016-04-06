@@ -12,10 +12,10 @@ FrustumCone::~FrustumCone()
 {
 }
 
-void FrustumCone::update(vec3 iorigin, mat4 viewmatrix, mat4 projmatrix)
+void FrustumCone::update(vec3 iorigin, mat4 viewprojmatrix)
 {
     origin = iorigin;
-    mat4 inv = inverse(projmatrix * viewmatrix);
+    mat4 inv = inverse(viewprojmatrix);
     leftBottom = getDir(origin, vec2(-1, -1), inv);
     leftTop = getDir(origin, vec2(-1, 1), inv);
     rightBottom = getDir(origin, vec2(1, -1), inv);

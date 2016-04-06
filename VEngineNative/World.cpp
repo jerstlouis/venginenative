@@ -6,23 +6,23 @@
 World::World()
 {
     mainDisplayCamera = nullptr;
-    currentCamera = nullptr;
     scene = new Scene();
 }
 
-
 World::~World()
 {
+    delete scene;
+    delete mainDisplayCamera;
 }
 
-void World::draw()
+void World::draw(ShaderProgram *shader, Camera *camera)
 {
-    if (mainDisplayCamera != nullptr && currentCamera != nullptr) {
-        ShaderProgram *shader = Game::instance->shaders->materialShader;
-        shader->use();
-        shader->setUniform("VPMatrix", currentCamera->projectionMatrix * currentCamera->transformation->getInverseWorldTransform());
-        shader->setUniform("Resolution", glm::vec2(Game::instance->width, Game::instance->height));
-        shader->setUniform("CameraPosition", currentCamera->transformation->position);
-        scene->draw();
-    }
+    shader->use();
+    glm::mat4 cameraViewMatrix = camera->transformation->getInverseWorldTransform();
+    glm::mat4 vpmatrix = camera->projectionMatrix * cameraViewMatrix;
+    camera->cone->update(camera->transformation->position, vpmatrix);
+    shader->setUniform("VPMatrix", camera->projectionMatrix * cameraViewMatrix);
+    shader->setUniform("Resolution", glm::vec2(Game::instance->width, Game::instance->height));
+    shader->setUniform("CameraPosition", camera->transformation->position);
+    scene->draw();
 }

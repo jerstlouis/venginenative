@@ -10,7 +10,9 @@ public:
     ~Renderer();
     void renderToFramebuffer(Framebuffer *fbo);
 private:
-    Texture *bufferTexture;
+    Texture *mrtAlbedoRoughnessTex;
+    Texture *mrtNormalMetalnessTex;
+    Texture *mrtDistanceTexture;
     Texture *depthTexture;
     Framebuffer *fbo;
     ShaderProgram *outputShader;

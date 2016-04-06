@@ -43,6 +43,7 @@ void Mesh3dLodLevel::draw()
 {
     ShaderProgram *shader = Game::instance->shaders->materialShader;
     shader->setUniform("Roughness", material->roughness);
+    shader->setUniform("Metalness", material->metalness);
     shader->setUniform("DiffuseColor", material->diffuseColor);
     shader->setUniform("SpecularColor", material->specularColor);
 
@@ -50,13 +51,13 @@ void Mesh3dLodLevel::draw()
     shader->setUniform("BumpTexEnabled", material->bumpTexture != nullptr);
     shader->setUniform("RoughnessTexEnabled", material->roughnessTexture != nullptr);
     shader->setUniform("DiffuseTexEnabled", material->diffuseTexture != nullptr);
-    shader->setUniform("SpecularTexEnabled", material->specularTexture != nullptr);
+    shader->setUniform("MetalnessTexEnabled", material->metalnessTexture != nullptr);
 
     if (material->normalsTexture != nullptr) material->normalsTexture->use(5);
     if (material->bumpTexture != nullptr) material->bumpTexture->use(6);
     if (material->roughnessTexture != nullptr) material->roughnessTexture->use(7);
     if (material->diffuseTexture != nullptr) material->diffuseTexture->use(8);
-    if (material->specularTexture != nullptr) material->specularTexture->use(9);
+    if (material->metalnessTexture != nullptr) material->metalnessTexture->use(9);
 
     modelInfosBuffer->use(0);
 
