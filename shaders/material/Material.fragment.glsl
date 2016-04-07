@@ -56,6 +56,29 @@ vec4 sampleNode(int i, vec2 uv){
     if(i == 19) return texture(texBind19, uv).rgba;
 }
 
+vec4 sampleNodeLod0(int i, vec2 uv){
+    if(i == 0)  return textureLod(texBind0 , uv, 0).rgba;
+    if(i == 1)  return textureLod(texBind1 , uv, 0).rgba;
+    if(i == 2)  return textureLod(texBind2 , uv, 0).rgba;
+    if(i == 3)  return textureLod(texBind3 , uv, 0).rgba;
+    if(i == 4)  return textureLod(texBind4 , uv, 0).rgba;
+    if(i == 5)  return textureLod(texBind5 , uv, 0).rgba;
+    if(i == 6)  return textureLod(texBind6 , uv, 0).rgba;
+    if(i == 7)  return textureLod(texBind7 , uv, 0).rgba;
+    if(i == 8)  return textureLod(texBind8 , uv, 0).rgba;
+    if(i == 9)  return textureLod(texBind9 , uv, 0).rgba;
+    if(i == 10) return textureLod(texBind10, uv, 0).rgba;
+    if(i == 11) return textureLod(texBind11, uv, 0).rgba;
+    if(i == 12) return textureLod(texBind12, uv, 0).rgba;
+    if(i == 13) return textureLod(texBind13, uv, 0).rgba;
+    if(i == 14) return textureLod(texBind14, uv, 0).rgba;
+    if(i == 15) return textureLod(texBind15, uv, 0).rgba;
+    if(i == 16) return textureLod(texBind16, uv, 0).rgba;
+    if(i == 17) return textureLod(texBind17, uv, 0).rgba;
+    if(i == 18) return textureLod(texBind18, uv, 0).rgba;
+    if(i == 19) return textureLod(texBind19, uv, 0).rgba;
+}
+
 uniform vec3 DiffuseColor;
 uniform float Roughness;
 uniform float Metalness;
@@ -96,7 +119,7 @@ NodeImageModifier getModifier(int i){
 }
 
 float nodeCombine(float v1, float v2, int mode, float dataAlpha){
-    if(mode == MODMODE_REPLACE) v2;
+    if(mode == MODMODE_REPLACE) return v2;
     if(mode == MODMODE_ADD) return v1 + v2;
     if(mode == MODMODE_MUL) return v1 * v2;
     if(mode == MODMODE_AVERAGE) return mix(v1, v2, 0.5);
@@ -106,7 +129,7 @@ float nodeCombine(float v1, float v2, int mode, float dataAlpha){
 }
 
 vec3 nodeCombine(vec3 v1, vec3 v2, int mode, float dataAlpha){
-    if(mode == MODMODE_REPLACE) v2;
+    if(mode == MODMODE_REPLACE) return v2;
     if(mode == MODMODE_ADD) return v1 + v2;
     if(mode == MODMODE_MUL) return v1 * v2;
     if(mode == MODMODE_AVERAGE) return mix(v1, v2, 0.5);
@@ -115,13 +138,32 @@ vec3 nodeCombine(vec3 v1, vec3 v2, int mode, float dataAlpha){
     return mix(v1, v2, 0.5);
 }
 
+vec2 UV = Input.TexCoord;
+bool RunParallax = false;
+
+
+float getBump(vec2 uv){
+    float bump = 0;
+    for(int i=0;i<NodesCount;i++){
+        NodeImageModifier node = getModifier(i);
+        if(node.target == MODTARGET_BUMP){
+            vec4 data = sampleNodeLod0(node.samplerIndex, uv * node.uvScale);
+            bump = nodeCombine(bump, data.r, node.mode, data.a);
+            RunParallax = true;
+        }
+    }
+    return bump;
+}
+
+#include ParallaxOcclusion.glsl
+
 void main(){
     vec3 diffuseColor = DiffuseColor;
     vec3 normal = normalize(Input.Normal);
     vec3 normalmap = vec3(0,0,1);
     float roughness = Roughness;
     float metalness = Metalness;
-    float bump = 0;
+    float bump = getBump(Input.TexCoord);
     
     vec3 tangent = normalize(Input.Tangent.rgb);
     float tangentSign = Input.Tangent.w;
@@ -132,9 +174,12 @@ void main(){
         normalize(normal)
     );    
     
+    if(RunParallax) UV = adjustParallaxUV(CameraPosition);
+    
+    
     for(int i=0;i<NodesCount;i++){
         NodeImageModifier node = getModifier(i);
-        vec4 data = sampleNode(node.samplerIndex, Input.TexCoord * node.uvScale);
+        vec4 data = sampleNode(node.samplerIndex, UV * node.uvScale);
         if(node.target == MODTARGET_DIFFUSE){
             diffuseColor = nodeCombine(diffuseColor, data.rgb, node.mode, data.a);
         }
@@ -147,9 +192,6 @@ void main(){
         if(node.target == MODTARGET_METALNESS){
             metalness = nodeCombine(metalness, data.r, node.mode, data.a);
         }
-        if(node.target == MODTARGET_BUMP){
-            bump = nodeCombine(bump, data.r, node.mode, data.a);
-        }
     }
     normalmap = normalize(normalmap);
     normalmap.r = - normalmap.r;
@@ -157,7 +199,9 @@ void main(){
     normal = TBN * normalmap;
 
     normal = quat_mul_vec(ModelInfos[Input.instanceId].Rotation, normal);
-
+    
+    diffuseColor *= 1.0 - newParallaxHeight;
+    
     outAlbedoRoughness = vec4(diffuseColor, roughness);
     outNormalsMetalness = vec4(normal, metalness);
     outDistance = distance(CameraPosition, Input.WorldPos);

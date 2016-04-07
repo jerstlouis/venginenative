@@ -17,7 +17,7 @@ int main()
 {
     Media::loadFileMap("../../media");
     Media::loadFileMap("../../shaders");
-    Game *game = new Game(1366, 768);
+    Game *game = new Game(1920, 1080);
     game->start();
     volatile bool ready = false;
     game->invoke([&ready]() {
@@ -26,7 +26,7 @@ int main()
     while (!ready);
 
     Camera *cam = new Camera();
-    cam->createProjectionPerspective(deg2rad(90.0f), 1366.0f / 768.0f, 0.01f, 1000);
+    cam->createProjectionPerspective(deg2rad(90.0f), (float)game->width / (float)game->height, 0.01f, 1000);
     cam->transformation->translate(glm::vec3(0, 0, 4));
     glm::quat rot = glm::quat_cast(glm::lookAt(cam->transformation->position, glm::vec3(0), glm::vec3(0, 1, 0)));
     cam->transformation->setOrientation(rot);
@@ -34,25 +34,22 @@ int main()
 
     Material *mat = new Material();
     mat->diffuseColor = glm::vec3(1.0f);
-    //mat->diffuseTexture = new Texture("KAMEN.JPG");
-   // mat->normalsTexture = new Texture("b1WtX.jpg");
-    mat->roughness = 0.5;
-    mat->metalness = 0.5;
+    mat->roughness = 0.2;
+    mat->metalness = 0.0;
 
-    MaterialNode *color1 = new MaterialNode(new Texture("ceg_a.png"), glm::vec2(1.0f), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE);
-    MaterialNode *color2 = new MaterialNode(new Texture("floor1a.jpg"), glm::vec2(11.0f), NODE_MODE_MUL, NODE_TARGET_DIFFUSE);
+    MaterialNode *bump = new MaterialNode(new Texture("DisplaceIT_Ground_Pebble1_Displace.png"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_BUMP);
+    MaterialNode *bump2 = new MaterialNode(new Texture("aaaaa.png"), glm::vec2(1), NODE_MODE_MUL, NODE_TARGET_BUMP);
+    MaterialNode *color = new MaterialNode(new Texture("DisplaceIT_Ground_Pebble1_Color.png"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE);
+    MaterialNode *normal = new MaterialNode(new Texture("DisplaceIT_Ground_Pebble1_NormalBump2.png"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_NORMAL);
+    MaterialNode *normal2 = new MaterialNode(new Texture("mrkbasestoneb01_n.jpg"), glm::vec2(30), NODE_MODE_ADD, NODE_TARGET_NORMAL);
+    MaterialNode *roughness = new MaterialNode(new Texture("test1.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_METALNESS);
 
-    MaterialNode *normals1 = new MaterialNode(new Texture("ceg_n.png"), glm::vec2(1.0f), NODE_MODE_REPLACE, NODE_TARGET_NORMAL);
-    MaterialNode *normals2 = new MaterialNode(new Texture("floor1n.jpg"), glm::vec2(10.0f), NODE_MODE_ADD, NODE_TARGET_NORMAL);
-
-    MaterialNode *roughness = new MaterialNode(new Texture("aaaaa.png"), glm::vec2(0.1f), NODE_MODE_REPLACE, NODE_TARGET_ROUGHNESS);
-
-    mat->addNode(color1);
-    mat->addNode(color2);
-    mat->addNode(normals1);
-    mat->addNode(normals2);
+  //  mat->addNode(bump);
+ //   mat->addNode(bump2);
+   // mat->addNode(color);
+   // mat->addNode(normal);
+    mat->addNode(normal2);
     mat->addNode(roughness);
-
 
     unsigned char* teapotBytes;
     int teapotBytesCount = Media::readBinary("sponza.raw", &teapotBytes);
@@ -107,8 +104,11 @@ int main()
     game->setCursorMode(GLFW_CURSOR_DISABLED);
 
     while (!game->shouldClose) {
-
         if (!cursorFree) {
+            float speed = 0.00001f;
+            if (game->getKeyStatus(GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+                speed *= 0.1f;
+            }
             // process logic - on another thread
             if (game->getKeyStatus(GLFW_KEY_F1) == GLFW_PRESS) {
                 light->transformation->position = cam->transformation->position;
@@ -116,19 +116,19 @@ int main()
             }
             if (game->getKeyStatus(GLFW_KEY_W) == GLFW_PRESS) {
                 glm::vec3 dir = cam->transformation->orientation * glm::vec3(0, 0, -1);
-                cam->transformation->translate(dir * 0.00001f);
+                cam->transformation->translate(dir * speed);
             }
             if (game->getKeyStatus(GLFW_KEY_S) == GLFW_PRESS) {
                 glm::vec3 dir = cam->transformation->orientation * glm::vec3(0, 0, 1);
-                cam->transformation->translate(dir * 0.00001f);
+                cam->transformation->translate(dir * speed);
             }
             if (game->getKeyStatus(GLFW_KEY_A) == GLFW_PRESS) {
                 glm::vec3 dir = cam->transformation->orientation * glm::vec3(-1, 0, 0);
-                cam->transformation->translate(dir * 0.00001f);
+                cam->transformation->translate(dir * speed);
             }
             if (game->getKeyStatus(GLFW_KEY_D) == GLFW_PRESS) {
                 glm::vec3 dir = cam->transformation->orientation * glm::vec3(1, 0, 0);
-                cam->transformation->translate(dir * 0.00001f);
+                cam->transformation->translate(dir * speed);
             }
             if (game->getKeyStatus(GLFW_KEY_ESCAPE) == GLFW_PRESS) {
                 game->shouldClose = true;

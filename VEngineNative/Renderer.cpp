@@ -17,7 +17,7 @@ Renderer::Renderer()
 
     outputShader = new ShaderProgram("PostProcess.vertex.glsl", "Output.fragment.glsl");
 
-    mrtAlbedoRoughnessTex = new Texture(Game::instance->width, Game::instance->height, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
+    mrtAlbedoRoughnessTex = new Texture(Game::instance->width, Game::instance->height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
     mrtNormalMetalnessTex = new Texture(Game::instance->width, Game::instance->height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
     mrtDistanceTexture = new Texture(Game::instance->width, Game::instance->height, GL_R32F, GL_RED, GL_FLOAT);
     depthTexture = new Texture(Game::instance->width, Game::instance->height, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT);

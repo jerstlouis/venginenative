@@ -52,9 +52,9 @@ vec3 FromCameraSpace(vec3 position){
 }
 
 void createData(){
-    vec4 albedo_roughness = texture(mrt_Albedo_Roughness_Tex, UV).rgba;
-    vec4 normal_metalness = texture(mrt_Normal_Metalness_Tex, UV).rgba;
-    float dist = texture(mrt_Distance_Tex, UV).r;
+    vec4 albedo_roughness = textureLod(mrt_Albedo_Roughness_Tex, UV, 0).rgba;
+    vec4 normal_metalness = textureLod(mrt_Normal_Metalness_Tex, UV, 0).rgba;
+    float dist = textureLod(mrt_Distance_Tex, UV, 0).r;
     vec3 cameraSpace = reconstructCameraSpaceDistance(UV, dist);
     vec3 worldSpace = FromCameraSpace(cameraSpace);
     currentData = PostProceessingData(
