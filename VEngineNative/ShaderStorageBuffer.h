@@ -6,7 +6,7 @@ public:
     ShaderStorageBuffer(GLuint ihandle);
     ~ShaderStorageBuffer();
     void use(unsigned int index);
-    void mapData(unsigned int size, const void * data);
+    void mapData(size_t size, const void * data);
 private:
     GLuint handle;
     bool generated;

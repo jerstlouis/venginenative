@@ -3,6 +3,7 @@
 #include "World.h";
 #include "Renderer.h";
 #include "GenericShaders.h";
+#include "EventHandler.h";
 
 class Game
 {
@@ -22,17 +23,20 @@ public:
     ~Game();
     void start();
     void invoke(const function<void(void)> &func);
-    void addOnRenderFrame(const function<void(void)> &func);
     bool shouldClose;
 
     int getKeyStatus(int key);
     void setCursorMode(int mode);
     glm::dvec2 getCursorPosition();
 
+    EventHandler<int> *onRenderFrame;
+    EventHandler<int> *onKeyPress;
+    EventHandler<int> *onKeyRelease;
+    EventHandler<int> *onKeyRepeat;
+
 private:
 
     queue<function<void(void)>> invokeQueue;
-    vector<function<void(void)>> onRenderFrame;
     void renderThread();
     void onRenderFrameFunc();
 };

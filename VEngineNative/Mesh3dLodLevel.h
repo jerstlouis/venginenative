@@ -18,6 +18,6 @@ public:
     void updateBuffer(const vector<Mesh3dInstance*> &instances);
 private:
     ShaderStorageBuffer *modelInfosBuffer;
-    unsigned int instancesFiltered;
+    size_t instancesFiltered;
 };
 

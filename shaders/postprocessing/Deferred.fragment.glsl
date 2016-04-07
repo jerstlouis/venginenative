@@ -90,14 +90,29 @@ float toLogDepth(float depth, float far){
     return badass_depth;
 }
 
+vec3 shadingMetalic(PostProceessingData data){
+    float fresnel = fresnel_again(data.normal, data.cameraPos, 1.0 - data.roughness);
+    
+    return shade(CameraPosition, data.diffuseColor, data.normal, data.worldPos, LightPosition, LightColor, 1.0 - fresnel, false);
+}
+
+vec3 shadingNonMetalic(PostProceessingData data){
+    float fresnel = fresnel_again(data.normal, data.cameraPos, 1.0 - data.roughness);
+    
+    vec3 radiance =  shade(CameraPosition, vec3(0.08), data.normal, data.worldPos, LightPosition, LightColor, 1.0 - fresnel, false);    
+    
+    vec3 difradiance = shadeDiffuse(CameraPosition, data.diffuseColor, data.normal, data.worldPos, LightPosition, LightColor, 1.0 - fresnel, false);
+    return difradiance + radiance;
+}
+
+vec3 MakeShading(PostProceessingData data){
+    return mix(shadingNonMetalic(data), shadingMetalic(data), data.metalness);
+}
+
 vec3 ApplyLighting(PostProceessingData data)
 {
     vec3 result = vec3(0);
-    float fresnel = fresnel_again(data.normal, data.cameraPos, data.roughness);
-    
-    vec3 radiance = fresnel * shade(CameraPosition, mix(vec3(0.08), data.diffuseColor, data.metalness), data.normal, data.worldPos, LightPosition, LightColor, max(0.02, data.roughness), false);
-    
-    vec3 difradiance = shadeDiffuse(CameraPosition, data.diffuseColor, data.normal, data.worldPos, LightPosition, LightColor, max(0.02, data.roughness), false) * (1.0 - data.metalness);
+    vec3 radiance = MakeShading(data);
     
     if(LightUseShadowMap == 1){
         vec4 lightClipSpace = LightVPMatrix * vec4(data.worldPos, 1.0);
@@ -108,11 +123,11 @@ vec3 ApplyLighting(PostProceessingData data)
             if(lightScreenSpace.x >= 0.0 && lightScreenSpace.x <= 1.0 && lightScreenSpace.y >= 0.0 && lightScreenSpace.y <= 1.0) {
                 percent = PCFDeferred(lightScreenSpace.xy, toLogDepth(distance(data.worldPos, LightPosition), 10000) - 0.001);
             }
-            result += (difradiance + radiance * 0.1) * 0.5 * percent;
+            result += radiance * percent;
         }
         
     } else if(LightUseShadowMap == 0){
-        result += (radiance + difradiance) * 0.5;
+        result += radiance;
     }
     return result * (1.0 - smoothstep(0.0, LightCutOffDistance, distance(LightPosition, data.worldPos)));
 }
@@ -120,6 +135,6 @@ vec3 ApplyLighting(PostProceessingData data)
 
 void main(){
     createData();
-    vec3 color = ApplyLighting(currentData) + currentData.diffuseColor*0.02;
+    vec3 color = ApplyLighting(currentData);
     outColor = vec4(color, 1.0);
 }

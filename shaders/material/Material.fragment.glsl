@@ -10,7 +10,7 @@ in Data {
 
 layout(location = 0) out vec4 outAlbedoRoughness;
 layout(location = 1) out vec4 outNormalsMetalness;
-layout(location = 2) out float outDistance
+layout(location = 2) out float outDistance;
 
 layout(binding = 5) uniform sampler2D normalsTex;
 layout(binding = 6) uniform sampler2D bumpTex;

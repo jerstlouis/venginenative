@@ -78,7 +78,7 @@ void Mesh3dLodLevel::updateBuffer(const vector<Mesh3dInstance*> &instances)
     /*layout rotation f4 translation f3+1 scale f3+1 =>> 12 floats*/
     vector<float> floats;
     floats.reserve(12 * instancesFiltered);
-    for (int i = 0; i < instancesFiltered; i++) {
+    for (unsigned int i = 0; i < instancesFiltered; i++) {
         TransformationManager *mgr = filtered[i]->transformation;
         floats.push_back(mgr->orientation.x);
         floats.push_back(mgr->orientation.y);

@@ -57,7 +57,7 @@ void Light::refreshShadowMap()
         mapper->use(true);
         ShaderProgram *shader = Game::instance->shaders->depthOnlyShader;
         lightCamera->transformation = transformation;
-        lightCamera->createProjectionPerspective(angle, (float)shadowMapWidth / (float)shadowMapHeight, 0.01, cutOffDistance);
+        lightCamera->createProjectionPerspective(angle, (float)shadowMapWidth / (float)shadowMapHeight, 0.01f, cutOffDistance);
         Game::instance->world->draw(shader, lightCamera);
     }
 }

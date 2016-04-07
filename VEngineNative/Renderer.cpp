@@ -53,6 +53,12 @@ void Renderer::renderToFramebuffer(Framebuffer * fboout)
     quad3dInfo->draw();
 }
 
+void Renderer::recompileShaders()
+{
+    deferredShader->recompile();
+    outputShader->recompile();
+}
+
 void Renderer::deferred()
 {
     vector<Light*> lights = Game::instance->world->scene->getLights();

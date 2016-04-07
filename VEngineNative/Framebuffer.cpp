@@ -55,7 +55,7 @@ void Framebuffer::generate()
         glFramebufferTexture(GL_FRAMEBUFFER, attachedTextures[i]->attachment, attachedTextures[i]->texture->handle, 0);
         if(attachedTextures[i]->attachment < GL_DEPTH_ATTACHMENT)buffers.push_back(attachedTextures[i]->attachment);
     }
-    glDrawBuffers(buffers.size(), buffers.data());
+    glDrawBuffers((GLsizei)buffers.size(), buffers.data());
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         printf("Framebuffer not complete");

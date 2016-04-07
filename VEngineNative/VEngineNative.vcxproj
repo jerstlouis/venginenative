@@ -101,6 +101,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -148,6 +149,7 @@
   <ItemGroup>
     <ClInclude Include="AbsTransformable.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="EventHandler.h" />
     <ClInclude Include="Framebuffer.h" />
     <ClInclude Include="FrustumCone.h" />
     <ClInclude Include="Game.h" />

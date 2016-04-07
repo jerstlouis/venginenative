@@ -24,7 +24,7 @@ void ShaderStorageBuffer::use(unsigned int index)
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, index, handle);
 }
 
-void ShaderStorageBuffer::mapData(unsigned int size, const void * data)
+void ShaderStorageBuffer::mapData(size_t size, const void * data)
 {
     if (!generated) generate();
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, handle);

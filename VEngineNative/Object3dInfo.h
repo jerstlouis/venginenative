@@ -12,7 +12,7 @@ public:
     Object3dManager *manager;
 
     void draw();
-    void drawInstanced(int instances);
+    void drawInstanced(size_t instances);
 
 private:
 
@@ -20,6 +20,7 @@ private:
 
     vector<GLfloat> vbo;
     bool generated = false;
-    GLuint vboHandle, vaoHandle, vertexCount;
+    GLuint vboHandle, vaoHandle;
+    GLsizei vertexCount;
 };
 

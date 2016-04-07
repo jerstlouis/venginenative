@@ -4,6 +4,7 @@
 //
 
 #pragma once
+#pragma warning(disable:4067)
 
 #include "targetver.h"
 
@@ -42,6 +43,6 @@ using namespace std;
 #include "glm/gtc/quaternion.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-#define PI 3.14159265358979323846
-#define rad2deg(a) (a * (180.0 / PI))
-#define deg2rad(a) (a * (PI / 180.0))
+#define PI 3.141592f
+#define rad2deg(a) (a * (180.0f / PI))
+#define deg2rad(a) (a * (PI / 180.0f))

@@ -9,6 +9,7 @@ public:
     Renderer();
     ~Renderer();
     void renderToFramebuffer(Framebuffer *fbo);
+    void recompileShaders();
 private:
     Texture *mrtAlbedoRoughnessTex;
     Texture *mrtNormalMetalnessTex;
@@ -19,8 +20,8 @@ private:
 
     Framebuffer *deferredFbo;
     Texture *deferredTexture;
-    ShaderProgram *deferredShader;
 
+    ShaderProgram *deferredShader;
     ShaderProgram *outputShader;
 
     Object3dInfo *quad3dInfo;

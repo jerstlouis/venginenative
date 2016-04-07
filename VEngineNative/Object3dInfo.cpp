@@ -11,7 +11,7 @@ Object3dInfo::Object3dInfo(vector<GLfloat> &vboin)
 {
     vbo = move(vboin);
     generated = false;
-    vertexCount = vbo.size() / 12;
+    vertexCount = (GLsizei) (vbo.size() / 12);
     drawMode = GL_TRIANGLES;
 }
 
@@ -33,12 +33,12 @@ void Object3dInfo::draw()
     glDrawArrays(drawMode, 0, vertexCount);
 }
 
-void Object3dInfo::drawInstanced(int instances)
+void Object3dInfo::drawInstanced(size_t instances)
 {
     if (!generated) 
         generate();
     glBindVertexArray(vaoHandle);
-    glDrawArraysInstanced(drawMode, 0, vertexCount, instances);
+    glDrawArraysInstanced(drawMode, 0, vertexCount, (GLsizei)instances);
 }
 
 void Object3dInfo::generate() 

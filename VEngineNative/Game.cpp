@@ -14,6 +14,10 @@ Game::Game(int windowwidth, int windowheight)
     renderer = new Renderer();
     shaders = new GenericShaders();
     screenFbo = new Framebuffer(width, height, 0);
+    onRenderFrame = new EventHandler<int>();
+    onKeyPress = new EventHandler<int>();
+    onKeyRelease = new EventHandler<int>();
+    onKeyRepeat = new EventHandler<int>();
 }
 
 
@@ -30,11 +34,6 @@ void Game::start()
 void Game::invoke(const function<void(void)> &func)
 {
     invokeQueue.push(func);
-}
-
-void Game::addOnRenderFrame(const function<void(void)>& func)
-{
-    onRenderFrame.push_back(func);
 }
 
 int Game::getKeyStatus(int key)
@@ -94,6 +93,16 @@ void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severi
         debSource, debType, id, debSev, message);
 }
 
+void glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (action == GLFW_PRESS)
+        Game::instance->onKeyPress->invoke(key);
+    if (action == GLFW_RELEASE)
+        Game::instance->onKeyRelease->invoke(key);
+    if (action == GLFW_REPEAT)
+        Game::instance->onKeyRepeat->invoke(key);
+}
+
 void Game::renderThread()
 {
     if (!glfwInit()) {
@@ -121,6 +130,8 @@ void Game::renderThread()
         printf("ERROR: Cannot initialize GLAD!\n");
         return;
     }
+
+    glfwSetKeyCallback(window, glfwKeyCallback);
 
     glDebugMessageCallback(&debugCallback, NULL);
 
@@ -157,9 +168,7 @@ void Game::onRenderFrameFunc()
         invokeQueue.front()();
         invokeQueue.pop();
     }
-    for (int i = 0; i < onRenderFrame.size(); i++) {
-        onRenderFrame[i]();
-    }
+    onRenderFrame->invoke(0);
 
     renderer->renderToFramebuffer(screenFbo);
 }

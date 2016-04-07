@@ -16,7 +16,7 @@ vec3 makeFresnel(float V2Ncos, vec3 reflected)
 
 float fresnel_again(vec3 normal, vec3 cameraspace, float roughness){
     vec3 dir = normalize(reflect(cameraspace, normal));
-	float fz = 1.0 - roughness;
+	float fz = roughness;
     float base =  max(0, 1.0 - dot(normalize(normal), dir));
     float fresnel = (fz + (1-fz)*(pow(base, 5.0)));
     return fresnel;
@@ -59,6 +59,26 @@ vec3 LightingFuncGGX_REF(vec3 N, vec3 V, vec3 L, float roughness, vec3 F0)
     return specular;
 }
 
+vec3 orenNayarDiffuse(
+  vec3 lightDirection,
+  vec3 viewDirection,
+  vec3 surfaceNormal,
+  float roughness,
+  vec3 albedo) {
+  
+  float LdotV = dot(lightDirection, viewDirection);
+  float NdotL = dot(lightDirection, surfaceNormal);
+  float NdotV = dot(surfaceNormal, viewDirection);
+
+  float s = LdotV - NdotL * NdotV;
+  float t = mix(1.0, max(NdotL, NdotV), step(0.0, s));
+
+  float sigma2 = roughness * roughness;
+  vec3 A = 1.0 + sigma2 * (albedo / (sigma2 + 0.13) + 0.5 / (sigma2 + 0.33));
+  float B = 0.45 * sigma2 / (sigma2 + 0.09);
+
+  return albedo * max(0.0, NdotL) * (A + B * s / t) / PI;
+}
 
 #define MaterialTypeSolid 0
 #define MaterialTypeRandomlyDisplaced 1
@@ -92,8 +112,10 @@ vec3 shade(
 		
 		
     
-    return specularComponent * albedo * CalculateFallof(distance(lightPosition, fragmentPosition));
-}vec3 shadeDiffuse(
+    return specularComponent * albedo;// * CalculateFallof(distance(lightPosition, fragmentPosition));
+}
+
+vec3 shadeDiffuse(
     vec3 camera,
     vec3 albedo, 
     vec3 normal,
@@ -104,13 +126,11 @@ vec3 shade(
     bool ignoreAtt
 ){
     vec3 lightRelativeToVPos =normalize( lightPosition - fragmentPosition);
-
-    float distanceToLight = distance(fragmentPosition, lightPosition);
-    float att = ignoreAtt ? 1 : (CalculateFallof(distanceToLight));
-    float diffuseComponent = max(0, dot(lightRelativeToVPos, normal));
-
-    vec3 cc = lightColor*albedo;
-    vec3 difcolor = cc * att;
-	
-    return difcolor * diffuseComponent;
+    
+    vec3 cameraRelativeToVPos = -normalize(fragmentPosition - camera);
+    return  lightColor *  orenNayarDiffuse(lightRelativeToVPos,
+              cameraRelativeToVPos,
+              normal,
+              roughness,
+              albedo);
 }

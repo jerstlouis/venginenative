@@ -19,6 +19,11 @@ ShaderProgram::~ShaderProgram()
     glDeleteProgram(handle);
 }
 
+void ShaderProgram::recompile()
+{
+    generated = false;
+}
+
 void ShaderProgram::use()
 {
     if (!generated)
@@ -277,8 +282,8 @@ string ShaderProgram::resolveIncludes(string source)
     regex includeregex("\\#include (.+)\n");
     smatch match;
     while (regex_search(src, match, includeregex)) {
-        int pos = match.position();
-        int len = match.length();
+        int64_t pos = match.position();
+        int64_t len = match.length();
         string group = match[1];
         string includedSrc = resolveIncludes(Media::readString(group));
         stringstream ss;

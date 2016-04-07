@@ -37,7 +37,7 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 #ifdef _MSC_VER
-# define WIN32_LEAN_AND_MEAN
+//# define WIN32_LEAN_AND_MEAN
 # include <windows.h>
 # pragma warning (disable : 4996)
 #else

@@ -5,6 +5,7 @@ class ShaderProgram
 public:
     ShaderProgram(string vertex, string fragment, string geometry = "", string tesscontrol = "", string tesseval = "");
     ~ShaderProgram();
+    void recompile();
     void use();
     void setUniform(string name, GLint value);
     void setUniform(string name, GLuint value);
