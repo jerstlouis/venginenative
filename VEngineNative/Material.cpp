@@ -6,17 +6,17 @@ using namespace glm;
 Material::Material()
 {
     diffuseColor = vec3(1);
-    specularColor = vec3(1);
     roughness = 1.0;
     metalness = 0.0;
-    diffuseTexture = nullptr;
-    metalnessTexture = nullptr;
-    normalsTexture = nullptr;
-    bumpTexture = nullptr;
-    roughnessTexture = nullptr;
+    nodes = {};
 }
 
 
 Material::~Material()
 {
+}
+
+void Material::addNode(MaterialNode * node)
+{
+    nodes.push_back(node);
 }

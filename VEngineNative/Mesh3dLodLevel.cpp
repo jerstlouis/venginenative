@@ -42,22 +42,31 @@ Mesh3dLodLevel::~Mesh3dLodLevel()
 void Mesh3dLodLevel::draw()
 {
     ShaderProgram *shader = ShaderProgram::current;
+    // base properties
     shader->setUniform("Roughness", material->roughness);
     shader->setUniform("Metalness", material->metalness);
     shader->setUniform("DiffuseColor", material->diffuseColor);
-    shader->setUniform("SpecularColor", material->specularColor);
 
-    shader->setUniform("NormalTexEnabled", material->normalsTexture != nullptr);
-    shader->setUniform("BumpTexEnabled", material->bumpTexture != nullptr);
-    shader->setUniform("RoughnessTexEnabled", material->roughnessTexture != nullptr);
-    shader->setUniform("DiffuseTexEnabled", material->diffuseTexture != nullptr);
-    shader->setUniform("MetalnessTexEnabled", material->metalnessTexture != nullptr);
-
-    if (material->normalsTexture != nullptr) material->normalsTexture->use(5);
-    if (material->bumpTexture != nullptr) material->bumpTexture->use(6);
-    if (material->roughnessTexture != nullptr) material->roughnessTexture->use(7);
-    if (material->diffuseTexture != nullptr) material->diffuseTexture->use(8);
-    if (material->metalnessTexture != nullptr) material->metalnessTexture->use(9);
+    vector<int> samplerIndices;
+    vector<int> modes;
+    vector<int> targets;
+    vector<vec2> uvScales;
+    int samplerIndex = 0;
+    for (int i = 0; i < material->nodes.size(); i++) {
+        MaterialNode * node = material->nodes[i];
+        if (node->texture == nullptr) continue;
+        node->texture->use(samplerIndex);
+        samplerIndices.push_back(samplerIndex);
+        modes.push_back(node->mixingMode);
+        targets.push_back(node->target);
+        uvScales.push_back(node->uvScale);
+        samplerIndex++;
+    }
+    shader->setUniform("NodesCount", samplerIndex);
+    shader->setUniformVector("SamplerIndexArray", samplerIndices);
+    shader->setUniformVector("ModeArray", modes);
+    shader->setUniformVector("TargetArray", targets);
+    shader->setUniformVector("UVScaleArray", uvScales);
 
     modelInfosBuffer->use(0);
 

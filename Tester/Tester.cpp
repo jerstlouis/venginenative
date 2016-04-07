@@ -35,9 +35,24 @@ int main()
     Material *mat = new Material();
     mat->diffuseColor = glm::vec3(1.0f);
     //mat->diffuseTexture = new Texture("KAMEN.JPG");
-    mat->normalsTexture = new Texture("b1WtX.jpg");
+   // mat->normalsTexture = new Texture("b1WtX.jpg");
     mat->roughness = 0.5;
     mat->metalness = 0.5;
+
+    MaterialNode *color1 = new MaterialNode(new Texture("ceg_a.png"), glm::vec2(1.0f), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE);
+    MaterialNode *color2 = new MaterialNode(new Texture("floor1a.jpg"), glm::vec2(11.0f), NODE_MODE_MUL, NODE_TARGET_DIFFUSE);
+
+    MaterialNode *normals1 = new MaterialNode(new Texture("ceg_n.png"), glm::vec2(1.0f), NODE_MODE_REPLACE, NODE_TARGET_NORMAL);
+    MaterialNode *normals2 = new MaterialNode(new Texture("floor1n.jpg"), glm::vec2(10.0f), NODE_MODE_ADD, NODE_TARGET_NORMAL);
+
+    MaterialNode *roughness = new MaterialNode(new Texture("aaaaa.png"), glm::vec2(0.1f), NODE_MODE_REPLACE, NODE_TARGET_ROUGHNESS);
+
+    mat->addNode(color1);
+    mat->addNode(color2);
+    mat->addNode(normals1);
+    mat->addNode(normals2);
+    mat->addNode(roughness);
+
 
     unsigned char* teapotBytes;
     int teapotBytesCount = Media::readBinary("sponza.raw", &teapotBytes);

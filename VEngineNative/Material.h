@@ -1,5 +1,6 @@
 #pragma once
 #include "Texture.h";
+#include "MaterialNode.h";
 class Material
 {
 public:
@@ -7,14 +8,11 @@ public:
     ~Material();
 
     glm::vec3 diffuseColor;
-    glm::vec3 specularColor;
     float roughness;
     float metalness;
 
-    Texture *diffuseTexture;
-    Texture *metalnessTexture;
-    Texture *normalsTexture;
-    Texture *bumpTexture;
-    Texture *roughnessTexture;
+    vector<MaterialNode*> nodes;
+
+    void addNode(MaterialNode *node);
 };
 
