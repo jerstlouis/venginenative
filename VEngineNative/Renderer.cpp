@@ -47,15 +47,28 @@ void Renderer::renderToFramebuffer(CubeMapFramebuffer * fbo)
 
 void Renderer::renderToFramebuffer(Framebuffer * fboout)
 {
+    draw();
+    fboout->use(true);
+    output();
+}
+
+void Renderer::draw()
+{
     fbo->use(true);
     Game::instance->world->draw(Game::instance->shaders->materialShader, Game::instance->world->mainDisplayCamera);
-
     deferred();
+}
 
-
-    fboout->use(true);
+void Renderer::output()
+{
     outputShader->use();
+    mrtDistanceTexture->use(2);
+    skyboxTexture->use(3);
     deferredTexture->use(5);
+    FrustumCone *cone = Game::instance->world->mainDisplayCamera->cone;
+    outputShader->setUniform("FrustumConeLeftBottom", cone->leftBottom);
+    outputShader->setUniform("FrustumConeBottomLeftToBottomRight", cone->rightBottom - cone->leftBottom);
+    outputShader->setUniform("FrustumConeBottomLeftToTopLeft", cone->leftTop - cone->leftBottom);
     quad3dInfo->draw();
 }
 
@@ -106,3 +119,5 @@ void Renderer::deferred()
 
     glDisable(GL_BLEND);
 }
+
+

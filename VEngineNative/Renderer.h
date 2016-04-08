@@ -31,5 +31,7 @@ private:
     Object3dInfo *quad3dInfo;
 
     void deferred();
+    void draw();
+    void output();
 };
 

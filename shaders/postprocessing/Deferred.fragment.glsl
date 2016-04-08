@@ -94,13 +94,13 @@ float toLogDepth(float depth, float far){
 vec3 shadingMetalic(PostProceessingData data){
     float fresnel = fresnel_again(data.normal, data.cameraPos, 1.0 - data.roughness);
     
-    return shade(CameraPosition, data.diffuseColor, data.normal, data.worldPos, LightPosition, LightColor, 1.0 - fresnel, false);
+    return shade(CameraPosition, data.diffuseColor, data.normal, data.worldPos, LightPosition, LightColor, max(0.02, 1.0 - fresnel), false);
 }
 
 vec3 shadingNonMetalic(PostProceessingData data){
     float fresnel = fresnel_again(data.normal, data.cameraPos, 1.0 - data.roughness);
     
-    vec3 radiance =  shade(CameraPosition, vec3(0.08), data.normal, data.worldPos, LightPosition, LightColor, 1.0 - fresnel, false);    
+    vec3 radiance =  shade(CameraPosition, vec3(0.08), data.normal, data.worldPos, LightPosition, LightColor, max(0.02, 1.0 - fresnel), false);    
     
     vec3 difradiance = shadeDiffuse(CameraPosition, data.diffuseColor, data.normal, data.worldPos, LightPosition, LightColor, 1.0 - fresnel, false);
     return difradiance + radiance;
@@ -117,21 +117,21 @@ float rand2s(vec2 co){
 #define MMAL_LOD_REGULATOR 512
 vec3 stupidBRDF(vec3 dir, float level, float roughness){
 	vec3 aaprc = vec3(0.0);
-    float xx=2;
-    float xx2=1;
-	for(int x = 0; x < 22; x++){
+    float xx=rand2s(UV);
+    float xx2=rand2s(UV.yx);
+	for(int x = 0; x < 15; x++){
 		vec3 rd = vec3(
 			rand2s(vec2(xx, xx2)),
 			rand2s(vec2(-xx2, xx)),
 			rand2s(vec2(xx2, xx))
 		) *2-1;
 		vec3 displace = rd;
-        vec3 prc = textureLod(skyboxTex, dir + (displace * 0.6 * roughness), level).rgb;
+        vec3 prc = textureLod(skyboxTex, dir + (displace * 0.5 * roughness), level).rgb;
 		aaprc += prc;
         xx += 0.01;
         xx2 -= 0.02123;
 	}
-	return aaprc / 22;
+	return aaprc / 15;
 }
 
 vec3 MMALSkybox(vec3 dir, float roughness){
@@ -182,13 +182,16 @@ vec3 ApplyLighting(PostProceessingData data)
     } else if(LightUseShadowMap == 0){
         result += radiance;
     }
-    return result * (1.0 - smoothstep(0.0, LightCutOffDistance, distance(LightPosition, data.worldPos)));
+    return result;// * (1.0 - smoothstep(0.0, LightCutOffDistance, distance(LightPosition, data.worldPos)));
 }
 
 
 void main(){
     createData();
-    vec3 color = ApplyLighting(currentData);
-    color += MMAL(currentData);
+    vec3 color = vec3(0);
+    if(currentData.cameraDistance > 0){
+        color += ApplyLighting(currentData);
+        color += MMAL(currentData) * 0.1;
+    }
     outColor = vec4(color, 1.0);
 }

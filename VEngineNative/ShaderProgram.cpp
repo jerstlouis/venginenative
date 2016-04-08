@@ -241,6 +241,7 @@ GLint ShaderProgram::getUniformLocation(string name)
 
 void ShaderProgram::compile()
 {
+    uniformLocationsMap = {};
     handle = glCreateProgram();
     GLuint vertexHandle = compileSingleShader(GL_VERTEX_SHADER, vertexFile, Media::readString(vertexFile));
     glAttachShader(handle, vertexHandle);

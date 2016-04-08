@@ -4,6 +4,18 @@ in vec2 UV;
 
 out vec4 outColor;
 
+uniform vec3 CameraPosition;
+uniform vec3 FrustumConeLeftBottom;
+uniform vec3 FrustumConeBottomLeftToBottomRight;
+uniform vec3 FrustumConeBottomLeftToTopLeft;
+    
+vec3 reconstructCameraSpaceDistance(vec2 uv, float dist){
+    vec3 dir = normalize((FrustumConeLeftBottom + FrustumConeBottomLeftToBottomRight * uv.x + FrustumConeBottomLeftToTopLeft * uv.y));
+    return dir * dist;
+}
+
+layout(binding = 2) uniform sampler2D mrt_Distance_Tex;
+layout(binding = 3) uniform samplerCube skyboxTex;
 layout(binding = 5) uniform sampler2D inTex;
 
 const float SRGB_ALPHA = 0.055;
@@ -23,5 +35,6 @@ vec3 rgb_to_srgb(vec3 rgb) {
 
 void main(){
     vec3 color = texture(inTex, UV).rgb;
+    color += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Tex, UV, 0).r)) * textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb;
     outColor = vec4(rgb_to_srgb(color), 1.0);
 }
