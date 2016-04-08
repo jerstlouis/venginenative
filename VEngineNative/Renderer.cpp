@@ -17,6 +17,8 @@ Renderer::Renderer()
 
     outputShader = new ShaderProgram("PostProcess.vertex.glsl", "Output.fragment.glsl");
 
+    skyboxTexture = new CubeMapTexture("posx.jpg", "posy.jpg", "posz.jpg", "negx.jpg", "negy.jpg", "negz.jpg");
+
     mrtAlbedoRoughnessTex = new Texture(Game::instance->width, Game::instance->height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
     mrtNormalMetalnessTex = new Texture(Game::instance->width, Game::instance->height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
     mrtDistanceTexture = new Texture(Game::instance->width, Game::instance->height, GL_R32F, GL_RED, GL_FLOAT);
@@ -36,6 +38,10 @@ Renderer::Renderer()
 
 
 Renderer::~Renderer()
+{
+}
+
+void Renderer::renderToFramebuffer(CubeMapFramebuffer * fbo)
 {
 }
 
@@ -78,6 +84,7 @@ void Renderer::deferred()
     mrtAlbedoRoughnessTex->use(0);
     mrtNormalMetalnessTex->use(1);
     mrtDistanceTexture->use(2);
+    skyboxTexture->use(3);
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
 

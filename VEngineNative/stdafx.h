@@ -43,6 +43,8 @@ using namespace std;
 #include "glm/gtc/quaternion.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+#include "stb_image.h"
+
 #define PI 3.141592f
 #define rad2deg(a) (a * (180.0f / PI))
 #define deg2rad(a) (a * (PI / 180.0f))

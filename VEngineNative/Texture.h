@@ -12,13 +12,14 @@ public:
 
     GLuint handle;
     int components;
-    unsigned char* data;
     int width, height;
-    bool generated;
     void use(int unit);
     void pregenerate();
+    void generateMipMaps();
 private:
+    bool generated;
     void generate();
+    unsigned char* data;
     int genMode;
     const int genModeFromFile = 1;
     const int genModeEmptyFromDesc = 2;

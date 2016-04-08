@@ -149,6 +149,8 @@
   <ItemGroup>
     <ClInclude Include="AbsTransformable.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="CubeMapFramebuffer.h" />
+    <ClInclude Include="CubeMapTexture.h" />
     <ClInclude Include="EventHandler.h" />
     <ClInclude Include="Framebuffer.h" />
     <ClInclude Include="FrustumCone.h" />
@@ -181,6 +183,8 @@
   <ItemGroup>
     <ClCompile Include="AbsTransformable.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CubeMapFramebuffer.cpp" />
+    <ClCompile Include="CubeMapTexture.cpp" />
     <ClCompile Include="Framebuffer.cpp" />
     <ClCompile Include="FrustumCone.cpp" />
     <ClCompile Include="Game.cpp" />

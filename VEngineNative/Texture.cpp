@@ -2,9 +2,6 @@
 #include "Texture.h"
 #include "Media.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
 Texture::Texture(GLuint ihandle)
 {
     handle = ihandle;
@@ -45,6 +42,13 @@ void Texture::pregenerate()
     if (!generated) {
         generate();
     }
+}
+
+void Texture::generateMipMaps()
+{
+    glBindTexture(GL_TEXTURE_2D, handle);        
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 void Texture::use(int unit)

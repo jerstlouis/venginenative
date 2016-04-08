@@ -7,6 +7,7 @@ out vec4 outColor;
 layout(binding = 0) uniform sampler2D mrt_Albedo_Roughness_Tex;
 layout(binding = 1) uniform sampler2D mrt_Normal_Metalness_Tex;
 layout(binding = 2) uniform sampler2D mrt_Distance_Tex;
+layout(binding = 3) uniform samplerCube skyboxTex;
 layout(binding = 4) uniform sampler2DShadow shadowMapSingle;
 
 uniform vec3 CameraPosition;
@@ -109,6 +110,58 @@ vec3 MakeShading(PostProceessingData data){
     return mix(shadingNonMetalic(data), shadingMetalic(data), data.metalness);
 }
 
+float rand2s(vec2 co){
+        return fract(sin(dot(co.xy,vec2(12.9898,78.233))) * 43758.5453);
+}
+
+#define MMAL_LOD_REGULATOR 512
+vec3 stupidBRDF(vec3 dir, float level, float roughness){
+	vec3 aaprc = vec3(0.0);
+    float xx=2;
+    float xx2=1;
+	for(int x = 0; x < 22; x++){
+		vec3 rd = vec3(
+			rand2s(vec2(xx, xx2)),
+			rand2s(vec2(-xx2, xx)),
+			rand2s(vec2(xx2, xx))
+		) *2-1;
+		vec3 displace = rd;
+        vec3 prc = textureLod(skyboxTex, dir + (displace * 0.6 * roughness), level).rgb;
+		aaprc += prc;
+        xx += 0.01;
+        xx2 -= 0.02123;
+	}
+	return aaprc / 22;
+}
+
+vec3 MMALSkybox(vec3 dir, float roughness){
+	//roughness = roughness * roughness;
+    float levels = max(0, float(textureQueryLevels(skyboxTex)) - 1);
+    float mx = log2(roughness*MMAL_LOD_REGULATOR+1)/log2(MMAL_LOD_REGULATOR);
+    vec3 result = stupidBRDF(dir, mx * levels, roughness);
+	
+	return pow(result * 1.2, vec3(2.0));
+}
+
+
+vec3 MMAL(PostProceessingData data){
+    vec3 reflected = normalize(reflect(data.cameraPos, data.normal));
+    vec3 dir = normalize(mix(reflected, data.normal, data.roughness));
+    float fresnel = fresnel_again(data.normal, data.cameraPos, 1.0 - data.roughness);
+    float roughness = 1.0 - fresnel;
+    
+    vec3 metallic = vec3(0);
+    vec3 nonmetallic = vec3(0);
+    
+    metallic += MMALSkybox(dir, roughness) * data.diffuseColor;
+    
+    nonmetallic += MMALSkybox(dir, roughness) * 0.08;
+    nonmetallic += MMALSkybox(dir, 1.0) * data.diffuseColor;
+    
+    return mix(nonmetallic, metallic, data.metalness);
+    
+}
+
 vec3 ApplyLighting(PostProceessingData data)
 {
     vec3 result = vec3(0);
@@ -136,5 +189,6 @@ vec3 ApplyLighting(PostProceessingData data)
 void main(){
     createData();
     vec3 color = ApplyLighting(currentData);
+    color += MMAL(currentData);
     outColor = vec4(color, 1.0);
 }

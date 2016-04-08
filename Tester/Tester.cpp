@@ -34,7 +34,7 @@ int main()
 
     Material *mat = new Material();
     mat->diffuseColor = glm::vec3(1.0f);
-    mat->roughness = 0.2;
+    mat->roughness = 1.0;
     mat->metalness = 0.0;
 
     MaterialNode *bump = new MaterialNode(new Texture("DisplaceIT_Ground_Pebble1_Displace.png"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_BUMP);
@@ -44,8 +44,8 @@ int main()
     MaterialNode *normal2 = new MaterialNode(new Texture("mrkbasestoneb01_n.jpg"), glm::vec2(30), NODE_MODE_ADD, NODE_TARGET_NORMAL);
     MaterialNode *roughness = new MaterialNode(new Texture("test1.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_METALNESS);
 
-  //  mat->addNode(bump);
- //   mat->addNode(bump2);
+   // mat->addNode(bump);
+    //mat->addNode(bump2);
    // mat->addNode(color);
    // mat->addNode(normal);
     mat->addNode(normal2);
