@@ -32,98 +32,98 @@ void ShaderProgram::use()
     glUseProgram(handle);
 }
 
-void ShaderProgram::setUniform(string name, GLint value)
+void ShaderProgram::setUniform(const string &name, const GLint &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
     glUniform1i(location, value);
 }
 
-void ShaderProgram::setUniform(string name, GLuint value)
+void ShaderProgram::setUniform(const string &name, const GLuint &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
     glUniform1ui(location, value);
 }
 
-void ShaderProgram::setUniform(string name, float value)
+void ShaderProgram::setUniform(const string &name, const float &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
     glUniform1f(location, value);
 }
 
-void ShaderProgram::setUniform(string name, bool value)
+void ShaderProgram::setUniform(const string &name, const bool &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
     glUniform1i(location, value ? 1 : 0);
 }
 
-void ShaderProgram::setUniform(string name, glm::vec2 value)
+void ShaderProgram::setUniform(const string &name, const glm::vec2 &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
     glUniform2f(location, value.x, value.y);
 }
 
-void ShaderProgram::setUniform(string name, glm::vec3 value)
+void ShaderProgram::setUniform(const string &name, const glm::vec3 &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
     glUniform3f(location, value.x, value.y, value.z);
 }
 
-void ShaderProgram::setUniform(string name, glm::vec4 value)
+void ShaderProgram::setUniform(const string &name, const glm::vec4 &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
     glUniform4f(location, value.x, value.y, value.z, value.w);
 }
 
-void ShaderProgram::setUniform(string name, glm::quat value)
+void ShaderProgram::setUniform(const string &name, const glm::quat &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
     glUniform4f(location, value.x, value.y, value.z, value.w);
 }
 
-void ShaderProgram::setUniform(string name, glm::mat3 value)
+void ShaderProgram::setUniform(const string &name, const glm::mat3 &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
     glUniformMatrix3fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void ShaderProgram::setUniform(string name, glm::mat4 value)
+void ShaderProgram::setUniform(const string &name, const glm::mat4 &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void ShaderProgram::setUniformVector(string name, vector<GLint> value)
+void ShaderProgram::setUniformVector(const string &name, const vector<GLint> &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
     glUniform1iv(location, (GLsizei)value.size(), value.data());
 }
 
-void ShaderProgram::setUniformVector(string name, vector<GLuint> value)
+void ShaderProgram::setUniformVector(const string &name, const vector<GLuint> &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
     glUniform1uiv(location, (GLsizei)value.size(), value.data());
 }
 
-void ShaderProgram::setUniformVector(string name, vector<float> value)
+void ShaderProgram::setUniformVector(const string &name, const vector<float> &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
     glUniform1fv(location, (GLsizei)value.size(), value.data());
 }
 
-void ShaderProgram::setUniformVector(string name, vector<glm::vec2> value)
+void ShaderProgram::setUniformVector(const string &name, const vector<glm::vec2> &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
@@ -135,7 +135,7 @@ void ShaderProgram::setUniformVector(string name, vector<glm::vec2> value)
     glUniform2fv(location, (GLsizei)value.size(), floats.data());
 }
 
-void ShaderProgram::setUniformVector(string name, vector<glm::vec3> value)
+void ShaderProgram::setUniformVector(const string &name, const vector<glm::vec3> &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
@@ -148,7 +148,7 @@ void ShaderProgram::setUniformVector(string name, vector<glm::vec3> value)
     glUniform3fv(location, (GLsizei)value.size(), floats.data());
 }
 
-void ShaderProgram::setUniformVector(string name, vector<glm::vec4> value)
+void ShaderProgram::setUniformVector(const string &name, const vector<glm::vec4> &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
@@ -162,7 +162,7 @@ void ShaderProgram::setUniformVector(string name, vector<glm::vec4> value)
     glUniform4fv(location, (GLsizei)value.size(), floats.data());
 }
 
-void ShaderProgram::setUniformVector(string name, vector<glm::quat> value)
+void ShaderProgram::setUniformVector(const string &name, const vector<glm::quat> &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
@@ -176,7 +176,7 @@ void ShaderProgram::setUniformVector(string name, vector<glm::quat> value)
     glUniform4fv(location, (GLsizei)value.size(), floats.data());
 }
 
-void ShaderProgram::setUniformVector(string name, vector<glm::mat3> value)
+void ShaderProgram::setUniformVector(const string &name, const vector<glm::mat3> &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
@@ -197,7 +197,7 @@ void ShaderProgram::setUniformVector(string name, vector<glm::mat3> value)
     glUniformMatrix3fv(location, (GLsizei)value.size(), GL_FALSE, floats.data());
 }
 
-void ShaderProgram::setUniformVector(string name, vector<glm::mat4> value)
+void ShaderProgram::setUniformVector(const string &name, const vector<glm::mat4> &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
@@ -226,7 +226,7 @@ void ShaderProgram::setUniformVector(string name, vector<glm::mat4> value)
     glUniformMatrix4fv(location, (GLsizei)value.size(), GL_FALSE, floats.data());
 }
 
-GLint ShaderProgram::getUniformLocation(string name)
+GLint ShaderProgram::getUniformLocation(const string &name)
 {
     if (!generated) return -1;
     if (uniformLocationsMap.find(name) == uniformLocationsMap.end()) {

@@ -7,32 +7,32 @@ public:
     ~ShaderProgram();
     void recompile();
     void use();
-    void setUniform(string name, GLint value);
-    void setUniform(string name, GLuint value);
+    void setUniform(const string &name, const GLint &value);
+    void setUniform(const string &name, const GLuint &value);
 
-    void setUniform(string name, float value);
-    void setUniform(string name, bool value);
+    void setUniform(const string &name, const float &value);
+    void setUniform(const string &name, const bool &value);
 
-    void setUniform(string name, glm::vec2 value);
-    void setUniform(string name, glm::vec3 value);
-    void setUniform(string name, glm::vec4 value);
+    void setUniform(const string &name, const glm::vec2 &value);
+    void setUniform(const string &name, const glm::vec3 &value);
+    void setUniform(const string &name, const glm::vec4 &value);
 
-    void setUniform(string name, glm::mat3 value);
-    void setUniform(string name, glm::mat4 value);
-    void setUniform(string name, glm::quat value);
+    void setUniform(const string &name, const glm::mat3 &value);
+    void setUniform(const string &name, const glm::mat4 &value);
+    void setUniform(const string &name, const glm::quat &value);
 
-    void setUniformVector(string name, vector<GLint> value);
-    void setUniformVector(string name, vector<GLuint> value);
+    void setUniformVector(const string &name, const vector<GLint> &value);
+    void setUniformVector(const string &name, const vector<GLuint> &value);
 
-    void setUniformVector(string name, vector<float> value);
+    void setUniformVector(const string &name, const vector<float> &value);
 
-    void setUniformVector(string name, vector<glm::vec2> value);
-    void setUniformVector(string name, vector<glm::vec3> value);
-    void setUniformVector(string name, vector<glm::vec4> value);
+    void setUniformVector(const string &name, const vector<glm::vec2> &value);
+    void setUniformVector(const string &name, const vector<glm::vec3> &value);
+    void setUniformVector(const string &name, const vector<glm::vec4> &value);
 
-    void setUniformVector(string name, vector<glm::mat3> value);
-    void setUniformVector(string name, vector<glm::mat4> value);
-    void setUniformVector(string name, vector<glm::quat> value);
+    void setUniformVector(const string &name, const vector<glm::mat3> &value);
+    void setUniformVector(const string &name, const vector<glm::mat4> &value);
+    void setUniformVector(const string &name, const vector<glm::quat> &value);
 
     static ShaderProgram *current;
 
@@ -47,7 +47,7 @@ private:
     string tessEvalFile;
     map<string, GLint> uniformLocationsMap;
 
-    GLint getUniformLocation(string name);
+    GLint getUniformLocation(const string &name);
     void compile();
     string resolveIncludes(string source);
     GLuint compileSingleShader(GLenum type, string filename, string source);
