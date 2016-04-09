@@ -21,7 +21,7 @@ void main(){
     Output.TexCoord = vec2(in_uv.x, in_uv.y);
     Output.WorldPos = transform_vertex(int(gl_InstanceID), v.xyz);
     Output.Normal = in_normal;
-    Output.Tangent = in_tangent;
+    Output.Tangent = clamp(in_tangent, -1.0, 1.0);
     vec4 outpoint = (VPMatrix) * vec4(Output.WorldPos, 1);
 //    outpoint.w = 0.5 + 0.5 * outpoint.w;
     //outpoint.w = - outpoint.w;

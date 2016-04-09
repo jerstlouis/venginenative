@@ -3,6 +3,12 @@ class TransformationManager
 {
 public:
     TransformationManager();
+    TransformationManager(glm::vec3 iposition);
+    TransformationManager(glm::vec3 iposition, glm::quat iorientation);
+    TransformationManager(glm::vec3 iposition, glm::quat iorientation, glm::vec3 isize);
+    TransformationManager(glm::vec3 iposition, glm::vec3 isize);
+    TransformationManager(glm::quat iorientation);
+    TransformationManager(glm::quat iorientation, glm::vec3 isize);
     ~TransformationManager();
 
     glm::vec3 position;

@@ -16,23 +16,22 @@ layout(location = 2) out float outDistance;
 
 void main(){
     vec3 diffuseColor = DiffuseColor;
-    vec3 normal = normalize(Input.Normal);
+    vec3 normal = length(Input.Normal) == 0.0 ? normalize(cross(dFdx(Input.WorldPos), dFdy(Input.WorldPos))) : normalize(Input.Normal);
     vec3 normalmap = vec3(0,0,1);
     float roughness = Roughness;
     float metalness = Metalness;
     float bump = getBump(Input.TexCoord);
     if(RunParallax) UV = adjustParallaxUV(MainCameraPosition);
     
-    vec3 tangent = normalize(Input.Tangent.rgb);
-    float tangentSign = Input.Tangent.w;
+    vec3 tangent = (Input.Tangent.w < -1.0 || Input.Tangent.w > 1.0) ? normalize(cross(normal, cross(dFdx(Input.WorldPos), dFdy(Input.WorldPos)))) : normalize(Input.Tangent.rgb);
+    
+    float tangentSign = Input.Tangent.w == 0 ? 1.0 : Input.Tangent.w;
 
     mat3 TBN = mat3(
         normalize(tangent),
         normalize(cross(normal, tangent)) * tangentSign,
         normalize(normal)
     );    
-    
-    
     
     for(int i=0;i<NodesCount;i++){
         NodeImageModifier node = getModifier(i);
@@ -57,9 +56,9 @@ void main(){
 
     normal = quat_mul_vec(ModelInfos[Input.instanceId].Rotation, normal);
     
-    //diffuseColor *= 1.0 - newParallaxHeight;
+    diffuseColor *= 1.0 - newParallaxHeight;
     
     outAlbedoRoughness = vec4(diffuseColor, roughness);
     outNormalsMetalness = vec4(normal, metalness);
-    outDistance = distance(CameraPosition, Input.WorldPos);
+    outDistance = max(0.01, distance(CameraPosition, Input.WorldPos - normal * parallaxScale * newParallaxHeight));
 }

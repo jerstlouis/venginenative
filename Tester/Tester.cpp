@@ -51,20 +51,13 @@ int main()
     Mesh3d * sponza = loadRawMesh("sponza.raw");
 
     Material *sponzamat = sponza->getLodLevel(0)->material;
-    sponzamat->diffuseColor = glm::vec3(0.8f, 0.1f, 0.0f);
+    sponzamat->diffuseColor = glm::vec3(1);
     sponzamat->roughness = 1.0;
     sponzamat->metalness = 0.0;
-
-    MaterialNode *color = new MaterialNode(new Texture("KAMEN.JPG"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE);
-    Texture* normalstones = new Texture("mrkbasestoneb01_n.jpg");
-    MaterialNode *normal2 = new MaterialNode(normalstones, glm::vec2(30), NODE_MODE_ADD, NODE_TARGET_NORMAL);
-    MaterialNode *normal3 = new MaterialNode(normalstones, glm::vec2(10), NODE_MODE_ADD, NODE_TARGET_NORMAL);
-    MaterialNode *normal4 = new MaterialNode(normalstones, glm::vec2(1), NODE_MODE_ADD, NODE_TARGET_NORMAL);
-
-    sponzamat->addNode(color);
-    sponzamat->addNode(normal2);
-    sponzamat->addNode(normal3);
-    sponzamat->addNode(normal4);
+    
+    sponzamat->addNode(new MaterialNode(new Texture("floor1a.jpg"), glm::vec2(1), NODE_MODE_SUB, NODE_TARGET_DIFFUSE));
+    sponzamat->addNode(new MaterialNode(new Texture("floor1n.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_NORMAL));
+    sponzamat->addNode(new MaterialNode(new Texture("floor1n.jpg"), glm::vec2(2), NODE_MODE_REPLACE, NODE_TARGET_NORMAL));
 
 
     //-----------------------//
@@ -75,25 +68,27 @@ int main()
     Material * spheremat = sphere->getLodLevel(0)->material;
     spheremat->diffuseColor = glm::vec3(1.0);
     spheremat->roughness = 0.0;
-    spheremat->metalness = 0.0;
-    Texture *coltt = new Texture("stonew_a.jpg");
-    Texture *normtt = new Texture("stonew_n.jpg");
-    spheremat->addNode(new MaterialNode(coltt, glm::vec2(10), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE));
-    spheremat->addNode(new MaterialNode(coltt, glm::vec2(20), NODE_MODE_MUL, NODE_TARGET_DIFFUSE));
-    spheremat->addNode(new MaterialNode(coltt, glm::vec2(30), NODE_MODE_MUL, NODE_TARGET_DIFFUSE));
+    spheremat->metalness = 1.0;
+    Texture *coltt = new Texture("floor1a.jpg");
+    Texture *normtt = new Texture("floor1n.jpg");
+    spheremat->addNode(new MaterialNode(coltt, glm::vec2(10), NODE_MODE_SUB, NODE_TARGET_DIFFUSE));
     spheremat->addNode(new MaterialNode(normtt, glm::vec2(10), NODE_MODE_REPLACE, NODE_TARGET_NORMAL));
-    spheremat->addNode(new MaterialNode(normtt, glm::vec2(20), NODE_MODE_ADD, NODE_TARGET_NORMAL));
-    spheremat->addNode(new MaterialNode(normtt, glm::vec2(30), NODE_MODE_ADD, NODE_TARGET_NORMAL));
 
     //-----------------------//
 
+
+    for (int x = 0; x < 10; x++) {
+        for (int y = 0; y < 10; y++) {
+            sponza->addInstance(new Mesh3dInstance(new TransformationManager(glm::vec3(x * 40, 0, y * 20))));
+        }
+    }
     game->invoke([&]() {
         sponza->updateBuffers();
         sphere->updateBuffers();
     });
 
     game->world->scene->addMesh(sponza);
-    game->world->scene->addMesh(sphere);
+   // game->world->scene->addMesh(sphere);
 
     Light* light = new Light();
     light->switchShadowMapping(true);

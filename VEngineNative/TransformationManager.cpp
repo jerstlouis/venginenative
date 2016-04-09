@@ -10,6 +10,48 @@ TransformationManager::TransformationManager()
     orientation = quat();
 }
 
+TransformationManager::TransformationManager(glm::vec3 iposition)
+{
+    position = iposition;
+    size = vec3(1);
+    orientation = quat();
+}
+
+TransformationManager::TransformationManager(glm::vec3 iposition, glm::quat iorientation)
+{
+    position = iposition;
+    size = vec3(1);
+    orientation = iorientation;
+}
+
+TransformationManager::TransformationManager(glm::vec3 iposition, glm::quat iorientation, glm::vec3 isize)
+{
+    position = iposition;
+    size = isize;
+    orientation = iorientation;
+}
+
+TransformationManager::TransformationManager(glm::vec3 iposition, glm::vec3 isize)
+{
+    position = iposition;
+    size = isize;
+    orientation = quat();
+}
+
+TransformationManager::TransformationManager(glm::quat iorientation)
+{
+    position = vec3(0);
+    size = vec3(1);
+    orientation = iorientation;
+}
+
+TransformationManager::TransformationManager(glm::quat iorientation, glm::vec3 isize)
+{
+    position = vec3(0);
+    size = isize;
+    orientation = iorientation;
+}
+
 
 TransformationManager::~TransformationManager()
 {

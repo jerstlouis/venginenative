@@ -4,20 +4,11 @@
 float CalculateFallof( float dist){
    return 1.0 / (dist * dist + 1.0);
 }
-
-float fresnelSchlick(float VdotH)
-{
-    return  pow(1.0 - VdotH, 5.0);
-}
-vec3 makeFresnel(float V2Ncos, vec3 reflected)
-{
-    return reflected + 0.5 * reflected * pow(1.0 - V2Ncos, 5.0);
-}
-
+ 
 float fresnel_again(vec3 normal, vec3 cameraspace, float roughness){
     vec3 dir = normalize(reflect(cameraspace, normal));
     float fz = roughness;
-    float base =  max(0, 1.0 - dot(normalize(normal), dir));
+    float base =  1.0 - abs(dot(normalize(normal), dir));
     float fresnel = (fz + (1-fz)*(pow(base, 5.0)));
     return fresnel;
 }

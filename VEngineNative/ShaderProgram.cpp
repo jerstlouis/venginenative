@@ -308,11 +308,13 @@ GLuint ShaderProgram::compileSingleShader(GLenum type, string filename, string s
     if (status != 1) {
         GLint loglen;
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &loglen);
-        char* log = new char[loglen + 1, sizeof(char)];
+        char* log = new char[loglen + 1];
         glGetShaderInfoLog(shader, loglen, NULL, log);
+        log[loglen] = 0;
         printf("COMPILATION FAILED WITH MESSAGE::\n%s\n", log);
         delete log;
         glDeleteShader(shader);
+        //throw exception("Shader compilation failed");
     }
     return shader;
 }

@@ -9,16 +9,6 @@ layout(binding = 6)  uniform sampler2D texBind6 ;
 layout(binding = 7)  uniform sampler2D texBind7 ;
 layout(binding = 8)  uniform sampler2D texBind8 ;
 layout(binding = 9)  uniform sampler2D texBind9 ;
-layout(binding = 10) uniform sampler2D texBind10;
-layout(binding = 11) uniform sampler2D texBind11;
-layout(binding = 12) uniform sampler2D texBind12;
-layout(binding = 13) uniform sampler2D texBind13;
-layout(binding = 14) uniform sampler2D texBind14;
-layout(binding = 15) uniform sampler2D texBind15;
-layout(binding = 16) uniform sampler2D texBind16;
-layout(binding = 17) uniform sampler2D texBind17;
-layout(binding = 18) uniform sampler2D texBind18;
-layout(binding = 19) uniform sampler2D texBind19;
 
 vec4 sampleNode(int i, vec2 uv){
     if(i == 0)  return texture(texBind0 , uv).rgba;
@@ -31,16 +21,6 @@ vec4 sampleNode(int i, vec2 uv){
     if(i == 7)  return texture(texBind7 , uv).rgba;
     if(i == 8)  return texture(texBind8 , uv).rgba;
     if(i == 9)  return texture(texBind9 , uv).rgba;
-    if(i == 10) return texture(texBind10, uv).rgba;
-    if(i == 11) return texture(texBind11, uv).rgba;
-    if(i == 12) return texture(texBind12, uv).rgba;
-    if(i == 13) return texture(texBind13, uv).rgba;
-    if(i == 14) return texture(texBind14, uv).rgba;
-    if(i == 15) return texture(texBind15, uv).rgba;
-    if(i == 16) return texture(texBind16, uv).rgba;
-    if(i == 17) return texture(texBind17, uv).rgba;
-    if(i == 18) return texture(texBind18, uv).rgba;
-    if(i == 19) return texture(texBind19, uv).rgba;
 }
 
 vec4 sampleNodeLod0(int i, vec2 uv){
@@ -54,16 +34,6 @@ vec4 sampleNodeLod0(int i, vec2 uv){
     if(i == 7)  return textureLod(texBind7 , uv, 0).rgba;
     if(i == 8)  return textureLod(texBind8 , uv, 0).rgba;
     if(i == 9)  return textureLod(texBind9 , uv, 0).rgba;
-    if(i == 10) return textureLod(texBind10, uv, 0).rgba;
-    if(i == 11) return textureLod(texBind11, uv, 0).rgba;
-    if(i == 12) return textureLod(texBind12, uv, 0).rgba;
-    if(i == 13) return textureLod(texBind13, uv, 0).rgba;
-    if(i == 14) return textureLod(texBind14, uv, 0).rgba;
-    if(i == 15) return textureLod(texBind15, uv, 0).rgba;
-    if(i == 16) return textureLod(texBind16, uv, 0).rgba;
-    if(i == 17) return textureLod(texBind17, uv, 0).rgba;
-    if(i == 18) return textureLod(texBind18, uv, 0).rgba;
-    if(i == 19) return textureLod(texBind19, uv, 0).rgba;
 }
 
 uniform vec3 DiffuseColor;

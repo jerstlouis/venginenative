@@ -170,7 +170,7 @@ vec3 MMAL(PostProceessingData data){
     metallic += MMALSkybox(dir, data.roughness) * newBase;
     
     nonmetallic += MMALSkybox(dir, data.roughness) * fresnel;
-    nonmetallic += MMALSkybox(dir, 1.0) * newBase;
+    nonmetallic += MMALSkybox(dir, 1.0) * data.diffuseColor;
     
     return mix(nonmetallic, metallic, data.metalness);
     
@@ -188,7 +188,7 @@ vec3 ApplyLighting(PostProceessingData data)
 
             float percent = 0;
             if(lightScreenSpace.x >= 0.0 && lightScreenSpace.x <= 1.0 && lightScreenSpace.y >= 0.0 && lightScreenSpace.y <= 1.0) {
-                percent = PCFDeferred(lightScreenSpace.xy, 1.0 - toLogDepth(distance(data.worldPos, LightPosition), LightCutOffDistance));
+                percent = PCFDeferred(lightScreenSpace.xy, 1.0 - toLogDepth(distance(data.worldPos, LightPosition), LightCutOffDistance)); 
             }
             result += radiance * percent;
         }
