@@ -33,23 +33,29 @@ int main()
     game->world->mainDisplayCamera = cam;
 
     Material *mat = new Material();
-    mat->diffuseColor = glm::vec3(1.0f);
+    mat->diffuseColor = glm::vec3(0.8f, 0.1f, 0.0f);
     mat->roughness = 1.0;
     mat->metalness = 0.0;
 
     MaterialNode *bump = new MaterialNode(new Texture("DisplaceIT_Ground_Pebble1_Displace.png"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_BUMP);
     MaterialNode *bump2 = new MaterialNode(new Texture("aaaaa.png"), glm::vec2(1), NODE_MODE_MUL, NODE_TARGET_BUMP);
-    MaterialNode *color = new MaterialNode(new Texture("DisplaceIT_Ground_Pebble1_Color.png"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE);
+    MaterialNode *color = new MaterialNode(new Texture("KAMEN.JPG"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE);
+    MaterialNode *color2 = new MaterialNode(new Texture("mrkbasestoneb01lite.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE);
     MaterialNode *normal = new MaterialNode(new Texture("DisplaceIT_Ground_Pebble1_NormalBump2.png"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_NORMAL);
     MaterialNode *normal2 = new MaterialNode(new Texture("mrkbasestoneb01_n.jpg"), glm::vec2(30), NODE_MODE_ADD, NODE_TARGET_NORMAL);
-    MaterialNode *roughness = new MaterialNode(new Texture("test1.jpg"), glm::vec2(0.1), NODE_MODE_REPLACE, NODE_TARGET_METALNESS);
+    MaterialNode *normal3 = new MaterialNode(new Texture("mrkbasestoneb01_n.jpg"), glm::vec2(10), NODE_MODE_ADD, NODE_TARGET_NORMAL);
+    MaterialNode *normal4 = new MaterialNode(new Texture("mrkbasestoneb01_n.jpg"), glm::vec2(1), NODE_MODE_ADD, NODE_TARGET_NORMAL);
+    MaterialNode *roughness = new MaterialNode(new Texture("test1.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_METALNESS);
 
-    mat->addNode(bump);
+    //    mat->addNode(bump);
     //mat->addNode(bump2);
     mat->addNode(color);
-    mat->addNode(normal);
+   // mat->addNode(color2);
+ // mat->addNode(normal);
     mat->addNode(normal2);
-    mat->addNode(roughness);
+    mat->addNode(normal3);
+    mat->addNode(normal4);
+   // mat->addNode(roughness);
 
     unsigned char* teapotBytes;
     int teapotBytesCount = Media::readBinary("sponza.raw", &teapotBytes);
@@ -69,10 +75,10 @@ int main()
 
     Light* light = new Light();
     light->switchShadowMapping(true);
-    light->cutOffDistance = 1000.0;
+    light->cutOffDistance = 100.0;
     light->color = glm::vec3(1);
     light->angle = deg2rad(90.0f);
-    light->resizeShadowMap(1024, 1024);
+    light->resizeShadowMap(2048, 2048);
     light->transformation->translate(glm::vec3(0, 2, 0));
 
     game->world->scene->addLight(light);
@@ -103,13 +109,18 @@ int main()
 
     game->setCursorMode(GLFW_CURSOR_DISABLED);
 
-    while (!game->shouldClose) {
+    game->onRenderFrame->add([&](int i) {
         if (!cursorFree) {
-            float speed = 0.00001f;
+            float speed = 0.1f;
             if (game->getKeyStatus(GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
                 speed *= 0.1f;
             }
-            // process logic - on another thread
+            if (game->getKeyStatus(GLFW_KEY_LEFT_ALT) == GLFW_PRESS) {
+                speed *= 10.0f;
+            }
+            if (game->getKeyStatus(GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+                speed *= 3.0f;
+            }
             if (game->getKeyStatus(GLFW_KEY_F1) == GLFW_PRESS) {
                 light->transformation->position = cam->transformation->position;
                 light->transformation->orientation = cam->transformation->orientation;
@@ -152,6 +163,10 @@ int main()
             glm::quat newrot = glm::angleAxis(deg2rad(pitch), glm::vec3(0, 1, 0)) * glm::angleAxis(deg2rad(yaw), glm::vec3(1, 0, 0));
             cam->transformation->setOrientation(newrot);
         }
+    });
+
+    while (!game->shouldClose) {
+        
     }
     return 0;
 }

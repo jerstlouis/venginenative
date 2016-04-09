@@ -4,7 +4,15 @@ in Data {
 #include InOutStageLayout.glsl
 } Input;
 
+out float Depth;
+
+#include Quaternions.glsl
+#include ModelBuffer.glsl
 #include Mesh3dUniforms.glsl
+
+#include Material.glsl
+
+uniform float CutOffDistance;
 
 float toLogDepth(float depth, float far){
     float badass_depth = log2(max(1e-6, 1.0 + depth)) / (log2(far));
@@ -12,6 +20,5 @@ float toLogDepth(float depth, float far){
 }
 
 void main(){
-    float dist = distance(CameraPosition, Input.WorldPos);
-    gl_FragDepth = toLogDepth(dist, 10000);
+    Depth = 1.0 - toLogDepth(distance(CameraPosition, Input.WorldPos), CutOffDistance);
 }

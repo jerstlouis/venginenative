@@ -56,8 +56,10 @@ void Light::refreshShadowMap()
     if (shadowMappingEnabled) {
         mapper->use(true);
         ShaderProgram *shader = Game::instance->shaders->depthOnlyShader;
+        shader->use();
+        shader->setUniform("CutOffDistance", cutOffDistance);
         lightCamera->transformation = transformation;
-        lightCamera->createProjectionPerspective(angle, (float)shadowMapWidth / (float)shadowMapHeight, 0.01f, cutOffDistance);
+        lightCamera->createProjectionPerspective(angle, (float)shadowMapWidth / (float)shadowMapHeight, 0.1f, cutOffDistance);
         Game::instance->world->draw(shader, lightCamera);
     }
 }
@@ -65,10 +67,13 @@ void Light::refreshShadowMap()
 void Light::recreateFbo()
 {
     destroyFbo();
+    Texture* helperDepthBuffer = new Texture(shadowMapWidth, shadowMapHeight,
+        GL_DEPTH_COMPONENT24, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT);
     depthMap = new Texture(shadowMapWidth, shadowMapHeight,
-        GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT);
+        GL_R32F, GL_RED, GL_FLOAT);
     mapper = new Framebuffer();
-    mapper->attachTexture(depthMap, GL_DEPTH_ATTACHMENT);
+    mapper->attachTexture(helperDepthBuffer, GL_DEPTH_ATTACHMENT);
+    mapper->attachTexture(depthMap, GL_COLOR_ATTACHMENT0);
 }
 
 void Light::destroyFbo()

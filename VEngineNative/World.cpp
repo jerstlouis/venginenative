@@ -24,5 +24,6 @@ void World::draw(ShaderProgram *shader, Camera *camera)
     shader->setUniform("VPMatrix", vpmatrix);
     shader->setUniform("Resolution", glm::vec2(Game::instance->width, Game::instance->height));
     shader->setUniform("CameraPosition", camera->transformation->position);
+    shader->setUniform("MainCameraPosition", mainDisplayCamera->transformation->position);
     scene->draw();
 }

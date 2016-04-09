@@ -5,7 +5,7 @@
 Texture::Texture(GLuint ihandle)
 {
     handle = ihandle;
-    generated = true; 
+    generated = true;
     width = 1;
     height = 1;
     components = 4;
@@ -26,7 +26,7 @@ Texture::Texture(string filekey)
 Texture::Texture(int iwidth, int iheight, GLint internalFormat, GLenum format, GLenum type)
 {
     width = iwidth;
-    height = iheight; 
+    height = iheight;
     internalFormatRequested = internalFormat;
     formatRequested = format;
     typeRequested = type;
@@ -46,7 +46,7 @@ void Texture::pregenerate()
 
 void Texture::generateMipMaps()
 {
-    glBindTexture(GL_TEXTURE_2D, handle);        
+    glBindTexture(GL_TEXTURE_2D, handle);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glGenerateMipmap(GL_TEXTURE_2D);
 }

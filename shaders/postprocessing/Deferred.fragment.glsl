@@ -8,7 +8,7 @@ layout(binding = 0) uniform sampler2D mrt_Albedo_Roughness_Tex;
 layout(binding = 1) uniform sampler2D mrt_Normal_Metalness_Tex;
 layout(binding = 2) uniform sampler2D mrt_Distance_Tex;
 layout(binding = 3) uniform samplerCube skyboxTex;
-layout(binding = 4) uniform sampler2DShadow shadowMapSingle;
+layout(binding = 4) uniform sampler2D shadowMapSingle;
 
 uniform vec3 CameraPosition;
 uniform vec2 Resolution;
@@ -80,7 +80,7 @@ float PCFDeferred(vec2 uvi, float comparison){
     for (float y = -bound; y <= bound; y += PCFEDGE){
         for (float x = -bound; x <= bound; x += PCFEDGE){
             vec2 uv = vec2(uvi+ vec2(x,y)* pixSize);
-            shadow += texture(shadowMapSingle, vec3(uv, comparison));
+            shadow +=  1.0 - step(comparison + 0.0005, texture(shadowMapSingle, uv).r);
         }
     }
     return shadow / (KERNEL * KERNEL);
@@ -92,17 +92,24 @@ float toLogDepth(float depth, float far){
 }
 
 vec3 shadingMetalic(PostProceessingData data){
-    float fresnel = fresnel_again(data.normal, data.cameraPos, 1.0 - data.roughness);
+    float fresnelR = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.r);
+    float fresnelG = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.g);
+    float fresnelB = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.b);
+    vec3 newBase = vec3(fresnelR, fresnelG, fresnelB);
     
-    return shade(CameraPosition, data.diffuseColor, data.normal, data.worldPos, LightPosition, LightColor, max(0.02, 1.0 - fresnel), false);
+    return shade(CameraPosition, newBase, data.normal, data.worldPos, LightPosition, LightColor, max(0.02, data.roughness), false);
 }
 
 vec3 shadingNonMetalic(PostProceessingData data){
-    float fresnel = fresnel_again(data.normal, data.cameraPos, 1.0 - data.roughness);
+    float fresnel = fresnel_again(data.normal, data.cameraPos, 0.08);
+    float fresnelR = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.r);
+    float fresnelG = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.g);
+    float fresnelB = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.b);
+    vec3 newBase = vec3(fresnelR, fresnelG, fresnelB);
     
-    vec3 radiance =  shade(CameraPosition, vec3(0.08), data.normal, data.worldPos, LightPosition, LightColor, max(0.02, 1.0 - fresnel), false);    
+    vec3 radiance =  shade(CameraPosition, vec3(fresnel), data.normal, data.worldPos, LightPosition, LightColor, max(0.02, data.roughness), false);    
     
-    vec3 difradiance = shadeDiffuse(CameraPosition, data.diffuseColor, data.normal, data.worldPos, LightPosition, LightColor, 1.0 - fresnel, false);
+    vec3 difradiance = shadeDiffuse(CameraPosition, newBase, data.normal, data.worldPos, LightPosition, LightColor, data.roughness, false);
     return difradiance + radiance;
 }
 
@@ -140,23 +147,28 @@ vec3 MMALSkybox(vec3 dir, float roughness){
     float mx = log2(roughness*MMAL_LOD_REGULATOR+1)/log2(MMAL_LOD_REGULATOR);
     vec3 result = stupidBRDF(dir, mx * levels, roughness);
 	
-	return pow(result * 1.2, vec3(2.0));
+	//return pow(result * 1.2, vec3(2.0));
+	return result;
 }
 
 
 vec3 MMAL(PostProceessingData data){
     vec3 reflected = normalize(reflect(data.cameraPos, data.normal));
     vec3 dir = normalize(mix(reflected, data.normal, data.roughness));
-    float fresnel = fresnel_again(data.normal, data.cameraPos, 1.0 - data.roughness);
-    float roughness = 1.0 - fresnel;
+    
+    float fresnel = fresnel_again(data.normal, data.cameraPos, 0.08);
+    float fresnelR = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.r);
+    float fresnelG = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.g);
+    float fresnelB = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.b);
+    vec3 newBase = vec3(fresnelR, fresnelG, fresnelB);
     
     vec3 metallic = vec3(0);
     vec3 nonmetallic = vec3(0);
     
-    metallic += MMALSkybox(dir, roughness) * data.diffuseColor;
+    metallic += MMALSkybox(dir, data.roughness) * newBase;
     
-    nonmetallic += MMALSkybox(dir, roughness) * 0.08;
-    nonmetallic += MMALSkybox(dir, 1.0) * data.diffuseColor;
+    nonmetallic += MMALSkybox(dir, data.roughness) * fresnel;
+    nonmetallic += MMALSkybox(dir, 1.0) * newBase;
     
     return mix(nonmetallic, metallic, data.metalness);
     
@@ -174,7 +186,7 @@ vec3 ApplyLighting(PostProceessingData data)
 
             float percent = 0;
             if(lightScreenSpace.x >= 0.0 && lightScreenSpace.x <= 1.0 && lightScreenSpace.y >= 0.0 && lightScreenSpace.y <= 1.0) {
-                percent = PCFDeferred(lightScreenSpace.xy, toLogDepth(distance(data.worldPos, LightPosition), 10000) - 0.001);
+                percent = PCFDeferred(lightScreenSpace.xy, 1.0 - toLogDepth(distance(data.worldPos, LightPosition), LightCutOffDistance));
             }
             result += radiance * percent;
         }
@@ -191,7 +203,7 @@ void main(){
     vec3 color = vec3(0);
     if(currentData.cameraDistance > 0){
         color += ApplyLighting(currentData);
-        color += MMAL(currentData) * 0.1;
+        color += MMAL(currentData);
     }
     outColor = vec4(color, 1.0);
 }

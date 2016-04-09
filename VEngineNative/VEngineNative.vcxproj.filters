@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\glfw">
+      <UniqueIdentifier>{150d9001-c425-4ae9-a283-255bf6acc5cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\glad">
+      <UniqueIdentifier>{f7dbbf72-182e-48d2-b9c0-cb5ea39b366d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -25,15 +31,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Game.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="khrplatform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="glad.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="glfw.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Object3dInfo.h">
@@ -113,6 +110,15 @@
     </ClInclude>
     <ClInclude Include="CubeMapFramebuffer.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="glfw.h">
+      <Filter>Header Files\glfw</Filter>
+    </ClInclude>
+    <ClInclude Include="glad.h">
+      <Filter>Header Files\glad</Filter>
+    </ClInclude>
+    <ClInclude Include="khrplatform.h">
+      <Filter>Header Files\glad</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
