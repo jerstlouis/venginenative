@@ -91,7 +91,7 @@ float toLogDepth(float depth, float far){
     return badass_depth;
 }
 
-#define MIN_ROUGHNESS_DIRECT 0.07
+#define MIN_ROUGHNESS_DIRECT 0.04
 
 vec3 shadingMetalic(PostProceessingData data){
     float fresnelR = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.r);
@@ -111,7 +111,7 @@ vec3 shadingNonMetalic(PostProceessingData data){
     
     vec3 radiance =  shade(CameraPosition, vec3(fresnel), data.normal, data.worldPos, LightPosition, LightColor, max(MIN_ROUGHNESS_DIRECT, data.roughness), false);    
     
-    vec3 difradiance = shadeDiffuse(CameraPosition, newBase, data.normal, data.worldPos, LightPosition, LightColor, data.roughness, false);
+    vec3 difradiance = shadeDiffuse(CameraPosition, data.diffuseColor, data.normal, data.worldPos, LightPosition, LightColor, data.roughness, false);
     return difradiance + radiance;
 }
 
@@ -189,6 +189,7 @@ vec3 ApplyLighting(PostProceessingData data)
             float percent = 0;
             if(lightScreenSpace.x >= 0.0 && lightScreenSpace.x <= 1.0 && lightScreenSpace.y >= 0.0 && lightScreenSpace.y <= 1.0) {
                 percent = PCFDeferred(lightScreenSpace.xy, 1.0 - toLogDepth(distance(data.worldPos, LightPosition), LightCutOffDistance)); 
+                
             }
             result += radiance * percent;
         }
@@ -205,7 +206,7 @@ void main(){
     vec3 color = vec3(0);
     if(currentData.cameraDistance > 0){
         color += ApplyLighting(currentData);
-        color += MMAL(currentData);
+        color += MMAL(currentData) * 0.1;
     }
     outColor = vec4(color, 1.0);
 }

@@ -12,6 +12,11 @@ float fresnel_again(vec3 normal, vec3 cameraspace, float roughness){
     float fresnel = (fz + (1-fz)*(pow(base, 5.0)));
     return fresnel;
 }
+float fresnel_again2(float base, float roughness){
+    float fz = roughness;
+    float fresnel = (fz + (1-fz)*(pow(base, 5.0)));
+    return fresnel;
+}
 
 float G1V(float dotNV, float k)
 {
@@ -97,13 +102,13 @@ vec3 shade(
         normal,
         cameraRelativeToVPos,
         lightRelativeToVPos,
-        clamp(roughness, 0.005, 0.99),
+        roughness,
         lightColor
         );
         
-        
     
-    return specularComponent * albedo;// * CalculateFallof(distance(lightPosition, fragmentPosition));
+    
+    return  specularComponent * albedo;// * CalculateFallof(distance(lightPosition, fragmentPosition));
 }
 
 vec3 shadeDiffuse(

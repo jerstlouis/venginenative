@@ -4,8 +4,10 @@
 #include "FrustumCone.h"
 
 
-Renderer::Renderer()
+Renderer::Renderer(int iwidth, int iheight)
 {
+    width = iwidth;
+    height = iheight;
     vector<GLfloat> ppvertices = {
         -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
         1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
@@ -16,47 +18,143 @@ Renderer::Renderer()
     quad3dInfo->drawMode = GL_TRIANGLE_STRIP;
 
     outputShader = new ShaderProgram("PostProcess.vertex.glsl", "Output.fragment.glsl");
+    deferredShader = new ShaderProgram("PostProcess.vertex.glsl", "Deferred.fragment.glsl");
+    ambientLightShader = new ShaderProgram("PostProcess.vertex.glsl", "AmbientLight.fragment.glsl");
+    ambientOcclusionShader = new ShaderProgram("PostProcess.vertex.glsl", "AmbientOcclusion.fragment.glsl");
+    fogShader = new ShaderProgram("PostProcess.vertex.glsl", "Fog.fragment.glsl");
+    motionBlurShader = new ShaderProgram("PostProcess.vertex.glsl", "MotionBlur.fragment.glsl");
+    bloomShader = new ShaderProgram("PostProcess.vertex.glsl", "Bloom.fragment.glsl");
+    combineShader = new ShaderProgram("PostProcess.vertex.glsl", "Combine.fragment.glsl");
 
     skyboxTexture = new CubeMapTexture("posx.jpg", "posy.jpg", "posz.jpg", "negx.jpg", "negy.jpg", "negz.jpg");
-
-    mrtAlbedoRoughnessTex = new Texture(Game::instance->width, Game::instance->height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
-    mrtNormalMetalnessTex = new Texture(Game::instance->width, Game::instance->height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
-    mrtDistanceTexture = new Texture(Game::instance->width, Game::instance->height, GL_R32F, GL_RED, GL_FLOAT);
-    depthTexture = new Texture(Game::instance->width, Game::instance->height, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT);
-
-    fbo = new Framebuffer();
-    fbo->attachTexture(mrtAlbedoRoughnessTex, GL_COLOR_ATTACHMENT0);
-    fbo->attachTexture(mrtNormalMetalnessTex, GL_COLOR_ATTACHMENT1);
-    fbo->attachTexture(mrtDistanceTexture, GL_COLOR_ATTACHMENT2);
-    fbo->attachTexture(depthTexture, GL_DEPTH_ATTACHMENT);
-
-    deferredTexture = new Texture(Game::instance->width, Game::instance->height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
-    deferredFbo = new Framebuffer();
-    deferredFbo->attachTexture(deferredTexture, GL_COLOR_ATTACHMENT0);
-    deferredShader = new ShaderProgram("PostProcess.vertex.glsl", "Deferred.fragment.glsl");
 }
 
+void Renderer::resize(int width, int height)
+{
+    destroyFbos();
+    initializeFbos();
+}
+
+void Renderer::initializeFbos()
+{
+    mrtAlbedoRoughnessTex = new Texture(width, height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
+    mrtNormalMetalnessTex = new Texture(width, height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
+    mrtDistanceTexture = new Texture(width, height, GL_R32F, GL_RED, GL_FLOAT);
+    depthTexture = new Texture(width, height, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT); // most probably overkill
+
+    mrtFbo = new Framebuffer();
+    mrtFbo->attachTexture(mrtAlbedoRoughnessTex, GL_COLOR_ATTACHMENT0);
+    mrtFbo->attachTexture(mrtNormalMetalnessTex, GL_COLOR_ATTACHMENT1);
+    mrtFbo->attachTexture(mrtDistanceTexture, GL_COLOR_ATTACHMENT2);
+    mrtFbo->attachTexture(depthTexture, GL_DEPTH_ATTACHMENT);
+
+    deferredTexture = new Texture(width, height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
+    deferredFbo = new Framebuffer();
+    deferredFbo->attachTexture(deferredTexture, GL_COLOR_ATTACHMENT0);
+
+    ambientLightTexture = new Texture(width, height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
+    ambientLightFbo = new Framebuffer();
+    ambientLightFbo->attachTexture(ambientLightTexture, GL_COLOR_ATTACHMENT0);
+
+    ambientOcclusionTexture = new Texture(width, height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
+    ambientOcclusionFbo = new Framebuffer();
+    ambientOcclusionFbo->attachTexture(ambientOcclusionTexture, GL_COLOR_ATTACHMENT0);
+
+    fogTexture = new Texture(width, height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
+    fogFbo = new Framebuffer();
+    fogFbo->attachTexture(fogTexture, GL_COLOR_ATTACHMENT0);
+
+    motionBlurTexture = new Texture(width, height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
+    motionBlurFbo = new Framebuffer();
+    motionBlurFbo->attachTexture(motionBlurTexture, GL_COLOR_ATTACHMENT0);
+
+    bloomXTexture = new Texture(width, height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
+    bloomYTexture = new Texture(width, height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
+    bloomFbo = new Framebuffer();
+    bloomFbo->attachTexture(bloomXTexture, GL_COLOR_ATTACHMENT0);
+    bloomFbo->attachTexture(bloomYTexture, GL_COLOR_ATTACHMENT1);
+
+    combineTexture = new Texture(width, height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
+    combineFbo = new Framebuffer();
+    combineFbo->attachTexture(combineTexture, GL_COLOR_ATTACHMENT0);
+}
+
+void Renderer::destroyFbos()
+{
+    delete mrtAlbedoRoughnessTex;
+    delete mrtNormalMetalnessTex;
+    delete mrtDistanceTexture;
+    delete depthTexture;
+
+    delete deferredFbo;
+    delete deferredTexture;
+
+    delete ambientLightFbo;
+    delete ambientLightTexture;
+
+    delete ambientOcclusionFbo;
+    delete ambientOcclusionTexture;
+
+    delete fogFbo;
+    delete fogTexture;
+
+    delete motionBlurFbo;
+    delete motionBlurTexture;
+
+    delete bloomFbo;
+    delete bloomXTexture;
+    delete bloomYTexture;
+
+    delete combineFbo;
+    delete combineTexture;
+}
 
 Renderer::~Renderer()
 {
+    destroyFbos();
+    delete quad3dInfo;
+    delete skyboxTexture;
+    delete deferredShader;
+    delete ambientLightShader;
+    delete ambientOcclusionShader;
+    delete fogShader;
+    delete motionBlurShader;
+    delete bloomShader;
+    delete combineShader;
+    delete outputShader;
 }
 
-void Renderer::renderToFramebuffer(CubeMapFramebuffer * fbo)
+void Renderer::renderToFramebuffer(glm::vec3 position, CubeMapFramebuffer * fboout)
 {
+    for (int i = 0; i < 6; i++) {
+        fboout->use();
+        Camera *cam = fboout->switchFace(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, true);
+        cam->transformation->setPosition(position);
+        draw(cam);
+        fboout->use();
+    }
 }
 
-void Renderer::renderToFramebuffer(Framebuffer * fboout)
+void Renderer::renderToFramebuffer(Camera *camera, Framebuffer * fboout)
 {
-    draw();
+    draw(camera);
     fboout->use(true);
     output();
 }
 
-void Renderer::draw()
+void Renderer::draw(Camera *camera)
 {
-    fbo->use(true);
-    Game::instance->world->draw(Game::instance->shaders->materialShader, Game::instance->world->mainDisplayCamera);
+    mrtFbo->use(true);
+    Game::instance->world->draw(Game::instance->shaders->materialShader, camera);
     deferred();
+}
+
+void Renderer::bloom()
+{
+}
+
+void Renderer::combine()
+{
 }
 
 void Renderer::output()
@@ -77,6 +175,7 @@ void Renderer::recompileShaders()
     deferredShader->recompile();
     outputShader->recompile();
 }
+
 
 void Renderer::deferred()
 {
@@ -118,6 +217,22 @@ void Renderer::deferred()
     }
 
     glDisable(GL_BLEND);
+}
+
+void Renderer::ambientLight()
+{
+}
+
+void Renderer::ambientOcclusion()
+{
+}
+
+void Renderer::fog()
+{
+}
+
+void Renderer::motionBlur()
+{
 }
 
 

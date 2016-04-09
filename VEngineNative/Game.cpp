@@ -170,6 +170,6 @@ void Game::onRenderFrameFunc()
     }
     onRenderFrame->invoke(0);
 
-    renderer->renderToFramebuffer(screenFbo);
+    renderer->renderToFramebuffer(world->mainDisplayCamera, screenFbo);
 }
 
