@@ -11,7 +11,7 @@ Game::Game(int windowwidth, int windowheight)
     invokeQueue = {};
     onRenderFrame = {};
     world = new World();
-    renderer = new Renderer();
+    renderer = new Renderer(width, height);
     shaders = new GenericShaders();
     screenFbo = new Framebuffer(width, height, 0);
     onRenderFrame = new EventHandler<int>();
@@ -170,6 +170,8 @@ void Game::onRenderFrameFunc()
     }
     onRenderFrame->invoke(0);
 
-    renderer->renderToFramebuffer(world->mainDisplayCamera, screenFbo);
+    if (world->mainDisplayCamera != nullptr) {
+        renderer->renderToFramebuffer(world->mainDisplayCamera, screenFbo);
+    }
 }
 

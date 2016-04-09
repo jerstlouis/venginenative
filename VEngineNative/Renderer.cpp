@@ -27,6 +27,7 @@ Renderer::Renderer(int iwidth, int iheight)
     combineShader = new ShaderProgram("PostProcess.vertex.glsl", "Combine.fragment.glsl");
 
     skyboxTexture = new CubeMapTexture("posx.jpg", "posy.jpg", "posz.jpg", "negx.jpg", "negy.jpg", "negz.jpg");
+    initializeFbos();
 }
 
 void Renderer::resize(int width, int height)

@@ -1,4 +1,6 @@
 
+#extension GL_ARB_bindless_texture : require
+
 layout(binding = 0)  uniform sampler2D texBind0 ;
 layout(binding = 1)  uniform sampler2D texBind1 ;
 layout(binding = 2)  uniform sampler2D texBind2 ;
@@ -36,6 +38,19 @@ vec4 sampleNodeLod0(int i, vec2 uv){
     if(i == 9)  return textureLod(texBind9 , uv, 0).rgba;
 }
 
+sampler2D retrieveSampler(int i){
+    if(i == 0)  return texBind0;
+    if(i == 1)  return texBind1;
+    if(i == 2)  return texBind2;
+    if(i == 3)  return texBind3;
+    if(i == 4)  return texBind4;
+    if(i == 5)  return texBind5;
+    if(i == 6)  return texBind6;
+    if(i == 7)  return texBind7;
+    if(i == 8)  return texBind8;
+    if(i == 9)  return texBind9;
+}
+
 uniform vec3 DiffuseColor;
 uniform float Roughness;
 uniform float Metalness;
@@ -52,6 +67,7 @@ uniform float Metalness;
 #define MODTARGET_ROUGHNESS 2
 #define MODTARGET_METALNESS 3
 #define MODTARGET_BUMP 4
+#define MODTARGET_BUMP_AS_NORMAL 5
 
 struct NodeImageModifier{
     int samplerIndex;
@@ -111,5 +127,19 @@ float getBump(vec2 uv){
     }
     return bump;
 }
+
+vec3 examineBumpMap(sampler2D bumpTex, vec2 iuv){
+    float bc = texture(bumpTex, iuv).r;
+    vec2 dsp = 1.0 / vec2(textureSize(bumpTex, 0));
+    float bdx = texture(bumpTex, iuv).r - texture(bumpTex, iuv+vec2(dsp.x, 0)).r;
+    float bdy = texture(bumpTex, iuv).r - texture(bumpTex, iuv+vec2(0, dsp.y)).r;
+
+    vec3 tang = normalize(Input.Tangent.xyz)*6;
+    vec3 bitan = normalize(cross(Input.Tangent.xyz, Input.Normal))*6 * Input.Tangent.w;
+
+    return normalize(vec3(0,0,1) - bdx * tang - bdy * bitan);
+}
+
+
 
 #include ParallaxOcclusion.glsl

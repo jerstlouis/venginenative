@@ -65,18 +65,37 @@ int main()
     //-----------------------//
     // now a sphere
 
-    Mesh3d * sphere = loadRawMesh("sphere.raw");
+    Mesh3d * sphere = loadRawMesh("emily.raw");
     sphere->getInstance(0)->transformation->translate(glm::vec3(0, 2, 0));
     Material * spheremat = sphere->getLodLevel(0)->material;
     spheremat->diffuseColor = glm::vec3(0, 0, 1);
     spheremat->roughness = 0.5;
-    spheremat->metalness = 1.0;
-    Texture *coltt = new Texture("floor1a.jpg");
-    Texture *normtt = new Texture("floor1n.jpg");
-   // spheremat->addNode(new MaterialNode(coltt, glm::vec2(10), NODE_MODE_SUB, NODE_TARGET_DIFFUSE));
-  //  spheremat->addNode(new MaterialNode(normtt, glm::vec2(10), NODE_MODE_REPLACE, NODE_TARGET_NORMAL));
+    spheremat->metalness = 0.0;
+    spheremat->addNode(new MaterialNode(new Texture("00_diffuse_unlit_unpainted_gamma.png"), glm::vec2(1, -1), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE));
+    spheremat->addNode(new MaterialNode(new Texture("00_displacement.png"), glm::vec2(1, -1), NODE_MODE_REPLACE, NODE_TARGET_BUMP_AS_NORMAL));
+    spheremat->addNode(new MaterialNode(new Texture("00_displacement_micro.png"), glm::vec2(1, -1), NODE_MODE_ADD, NODE_TARGET_BUMP_AS_NORMAL));
+    spheremat->addNode(new MaterialNode(new Texture("00_displacement_micro.png"), glm::vec2(10, -10), NODE_MODE_ADD, NODE_TARGET_BUMP_AS_NORMAL));
+    spheremat->addNode(new MaterialNode(new Texture("00_specular_unlit_unpainted.png"), glm::vec2(1, -1), NODE_MODE_REPLACE, NODE_TARGET_ROUGHNESS));
 
     //-----------------------//
+
+    // now eyes
+
+    Mesh3d * eyes = loadRawMesh("emilyeyes.raw");
+    eyes->getInstance(0)->transformation->translate(glm::vec3(0, 2, 0));
+    Material * eyesmat = eyes->getLodLevel(0)->material;
+    eyesmat->diffuseColor = glm::vec3(0, 0, 1);
+    eyesmat->roughness = 0.1;
+    eyesmat->metalness = 0.0;
+    eyesmat->addNode(new MaterialNode(new Texture("Eye_Outter_Color_01.png"), glm::vec2(1, -1), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE));
+
+    // lashesh
+    Mesh3d * lashes = loadRawMesh("emilylashes.raw");
+    lashes->getInstance(0)->transformation->translate(glm::vec3(0, 2, 0));
+    Material * lashesmat = lashes->getLodLevel(0)->material;
+    lashesmat->diffuseColor = glm::vec3(0, 0, 0);
+    lashesmat->roughness = 0.9;
+    lashesmat->metalness = 0.0;
 
 
     for (int x = 0; x < 10; x++) {
@@ -85,12 +104,16 @@ int main()
         }
     }
     game->invoke([&]() {
-        sponza->updateBuffers();
+      //  sponza->updateBuffers();
         sphere->updateBuffers();
+        eyes->updateBuffers();
+     //   lashes->updateBuffers();
     });
 
-    game->world->scene->addMesh(sponza);
+    //game->world->scene->addMesh(sponza);
     game->world->scene->addMesh(sphere);
+    game->world->scene->addMesh(eyes);
+    game->world->scene->addMesh(lashes);
 
     Light* light = new Light();
     light->switchShadowMapping(true);

@@ -13,6 +13,7 @@
 #define NODE_TARGET_ROUGHNESS 2
 #define NODE_TARGET_METALNESS 3
 #define NODE_TARGET_BUMP 4
+#define NODE_TARGET_BUMP_AS_NORMAL 5
 
 class MaterialNode
 {

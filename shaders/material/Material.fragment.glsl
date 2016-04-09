@@ -48,6 +48,10 @@ void main(){
         if(node.target == MODTARGET_METALNESS){
             metalness = nodeCombine(metalness, data.r, node.mode, data.a);
         }
+        if(node.target == MODTARGET_BUMP_AS_NORMAL){
+            data.rgb = examineBumpMap(retrieveSampler(node.samplerIndex), UV * node.uvScale);
+            normalmap = nodeCombine(normalmap, data.rgb, node.mode, data.a);
+        }
     }
     normalmap = normalize(normalmap);
     normalmap.r = - normalmap.r;

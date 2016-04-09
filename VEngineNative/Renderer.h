@@ -18,7 +18,6 @@ private:
     int width;
     int height;
     void draw(Camera *camera);
-    void output();
     void initializeFbos();
     void destroyFbos();
 
