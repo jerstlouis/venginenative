@@ -91,13 +91,15 @@ float toLogDepth(float depth, float far){
     return badass_depth;
 }
 
+#define MIN_ROUGHNESS_DIRECT 0.07
+
 vec3 shadingMetalic(PostProceessingData data){
     float fresnelR = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.r);
     float fresnelG = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.g);
     float fresnelB = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.b);
     vec3 newBase = vec3(fresnelR, fresnelG, fresnelB);
     
-    return shade(CameraPosition, newBase, data.normal, data.worldPos, LightPosition, LightColor, max(0.02, data.roughness), false);
+    return shade(CameraPosition, newBase, data.normal, data.worldPos, LightPosition, LightColor, max(0.02, max(MIN_ROUGHNESS_DIRECT, data.roughness)), false);
 }
 
 vec3 shadingNonMetalic(PostProceessingData data){
@@ -107,7 +109,7 @@ vec3 shadingNonMetalic(PostProceessingData data){
     float fresnelB = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.b);
     vec3 newBase = vec3(fresnelR, fresnelG, fresnelB);
     
-    vec3 radiance =  shade(CameraPosition, vec3(fresnel), data.normal, data.worldPos, LightPosition, LightColor, max(0.02, data.roughness), false);    
+    vec3 radiance =  shade(CameraPosition, vec3(fresnel), data.normal, data.worldPos, LightPosition, LightColor, max(MIN_ROUGHNESS_DIRECT, data.roughness), false);    
     
     vec3 difradiance = shadeDiffuse(CameraPosition, newBase, data.normal, data.worldPos, LightPosition, LightColor, data.roughness, false);
     return difradiance + radiance;
@@ -123,32 +125,32 @@ float rand2s(vec2 co){
 
 #define MMAL_LOD_REGULATOR 512
 vec3 stupidBRDF(vec3 dir, float level, float roughness){
-	vec3 aaprc = vec3(0.0);
+    vec3 aaprc = vec3(0.0);
     float xx=rand2s(UV);
     float xx2=rand2s(UV.yx);
-	for(int x = 0; x < 15; x++){
-		vec3 rd = vec3(
-			rand2s(vec2(xx, xx2)),
-			rand2s(vec2(-xx2, xx)),
-			rand2s(vec2(xx2, xx))
-		) *2-1;
-		vec3 displace = rd;
+    for(int x = 0; x < 15; x++){
+        vec3 rd = vec3(
+            rand2s(vec2(xx, xx2)),
+            rand2s(vec2(-xx2, xx)),
+            rand2s(vec2(xx2, xx))
+        ) *2-1;
+        vec3 displace = rd;
         vec3 prc = textureLod(skyboxTex, dir + (displace * 0.5 * roughness), level).rgb;
-		aaprc += prc;
+        aaprc += prc;
         xx += 0.01;
         xx2 -= 0.02123;
-	}
-	return aaprc / 15;
+    }
+    return aaprc / 15;
 }
 
 vec3 MMALSkybox(vec3 dir, float roughness){
-	//roughness = roughness * roughness;
+    //roughness = roughness * roughness;
     float levels = max(0, float(textureQueryLevels(skyboxTex)) - 1);
     float mx = log2(roughness*MMAL_LOD_REGULATOR+1)/log2(MMAL_LOD_REGULATOR);
     vec3 result = stupidBRDF(dir, mx * levels, roughness);
-	
-	//return pow(result * 1.2, vec3(2.0));
-	return result;
+    
+    //return pow(result * 1.2, vec3(2.0));
+    return result;
 }
 
 

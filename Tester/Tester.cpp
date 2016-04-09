@@ -13,6 +13,20 @@
 #include "../VEngineNative/Mesh3d.h";
 #include "../VEngineNative/Light.h";
 
+Mesh3d * loadRawMesh(string file) {
+    Material *mat = new Material();
+
+    unsigned char* bytes;
+    int bytescount = Media::readBinary(file, &bytes);
+    GLfloat * floats = (GLfloat*)bytes;
+    int floatsCount = bytescount / 4;
+    vector<GLfloat> flo(floats, floats + floatsCount);
+
+    Object3dInfo *o3i = new Object3dInfo(flo);
+
+    return Mesh3d::create(o3i, mat);
+}
+
 int main()
 {
     Media::loadFileMap("../../media");
@@ -32,46 +46,54 @@ int main()
     cam->transformation->setOrientation(rot);
     game->world->mainDisplayCamera = cam;
 
-    Material *mat = new Material();
-    mat->diffuseColor = glm::vec3(0.8f, 0.1f, 0.0f);
-    mat->roughness = 1.0;
-    mat->metalness = 0.0;
+    // mesh loading
 
-    MaterialNode *bump = new MaterialNode(new Texture("DisplaceIT_Ground_Pebble1_Displace.png"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_BUMP);
-    MaterialNode *bump2 = new MaterialNode(new Texture("aaaaa.png"), glm::vec2(1), NODE_MODE_MUL, NODE_TARGET_BUMP);
+    Mesh3d * sponza = loadRawMesh("sponza.raw");
+
+    Material *sponzamat = sponza->getLodLevel(0)->material;
+    sponzamat->diffuseColor = glm::vec3(0.8f, 0.1f, 0.0f);
+    sponzamat->roughness = 1.0;
+    sponzamat->metalness = 0.0;
+
     MaterialNode *color = new MaterialNode(new Texture("KAMEN.JPG"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE);
-    MaterialNode *color2 = new MaterialNode(new Texture("mrkbasestoneb01lite.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE);
-    MaterialNode *normal = new MaterialNode(new Texture("DisplaceIT_Ground_Pebble1_NormalBump2.png"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_NORMAL);
-    MaterialNode *normal2 = new MaterialNode(new Texture("mrkbasestoneb01_n.jpg"), glm::vec2(30), NODE_MODE_ADD, NODE_TARGET_NORMAL);
-    MaterialNode *normal3 = new MaterialNode(new Texture("mrkbasestoneb01_n.jpg"), glm::vec2(10), NODE_MODE_ADD, NODE_TARGET_NORMAL);
-    MaterialNode *normal4 = new MaterialNode(new Texture("mrkbasestoneb01_n.jpg"), glm::vec2(1), NODE_MODE_ADD, NODE_TARGET_NORMAL);
-    MaterialNode *roughness = new MaterialNode(new Texture("test1.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_METALNESS);
+    Texture* normalstones = new Texture("mrkbasestoneb01_n.jpg");
+    MaterialNode *normal2 = new MaterialNode(normalstones, glm::vec2(30), NODE_MODE_ADD, NODE_TARGET_NORMAL);
+    MaterialNode *normal3 = new MaterialNode(normalstones, glm::vec2(10), NODE_MODE_ADD, NODE_TARGET_NORMAL);
+    MaterialNode *normal4 = new MaterialNode(normalstones, glm::vec2(1), NODE_MODE_ADD, NODE_TARGET_NORMAL);
 
-    //    mat->addNode(bump);
-    //mat->addNode(bump2);
-    mat->addNode(color);
-   // mat->addNode(color2);
- // mat->addNode(normal);
-    mat->addNode(normal2);
-    mat->addNode(normal3);
-    mat->addNode(normal4);
-   // mat->addNode(roughness);
+    sponzamat->addNode(color);
+    sponzamat->addNode(normal2);
+    sponzamat->addNode(normal3);
+    sponzamat->addNode(normal4);
 
-    unsigned char* teapotBytes;
-    int teapotBytesCount = Media::readBinary("sponza.raw", &teapotBytes);
-    GLfloat * floats = (GLfloat*)teapotBytes;
-    int floatsCount = teapotBytesCount / 4;
-    vector<GLfloat> flo(floats, floats + floatsCount);
 
-    Object3dInfo *o3i = new Object3dInfo(flo);
+    //-----------------------//
+    // now a sphere
 
-    Mesh3d *teapot = Mesh3d::create(o3i, mat);
+    Mesh3d * sphere = loadRawMesh("sphere.raw");
+    sphere->getInstance(0)->transformation->translate(glm::vec3(0, 2, 0));
+    Material * spheremat = sphere->getLodLevel(0)->material;
+    spheremat->diffuseColor = glm::vec3(1.0);
+    spheremat->roughness = 0.0;
+    spheremat->metalness = 0.0;
+    Texture *coltt = new Texture("stonew_a.jpg");
+    Texture *normtt = new Texture("stonew_n.jpg");
+    spheremat->addNode(new MaterialNode(coltt, glm::vec2(10), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE));
+    spheremat->addNode(new MaterialNode(coltt, glm::vec2(20), NODE_MODE_MUL, NODE_TARGET_DIFFUSE));
+    spheremat->addNode(new MaterialNode(coltt, glm::vec2(30), NODE_MODE_MUL, NODE_TARGET_DIFFUSE));
+    spheremat->addNode(new MaterialNode(normtt, glm::vec2(10), NODE_MODE_REPLACE, NODE_TARGET_NORMAL));
+    spheremat->addNode(new MaterialNode(normtt, glm::vec2(20), NODE_MODE_ADD, NODE_TARGET_NORMAL));
+    spheremat->addNode(new MaterialNode(normtt, glm::vec2(30), NODE_MODE_ADD, NODE_TARGET_NORMAL));
 
-    game->invoke([teapot]() {
-        teapot->updateBuffers();
+    //-----------------------//
+
+    game->invoke([&]() {
+        sponza->updateBuffers();
+        sphere->updateBuffers();
     });
 
-    game->world->scene->addMesh(teapot);
+    game->world->scene->addMesh(sponza);
+    game->world->scene->addMesh(sphere);
 
     Light* light = new Light();
     light->switchShadowMapping(true);

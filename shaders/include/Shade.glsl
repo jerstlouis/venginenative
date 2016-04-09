@@ -16,7 +16,7 @@ vec3 makeFresnel(float V2Ncos, vec3 reflected)
 
 float fresnel_again(vec3 normal, vec3 cameraspace, float roughness){
     vec3 dir = normalize(reflect(cameraspace, normal));
-	float fz = roughness;
+    float fz = roughness;
     float base =  max(0, 1.0 - dot(normalize(normal), dir));
     float fresnel = (fz + (1-fz)*(pow(base, 5.0)));
     return fresnel;
@@ -109,8 +109,8 @@ vec3 shade(
         clamp(roughness, 0.005, 0.99),
         lightColor
         );
-		
-		
+        
+        
     
     return specularComponent * albedo;// * CalculateFallof(distance(lightPosition, fragmentPosition));
 }
