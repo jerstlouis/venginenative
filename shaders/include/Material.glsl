@@ -59,8 +59,21 @@ uniform float Metalness;
 #define MODMODE_MUL 1
 #define MODMODE_AVERAGE 2
 #define MODMODE_SUB 3
-#define MODMODE_ALPHAMIX 4
-#define MODMODE_REPLACE 5
+#define MODMODE_ALPHA 4
+#define MODMODE_ONE_MINUS_ALPHA 5
+#define MODMODE_REPLACE 6
+#define MODMODE_MAX 7
+#define MODMODE_MIN 8
+#define MODMODE_DISTANCE 9
+
+#define MODMODIFIER_ORIGINAL 0
+#define MODMODIFIER_NEGATIVE 1
+#define MODMODIFIER_LINEARIZE 2
+#define MODMODIFIER_SATURATE 4
+#define MODMODIFIER_HUE 8
+#define MODMODIFIER_BRIGHTNESS 16
+#define MODMODIFIER_POWER 32
+#define MODMODIFIER_HSV 64
 
 #define MODTARGET_DIFFUSE 0
 #define MODTARGET_NORMAL 1
@@ -69,25 +82,40 @@ uniform float Metalness;
 #define MODTARGET_BUMP 4
 #define MODTARGET_BUMP_AS_NORMAL 5
 
+#define MODSOURCE_COLOR 0
+#define MODSOURCE_TEXTURE 1
+
 struct NodeImageModifier{
     int samplerIndex;
     int mode;
     int target;
+    int modifier;
+    int source;
     vec2 uvScale;
+    vec4 data;
+    vec4 soureColor;
 };
-#define MAX_NODES 20
+#define MAX_NODES 10
 uniform int NodesCount;
 uniform int SamplerIndexArray[MAX_NODES];
 uniform int ModeArray[MAX_NODES];
 uniform int TargetArray[MAX_NODES];
+uniform int SourcesArray[MAX_NODES];
+uniform int ModifiersArray[MAX_NODES];
 uniform vec2 UVScaleArray[MAX_NODES];
+uniform vec4 NodeDataArray[MAX_NODES];
+uniform vec4 SourceColorsArray[MAX_NODES];
 
 NodeImageModifier getModifier(int i){
     return NodeImageModifier(
         SamplerIndexArray[i],
         ModeArray[i],
         TargetArray[i],
-        UVScaleArray[i]
+        ModifiersArray[i],
+        SourcesArray[i],
+        UVScaleArray[i],
+        NodeDataArray[i],
+        SourceColorsArray[i]
     );
 }
 
@@ -97,7 +125,11 @@ float nodeCombine(float v1, float v2, int mode, float dataAlpha){
     if(mode == MODMODE_MUL) return v1 * v2;
     if(mode == MODMODE_AVERAGE) return mix(v1, v2, 0.5);
     if(mode == MODMODE_SUB) return v1 - v2;
-    if(mode == MODMODE_ALPHAMIX) return mix(v1, v2, dataAlpha);
+    if(mode == MODMODE_ALPHA) return mix(v1, v2, dataAlpha);
+    if(mode == MODMODE_ONE_MINUS_ALPHA) return mix(v1, v2, 1.0 - dataAlpha);
+    if(mode == MODMODE_MAX) return max(v1, v2);
+    if(mode == MODMODE_MIN) return min(v1, v2);
+    if(mode == MODMODE_DISTANCE) return distance(v1, v2);
     return mix(v1, v2, 0.5);
 }
 
@@ -107,7 +139,11 @@ vec3 nodeCombine(vec3 v1, vec3 v2, int mode, float dataAlpha){
     if(mode == MODMODE_MUL) return v1 * v2;
     if(mode == MODMODE_AVERAGE) return mix(v1, v2, 0.5);
     if(mode == MODMODE_SUB) return v1 - v2;
-    if(mode == MODMODE_ALPHAMIX) return mix(v1, v2, dataAlpha);
+    if(mode == MODMODE_ALPHA) return mix(v1, v2, dataAlpha);
+    if(mode == MODMODE_ONE_MINUS_ALPHA) return mix(v1, v2, 1.0 - dataAlpha);
+    if(mode == MODMODE_MAX) return max(v1, v2);
+    if(mode == MODMODE_MIN) return min(v1, v2);
+    if(mode == MODMODE_DISTANCE) return vec3(distance(v1, v2));
     return mix(v1, v2, 0.5);
 }
 
@@ -134,8 +170,8 @@ vec3 examineBumpMap(sampler2D bumpTex, vec2 iuv){
     float bdx = texture(bumpTex, iuv).r - texture(bumpTex, iuv+vec2(dsp.x, 0)).r;
     float bdy = texture(bumpTex, iuv).r - texture(bumpTex, iuv+vec2(0, dsp.y)).r;
 
-    vec3 tang = normalize(Input.Tangent.xyz)*6;
-    vec3 bitan = normalize(cross(Input.Tangent.xyz, Input.Normal))*6 * Input.Tangent.w;
+    vec3 tang = normalize(Input.Tangent.xyz);
+    vec3 bitan = normalize(cross(Input.Tangent.xyz, Input.Normal)) * Input.Tangent.w;
 
     return normalize(vec3(0,0,1) - bdx * tang - bdy * bitan);
 }

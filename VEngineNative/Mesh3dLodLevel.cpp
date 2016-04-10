@@ -50,23 +50,40 @@ void Mesh3dLodLevel::draw()
     vector<int> samplerIndices;
     vector<int> modes;
     vector<int> targets;
+    vector<int> sources;
+    vector<int> modifiers;
     vector<vec2> uvScales;
+    vector<vec4> nodesDatas;
+    vector<vec4> nodesColors;
+
     int samplerIndex = 0;
+    int nodes = 0;
     for (int i = 0; i < material->nodes.size(); i++) {
         MaterialNode * node = material->nodes[i];
-        if (node->texture == nullptr) continue;
-        node->texture->use(samplerIndex);
+       // if (node->texture == nullptr) continue;
         samplerIndices.push_back(samplerIndex);
         modes.push_back(node->mixingMode);
         targets.push_back(node->target);
+        sources.push_back(node->source);
+        modifiers.push_back(node->modifierflags);
         uvScales.push_back(node->uvScale);
-        samplerIndex++;
+        nodesDatas.push_back(node->data);
+        nodesColors.push_back(node->color);
+        if (node->texture != nullptr && node->source == NODE_SOURCE_TEXTURE) {
+            node->texture->use(samplerIndex);
+            samplerIndex++;
+        }
+        nodes++;
     }
-    shader->setUniform("NodesCount", samplerIndex);
+    shader->setUniform("NodesCount", nodes);
     shader->setUniformVector("SamplerIndexArray", samplerIndices);
     shader->setUniformVector("ModeArray", modes);
     shader->setUniformVector("TargetArray", targets);
+    shader->setUniformVector("SourcesArray", sources);
+    shader->setUniformVector("ModifiersArray", modifiers);
     shader->setUniformVector("UVScaleArray", uvScales);
+    shader->setUniformVector("NodeDataArray", nodesDatas);
+    shader->setUniformVector("SourceColorsArray", nodesColors);
 
     modelInfosBuffer->use(0);
 
