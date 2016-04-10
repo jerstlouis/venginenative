@@ -44,14 +44,14 @@ vec3 hsv2rgb(vec3 c)
 
 void main(){
     vec3 diffuseColor = DiffuseColor;
-    vec3 normal = length(Input.Normal) == 0.0 ? normalize(cross(dFdx(Input.WorldPos), dFdy(Input.WorldPos))) : normalize(Input.Normal);
+    vec3 normal = normalize(Input.Normal);
     vec3 normalmap = vec3(0,0,1);
     float roughness = Roughness;
     float metalness = Metalness;
     float bump = getBump(Input.TexCoord);
     if(RunParallax) UV = adjustParallaxUV(MainCameraPosition);
     
-    vec3 tangent = (Input.Tangent.w < -1.0 || Input.Tangent.w > 1.0) ? normalize(cross(normal, cross(dFdx(Input.WorldPos), dFdy(Input.WorldPos)))) : normalize(Input.Tangent.rgb);
+    vec3 tangent = normalize(Input.Tangent.rgb);
     
     float tangentSign = Input.Tangent.w == 0 ? 1.0 : Input.Tangent.w;
 
@@ -60,7 +60,7 @@ void main(){
         normalize(cross(normal, tangent)) * tangentSign,
         normalize(normal)
     );    
-    
+    bool modifiedNormal = false;
     for(int i=0;i<NodesCount;i++){
         NodeImageModifier node = getModifier(i);
         vec4 data = node.soureColor;
@@ -92,6 +92,7 @@ void main(){
         }
         if(node.target == MODTARGET_NORMAL){
             normalmap = nodeCombine(normalmap, node.source == MODSOURCE_TEXTURE ? data.rgb * 2 - 1 : data.rgb, node.mode, data.a);
+            modifiedNormal = true;
         }
         if(node.target == MODTARGET_ROUGHNESS){
             roughness = nodeCombine(roughness, data.r, node.mode, data.a);
@@ -102,13 +103,15 @@ void main(){
         if(node.target == MODTARGET_BUMP_AS_NORMAL){
             data.rgb = examineBumpMap(retrieveSampler(node.samplerIndex), UV * node.uvScale);
             normalmap = nodeCombine(normalmap, data.rgb, node.mode, data.a);
+            modifiedNormal = true;
         }
     }
-    normalmap = normalize(normalmap);
-    normalmap.r = - normalmap.r;
-    normalmap.g = - normalmap.g;
-    normal = TBN * normalmap;
-
+    if(modifiedNormal){
+        normalmap = normalize(normalmap);
+        normalmap.r = - normalmap.r;
+        normalmap.g = - normalmap.g;
+        normal = TBN * normalmap;
+    }
     normal = quat_mul_vec(ModelInfos[Input.instanceId].Rotation, normal);
     
     diffuseColor *= 1.0 - newParallaxHeight;

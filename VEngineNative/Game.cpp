@@ -55,7 +55,7 @@ glm::dvec2 Game::getCursorPosition()
 
 void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
 {
-    char debSource[16], debType[20], debSev[5];
+    char debSource[160], debType[200], debSev[500];
     if (source == GL_DEBUG_SOURCE_API)
         strcpy_s(debSource, "OpenGL");
     else if (source == GL_DEBUG_SOURCE_WINDOW_SYSTEM)
@@ -140,6 +140,8 @@ void Game::renderThread()
     glClearColor(0, 0, 0, 0);
     glClearDepth(1);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_DEPTH_CLAMP);
+    glEnable(GL_CULL_FACE);
     glDepthFunc(GL_LEQUAL);
 
     shouldClose = false;

@@ -57,7 +57,7 @@ int main()
 
     Texture *grass = new Texture("grass.jpg");
     sponzamat->addNode(new MaterialNode(grass, glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE, NODE_MODIFIER_LINEARIZE));
-    sponzamat->addNode(new MaterialNode(grass, glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_BUMP_AS_NORMAL));
+    sponzamat->addNode(new MaterialNode(new Texture("b1WtX.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_NORMAL));
     sponzamat->addNode(new MaterialNode(grass, glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_ROUGHNESS, NODE_MODIFIER_NEGATIVE | NODE_MODIFIER_HUE, 0.5));
     sponzamat->addNode(new MaterialNode(glm::vec4(0.5), glm::vec2(1), NODE_MODE_ALPHA, NODE_TARGET_ROUGHNESS));
    // sponzamat->addNode(new MaterialNode(normtt, glm::vec2(10), NODE_MODE_REPLACE, NODE_TARGET_NORMAL));
