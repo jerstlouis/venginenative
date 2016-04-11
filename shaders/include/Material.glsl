@@ -80,7 +80,6 @@ uniform float Metalness;
 #define MODTARGET_ROUGHNESS 2
 #define MODTARGET_METALNESS 3
 #define MODTARGET_BUMP 4
-#define MODTARGET_BUMP_AS_NORMAL 5
 
 #define MODSOURCE_COLOR 0
 #define MODSOURCE_TEXTURE 1
@@ -148,21 +147,6 @@ vec3 nodeCombine(vec3 v1, vec3 v2, int mode, float dataAlpha){
 }
 
 vec2 UV = Input.TexCoord;
-bool RunParallax = false;
-
-
-float getBump(vec2 uv){
-    float bump = 0;
-    for(int i=0;i<NodesCount;i++){
-        NodeImageModifier node = getModifier(i);
-        if(node.target == MODTARGET_BUMP){
-            vec4 data = sampleNodeLod0(node.samplerIndex, uv * node.uvScale);
-            bump = nodeCombine(bump, data.r, node.mode, data.a);
-            RunParallax = true;
-        }
-    }
-    return bump;
-}
 
 #define textureLod0(a,b) textureLod(a,b,0)
 
@@ -176,6 +160,3 @@ vec3 examineBumpMap(sampler2D bumpTex, vec2 iuv){
     return normalize(vec3( bdx * 3.1415 * 12.0, bdy * 3.1415 * 12.0,max(0, 1.0 - bdx - bdy)));
 }
 
-
-
-#include ParallaxOcclusion.glsl

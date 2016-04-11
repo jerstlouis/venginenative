@@ -6,7 +6,7 @@ in Data {
 
 layout(location = 0) out vec4 outAlbedoRoughness;
 layout(location = 1) out vec4 outNormalsMetalness;
-layout(location = 2) out vec4 outDistance;
+layout(location = 2) out float outDistance;
 
 #include Quaternions.glsl
 #include ModelBuffer.glsl
@@ -48,10 +48,7 @@ void main(){
     vec3 normalmap = vec3(0,0,1);
     float roughness = Roughness;
     float metalness = Metalness;
-    float bump = getBump(Input.TexCoord);
-    if(RunParallax) {
-        UV = adjustParallaxUV(MainCameraPosition);
-    }
+
     
     vec3 tangent = normalize(Input.Tangent.rgb);
     
@@ -102,7 +99,7 @@ void main(){
         if(node.target == MODTARGET_METALNESS){
             metalness = nodeCombine(metalness, data.r, node.mode, data.a);
         }
-        if(node.target == MODTARGET_BUMP_AS_NORMAL){
+        if(node.target == MODTARGET_BUMP){
             data.rgb = examineBumpMap(retrieveSampler(node.samplerIndex), UV * node.uvScale);
             normalmap = nodeCombine(normalmap, data.rgb, node.mode, data.a);
             modifiedNormal = true;
@@ -116,15 +113,11 @@ void main(){
     }
     normal = quat_mul_vec(ModelInfos[Input.instanceId].Rotation, normal);
     
-    float LowFrequencyAO = 1.0 - newParallaxHeight*0.7;
+  //  float LowFrequencyAO = 1.0 - newParallaxHeight*0.7;
    // diffuseColor *= LowFrequencyAO;
     
     outAlbedoRoughness = vec4(diffuseColor, roughness);
     outNormalsMetalness = vec4(normal, metalness);
 
-    outDistance = vec4(
-        max(0.01, distance(CameraPosition, Input.WorldPos)),
-        1.0 - parallaxScale * bump, 
-        pdist, 
-         newParallaxHeight);
+    outDistance = max(0.01, distance(CameraPosition, Input.WorldPos));
 }
