@@ -6,10 +6,11 @@ out vec4 outColor;
 
 layout(binding = 0) uniform sampler2D mrt_Albedo_Roughness_Tex;
 layout(binding = 1) uniform sampler2D mrt_Normal_Metalness_Tex;
-layout(binding = 2) uniform sampler2D mrt_Distance_Tex;
+layout(binding = 2) uniform sampler2D mrt_Distance_Bump_Tex;
 layout(binding = 3) uniform samplerCube skyboxTex;
 layout(binding = 4) uniform sampler2D shadowMapSingle;
 
+uniform mat4 VPMatrix;
 uniform vec3 CameraPosition;
 uniform vec2 Resolution;
 uniform vec3 FrustumConeLeftBottom;
@@ -55,7 +56,7 @@ vec3 FromCameraSpace(vec3 position){
 void createData(){
     vec4 albedo_roughness = textureLod(mrt_Albedo_Roughness_Tex, UV, 0).rgba;
     vec4 normal_metalness = textureLod(mrt_Normal_Metalness_Tex, UV, 0).rgba;
-    float dist = textureLod(mrt_Distance_Tex, UV, 0).r;
+    float dist = textureLod(mrt_Distance_Bump_Tex, UV, 0).r;
     vec3 cameraSpace = reconstructCameraSpaceDistance(UV, dist);
     vec3 worldSpace = FromCameraSpace(cameraSpace);
     currentData = PostProceessingData(
@@ -68,6 +69,12 @@ void createData(){
     normal_metalness.a
     );
 }
+
+#define getBump(a) (textureLod(mrt_Distance_Bump_Tex,a,0).g)
+#define getDistance(a) (textureLod(mrt_Distance_Bump_Tex,a,0).r)
+#define getPDist(a) (textureLod(mrt_Distance_Bump_Tex,a,0).b)
+#define getPReal(a) (textureLod(mrt_Distance_Bump_Tex,a,0).a)
+#define getNormal(a) (textureLod(mrt_Normal_Metalness_Tex,a,0).rgb)
 
 #define KERNEL 6
 #define PCFEDGE 1
@@ -175,6 +182,53 @@ vec3 MMAL(PostProceessingData data){
     
 }
 
+vec2 project(vec3 pos){
+    vec4 tmp = (VPMatrix * vec4(pos, 1.0));
+    return (tmp.xy / tmp.w) * 0.5 + 0.5;
+}
+
+float softparallaxbumpshadow(PostProceessingData data){
+
+
+    float pdist = getPDist(UV);
+    if(pdist == 0) return 0;
+   // return pdist;
+    vec3 realpos = data.worldPos + normalize(data.cameraPos) * pdist;
+    float  cbump = 1.0 - textureLod(mrt_Distance_Bump_Tex,UV,0).a;
+    vec3 dir2light = normalize(LightPosition - realpos);
+    float ndot = dot(data.normal, dir2light);
+    float dist = dot(-data.normal, data.worldPos - realpos) / dot(-data.normal, dir2light);
+  //  return dist*1;
+    float scaling = 0.02;
+    float dotn = ndot * scaling;
+   // return dotn * 0.01;
+    vec3 tolight = realpos + dir2light * dist;
+    
+    float stepsize = 0.01;
+    float lookup = stepsize;
+    float visibility = 1.0;
+    cbump += dotn * stepsize;
+    float steps = 0;
+    for(int i=1;i<100;i++){
+        if(lookup > 1.0 || cbump > 1.0) return 0.5;
+        
+        vec3 newpos = mix(realpos, tolight, lookup);
+        lookup += stepsize;
+        
+        vec3 newtarg = newpos + data.normal * (cbump);
+        vec2 test = project(newtarg);
+        float d = textureLod(mrt_Distance_Bump_Tex,test,0).g;
+        
+        vec3 newtarg2 = newtarg - data.normal * (1.0 - d);
+        
+        if( d > cbump) visibility *= 0.88;
+        cbump += dotn * stepsize;
+        if(visibility == 0) break;
+        steps += 1.0;
+    }
+    return visibility;
+}
+
 vec3 ApplyLighting(PostProceessingData data)
 {
     vec3 result = vec3(0);
@@ -187,7 +241,7 @@ vec3 ApplyLighting(PostProceessingData data)
 
             float percent = 0;
             if(lightScreenSpace.x >= 0.0 && lightScreenSpace.x <= 1.0 && lightScreenSpace.y >= 0.0 && lightScreenSpace.y <= 1.0) {
-                percent = PCFDeferred(lightScreenSpace.xy, 1.0 - toLogDepth(distance(data.worldPos, LightPosition), LightCutOffDistance)); 
+                percent = PCFDeferred(lightScreenSpace.xy, 1.0 - toLogDepth(distance(data.worldPos, LightPosition), LightCutOffDistance)) * softparallaxbumpshadow(data); 
                 
             }
             result += radiance * percent;
@@ -196,7 +250,7 @@ vec3 ApplyLighting(PostProceessingData data)
     } else if(LightUseShadowMap == 0){
         result += radiance;
     }
-    return result;// * (1.0 - smoothstep(0.0, LightCutOffDistance, distance(LightPosition, data.worldPos)));
+    return vec3(1) * softparallaxbumpshadow(data); // * (1.0 - smoothstep(0.0, LightCutOffDistance, distance(LightPosition, data.worldPos)));
 }
 
 
@@ -205,7 +259,7 @@ void main(){
     vec3 color = vec3(0);
     if(currentData.cameraDistance > 0){
         color += ApplyLighting(currentData);
-       // color += MMAL(currentData) * 0.1;
+     //   color += MMAL(currentData);
     }
     outColor = vec4(color, 1.0);
 }

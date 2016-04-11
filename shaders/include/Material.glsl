@@ -164,16 +164,16 @@ float getBump(vec2 uv){
     return bump;
 }
 
+#define textureLod0(a,b) textureLod(a,b,0)
+
 vec3 examineBumpMap(sampler2D bumpTex, vec2 iuv){
-    float bc = texture(bumpTex, iuv).r;
-    vec2 dsp = 1.0 / vec2(textureSize(bumpTex, 0));
-    float bdx = texture(bumpTex, iuv).r - texture(bumpTex, iuv+vec2(dsp.x, 0)).r;
-    float bdy = texture(bumpTex, iuv).r - texture(bumpTex, iuv+vec2(0, dsp.y)).r;
+    float bc = textureLod0(bumpTex, iuv).r;
+    vec2 dsp = 1.0 / vec2(textureSize(bumpTex, 0)) * 2;
+    float bdx = textureLod0(bumpTex, iuv).r - textureLod0(bumpTex, iuv+vec2(dsp.x, 0)).r;
+    float bdy = textureLod0(bumpTex, iuv).r - textureLod0(bumpTex, iuv+vec2(0, dsp.y)).r;
 
-    vec3 tang = normalize(Input.Tangent.xyz);
-    vec3 bitan = normalize(cross(Input.Tangent.xyz, Input.Normal)) * Input.Tangent.w;
 
-    return normalize(vec3(0,0,1) - bdx * tang - bdy * bitan);
+    return normalize(vec3( bdx * 3.1415 * 12.0, bdy * 3.1415 * 12.0,max(0, 1.0 - bdx - bdy)));
 }
 
 

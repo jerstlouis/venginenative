@@ -36,5 +36,5 @@ vec3 rgb_to_srgb(vec3 rgb) {
 void main(){
     vec3 color = texture(inTex, UV).rgb;
     color += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Tex, UV, 0).r)) * textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb;
-    outColor = vec4(rgb_to_srgb(color), 1.0);
+    outColor = vec4((color), 1.0);
 }

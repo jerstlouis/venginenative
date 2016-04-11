@@ -2,6 +2,8 @@
 #define ParallaxHeightMultiplier 1.0
 float newParallaxHeight = 0;
 float parallaxScale = 0.02 * ParallaxHeightMultiplier;
+float pdist = 0;
+
 vec2 adjustParallaxUV(vec3 camera){
     
     vec2 T = Input.TexCoord;
@@ -17,23 +19,25 @@ vec2 adjustParallaxUV(vec3 camera){
     dot(eyevec, -nwpos)
     ));
     
+    
     const float minLayers = 6;
     const float maxLayersAngle = 11;
     const float maxLayersDistance = 24;
 
-    float numLayers = mix(maxLayersDistance, minLayers, clamp(distance(camera, Input.WorldPos) * 1, 0.0, 1.0)) * ParallaxHeightMultiplier;
+    float numLayers = 99;
     float layerHeight = 1.0 / numLayers;
     float curLayerHeight = 0;
     vec2 dtex = parallaxScale * V.xy / V.z / numLayers;
     vec2 currentTextureCoords = T;
     float heightFromTexture = 1.0 - getBump(currentTextureCoords);
     int cnt = int(numLayers);
-
+    float scale = 0.0;
     while(heightFromTexture > curLayerHeight && cnt-- >= 0) 
     {
         curLayerHeight += layerHeight; 
         currentTextureCoords -= dtex;
         heightFromTexture = 1.0 - getBump(currentTextureCoords);
+        scale += 1.0 / numLayers;
     }
 
     vec2 prevTCoords = currentTextureCoords + dtex;
@@ -41,6 +45,7 @@ vec2 adjustParallaxUV(vec3 camera){
     float prevH  = 1.0 - getBump(prevTCoords) - curLayerHeight + layerHeight;
     float weight = nextH / (nextH - prevH);
     vec2 finalTexCoords = prevTCoords * weight + currentTextureCoords * (1.0-weight);
-    newParallaxHeight = curLayerHeight + prevH * weight + nextH * (1.0 - weight);
+    newParallaxHeight = parallaxScale * heightFromTexture;
+    pdist = parallaxScale * scale;
     return finalTexCoords;
 }

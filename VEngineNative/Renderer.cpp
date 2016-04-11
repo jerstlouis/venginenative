@@ -40,7 +40,7 @@ void Renderer::initializeFbos()
 {
     mrtAlbedoRoughnessTex = new Texture(width, height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
     mrtNormalMetalnessTex = new Texture(width, height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
-    mrtDistanceTexture = new Texture(width, height, GL_R32F, GL_RED, GL_FLOAT);
+    mrtDistanceTexture = new Texture(width, height, GL_RGBA32F, GL_RGBA, GL_FLOAT);
     depthTexture = new Texture(width, height, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT); // most probably overkill
 
     mrtFbo = new Framebuffer();
@@ -189,6 +189,8 @@ void Renderer::deferred()
     deferredFbo->use(true);
     deferredShader->use();
     FrustumCone *cone = Game::instance->world->mainDisplayCamera->cone;
+    glm::mat4 vpmatrix = Game::instance->world->mainDisplayCamera->projectionMatrix * Game::instance->world->mainDisplayCamera->transformation->getInverseWorldTransform();
+    deferredShader->setUniform("VPMatrix", vpmatrix);
     deferredShader->setUniform("Resolution", glm::vec2(Game::instance->width, Game::instance->height));
     deferredShader->setUniform("CameraPosition", Game::instance->world->mainDisplayCamera->transformation->position);
     deferredShader->setUniform("FrustumConeLeftBottom", cone->leftBottom);

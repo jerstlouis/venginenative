@@ -6,7 +6,7 @@ in Data {
 
 layout(location = 0) out vec4 outAlbedoRoughness;
 layout(location = 1) out vec4 outNormalsMetalness;
-layout(location = 2) out float outDistance;
+layout(location = 2) out vec4 outDistance;
 
 #include Quaternions.glsl
 #include ModelBuffer.glsl
@@ -49,7 +49,9 @@ void main(){
     float roughness = Roughness;
     float metalness = Metalness;
     float bump = getBump(Input.TexCoord);
-    if(RunParallax) UV = adjustParallaxUV(MainCameraPosition);
+    if(RunParallax) {
+        UV = adjustParallaxUV(MainCameraPosition);
+    }
     
     vec3 tangent = normalize(Input.Tangent.rgb);
     
@@ -114,9 +116,15 @@ void main(){
     }
     normal = quat_mul_vec(ModelInfos[Input.instanceId].Rotation, normal);
     
-    diffuseColor *= 1.0 - newParallaxHeight;
+    float LowFrequencyAO = 1.0 - newParallaxHeight*0.7;
+   // diffuseColor *= LowFrequencyAO;
     
     outAlbedoRoughness = vec4(diffuseColor, roughness);
     outNormalsMetalness = vec4(normal, metalness);
-    outDistance = max(0.01, distance(CameraPosition, Input.WorldPos - normal * parallaxScale * newParallaxHeight));
+
+    outDistance = vec4(
+        max(0.01, distance(CameraPosition, Input.WorldPos)),
+        1.0 - parallaxScale * bump, 
+        pdist, 
+         newParallaxHeight);
 }
