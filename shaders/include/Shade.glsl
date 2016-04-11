@@ -2,7 +2,7 @@
 #define PI 3.14159265
 
 float CalculateFallof( float dist){
-    return 1.0 / (dist * dist + 1.0);
+    return 1.0 / (dist * dist + 0.01);
 }
 
 float fresnel_again(vec3 normal, vec3 cameraspace, float roughness){
@@ -124,5 +124,5 @@ bool ignoreAtt
     cameraRelativeToVPos,
     normal,
     roughness,
-    albedo);
+    albedo) * CalculateFallof(distance(lightPosition, fragmentPosition));
 }

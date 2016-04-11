@@ -10,6 +10,7 @@ Game::Game(int windowwidth, int windowheight)
     height = windowheight;
     invokeQueue = {};
     onRenderFrame = {};
+    asset = new AssetLoader();
     world = new World();
     renderer = new Renderer(width, height);
     shaders = new GenericShaders();
@@ -143,6 +144,8 @@ void Game::renderThread()
     glEnable(GL_DEPTH_CLAMP);
     glEnable(GL_CULL_FACE);
     glDepthFunc(GL_LEQUAL);
+    glPatchParameteri(GL_PATCH_VERTICES, 3);
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
     shouldClose = false;
     double lastTime = glfwGetTime();

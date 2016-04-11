@@ -25,6 +25,7 @@ void main(){
     vec4 outpoint = (VPMatrix) * vec4(Output.WorldPos, 1);
 //    outpoint.w = 0.5 + 0.5 * outpoint.w;
     //outpoint.w = - outpoint.w;
+    Output.Data.x = 1.0;
     Output.Data.y = (outpoint.z / outpoint.w) * 0.5 + 0.5; 
     gl_Position = outpoint;// + vec4(0, 0.9, 0, 0);
 }

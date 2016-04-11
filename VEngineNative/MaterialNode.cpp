@@ -100,10 +100,14 @@ MaterialNode::MaterialNode(Texture * tex, glm::vec2 uvScaling, int mixMode, int 
 
 MaterialNode::MaterialNode()
 {
+    source = NODE_SOURCE_TEXTURE;
+    modifierflags = NODE_MODIFIER_ORIGINAL;
+    color = glm::vec4(1);
+    data = glm::vec4(1);
     texture = nullptr;
     uvScale = glm::vec2(1);
-    mixingMode = 0;
-    target = 0;
+    mixingMode = NODE_MODE_REPLACE;
+    target = NODE_TARGET_DIFFUSE;
 }
 
 

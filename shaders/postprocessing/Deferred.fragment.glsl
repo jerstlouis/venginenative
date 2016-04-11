@@ -120,7 +120,7 @@ vec3 shadingNonMetalic(PostProceessingData data){
     float fresnelB = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.b);
     vec3 newBase = vec3(fresnelR, fresnelG, fresnelB);
     
-    vec3 radiance =  shade(CameraPosition, newBase, data.normal, data.worldPos, LightPosition, LightColor, max(MIN_ROUGHNESS_DIRECT, data.roughness), false);    
+    vec3 radiance =  shade(CameraPosition, vec3(fresnel), data.normal, data.worldPos, LightPosition, LightColor, max(MIN_ROUGHNESS_DIRECT, data.roughness), false);    
     
     vec3 difradiance = shadeDiffuse(CameraPosition, data.diffuseColor, data.normal, data.worldPos, LightPosition, LightColor, data.roughness, false);
     return radiance + difradiance ;
@@ -134,7 +134,7 @@ float rand2s(vec2 co){
         return fract(sin(dot(co.xy,vec2(12.9898,78.233))) * 43758.5453);
 }
 
-#define MMAL_LOD_REGULATOR 512
+#define MMAL_LOD_REGULATOR 1024
 vec3 stupidBRDF(vec3 dir, float level, float roughness){
     vec3 aaprc = vec3(0.0);
     float xx=rand2s(UV);
@@ -231,7 +231,7 @@ void main(){
     vec3 color = vec3(0);
     if(currentData.cameraDistance > 0){
         color += ApplyLighting(currentData);
-        color += MMAL(currentData) * 0.1;
+        color += MMAL(currentData)*0.5;
     }
     outColor = vec4(color, 1.0);
 }

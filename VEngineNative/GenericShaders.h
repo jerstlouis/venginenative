@@ -6,6 +6,8 @@ public:
     GenericShaders();
     ~GenericShaders();
     ShaderProgram *materialShader;
+    ShaderProgram *materialGeometryShader;
+    ShaderProgram *depthOnlyGeometryShader;
     ShaderProgram *depthOnlyShader;
 };
 

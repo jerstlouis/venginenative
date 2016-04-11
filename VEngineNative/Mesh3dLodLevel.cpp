@@ -41,11 +41,7 @@ Mesh3dLodLevel::~Mesh3dLodLevel()
 
 void Mesh3dLodLevel::draw()
 {
-    ShaderProgram *shader = ShaderProgram::current;
     // base properties
-    shader->setUniform("Roughness", material->roughness);
-    shader->setUniform("Metalness", material->metalness);
-    shader->setUniform("DiffuseColor", material->diffuseColor);
 
     vector<int> samplerIndices;
     vector<int> modes;
@@ -56,11 +52,13 @@ void Mesh3dLodLevel::draw()
     vector<vec4> nodesDatas;
     vector<vec4> nodesColors;
 
+    bool useGeometryShader = false;
+
     int samplerIndex = 0;
     int nodes = 0;
     for (int i = 0; i < material->nodes.size(); i++) {
         MaterialNode * node = material->nodes[i];
-       // if (node->texture == nullptr) continue;
+        if (node->target == NODE_TARGET_BUMP) useGeometryShader = true;
         samplerIndices.push_back(samplerIndex);
         modes.push_back(node->mixingMode);
         targets.push_back(node->target);
@@ -75,6 +73,23 @@ void Mesh3dLodLevel::draw()
         }
         nodes++;
     }
+    if (useGeometryShader && ShaderProgram::current == Game::instance->shaders->depthOnlyShader) {
+        Game::instance->shaders->depthOnlyGeometryShader->use();
+    }
+    if (!useGeometryShader && ShaderProgram::current == Game::instance->shaders->depthOnlyGeometryShader) {
+        Game::instance->shaders->depthOnlyShader->use();
+    }
+    if (useGeometryShader && ShaderProgram::current == Game::instance->shaders->materialShader) {
+        Game::instance->shaders->materialGeometryShader->use();
+    }
+    if (!useGeometryShader && ShaderProgram::current == Game::instance->shaders->materialGeometryShader) {
+        Game::instance->shaders->materialShader->use();
+    }
+
+    ShaderProgram *shader = ShaderProgram::current;
+    shader->setUniform("Roughness", material->roughness);
+    shader->setUniform("Metalness", material->metalness);
+    shader->setUniform("DiffuseColor", material->diffuseColor);
     shader->setUniform("NodesCount", nodes);
     shader->setUniformVector("SamplerIndexArray", samplerIndices);
     shader->setUniformVector("ModeArray", modes);

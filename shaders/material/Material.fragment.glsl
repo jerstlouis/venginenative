@@ -43,12 +43,15 @@ vec3 hsv2rgb(vec3 c)
 }
 
 void main(){
+    float bump = getBump(Input.TexCoord);
+    if(Input.Data.x < 1.0 && bump >= Input.Data.x) discard;
     vec3 diffuseColor = DiffuseColor;
     vec3 normal = normalize(Input.Normal);
     vec3 normalmap = vec3(0,0,1);
     float roughness = Roughness;
     float metalness = Metalness;
 
+    vec2 UV = Input.TexCoord;
     
     vec3 tangent = normalize(Input.Tangent.rgb);
     

@@ -1,0 +1,10 @@
+diffuse 0.85 0.54 0.40
+#diffuse 0.0
+roughness 0.5
+metalness 1.0
+
+node
+texture floor1n.jpg
+uvscale 2.0
+mix REPLACE
+target NORMAL

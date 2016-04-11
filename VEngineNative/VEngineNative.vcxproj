@@ -150,6 +150,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbsTransformable.h" />
+    <ClInclude Include="AssetLoader.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CubeMapFramebuffer.h" />
     <ClInclude Include="CubeMapTexture.h" />
@@ -184,6 +185,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AbsTransformable.cpp" />
+    <ClCompile Include="AssetLoader.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CubeMapFramebuffer.cpp" />
     <ClCompile Include="CubeMapTexture.cpp" />

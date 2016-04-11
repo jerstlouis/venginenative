@@ -56,14 +56,14 @@ int main()
     sponzamat->metalness = 0.2;
 
     Texture *grass = new Texture("floor1a.jpg");
-   // sponzamat->addNode(new MaterialNode(new Texture("floor1a.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE, NODE_MODIFIER_LINEARIZE));
+    sponzamat->addNode(new MaterialNode(new Texture("floor1a.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE, NODE_MODIFIER_LINEARIZE));
    // sponzamat->addNode(new MaterialNode(new Texture("blood.png"), glm::vec2(1), NODE_MODE_ALPHA, NODE_TARGET_DIFFUSE, NODE_MODIFIER_LINEARIZE));
-   // sponzamat->addNode(new MaterialNode(new Texture("floor1n.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_NORMAL));
+    sponzamat->addNode(new MaterialNode(new Texture("floor1n.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_NORMAL));
    // sponzamat->addNode(new MaterialNode(new Texture("waterspec.png"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_METALNESS));
    // sponzamat->addNode(new MaterialNode(new Texture("waterspec.png"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_ROUGHNESS));
-    sponzamat->addNode(new MaterialNode(new Texture("stonew_a.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE));
-    sponzamat->addNode(new MaterialNode(new Texture("stonew_n.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_NORMAL));
-   // sponzamat->addNode(new MaterialNode(new Texture("asdasd.png"), glm::vec2(11), NODE_MODE_REPLACE, NODE_TARGET_BUMP_AS_NORMAL));
+   // sponzamat->addNode(new MaterialNode(new Texture("stonew_a.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE));
+   // sponzamat->addNode(new MaterialNode(new Texture("stonew_n.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_NORMAL));
+    //sponzamat->addNode(new MaterialNode(new Texture("asdasd.png"), glm::vec2(3), NODE_MODE_REPLACE, NODE_TARGET_BUMP));
    // sponzamat->addNode(new MaterialNode(new Texture("asdasd.png"), glm::vec2(31), NODE_MODE_REPLACE, NODE_TARGET_BUMP_AS_NORMAL));
 
     //sponzamat->addNode(new MaterialNode(grass, glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_ROUGHNESS, NODE_MODIFIER_NEGATIVE | NODE_MODIFIER_HUE, 0.5));
@@ -73,19 +73,13 @@ int main()
     //-----------------------//
     // now a sphere
 
-    Mesh3d * sphere = loadRawMesh("sphere.raw");
-    sphere->getInstance(0)->transformation->translate(glm::vec3(0, 2, 0));
-    Material * spheremat = sphere->getLodLevel(0)->material;
-    spheremat->diffuseColor = glm::vec3(1);
-    spheremat->roughness = 0.5;
-    spheremat->metalness = 0.0;
-   // spheremat->addNode(new MaterialNode(new Texture("aaaaa.png"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_BUMP));
-   // spheremat->addNode(new MaterialNode(new Texture("asdasd.png"), glm::vec2(11), NODE_MODE_REPLACE, NODE_TARGET_BUMP_AS_NORMAL));
-   // spheremat->addNode(new MaterialNode(new Texture("asdasd.png"), glm::vec2(31), NODE_MODE_REPLACE, NODE_TARGET_BUMP_AS_NORMAL));
-    //spheremat->addNode(new MaterialNode(new Texture("stonew_a.jpg"), glm::vec2(10), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE));
-  //  spheremat->addNode(new MaterialNode(new Texture("kstki.jpg"), glm::vec2(31), NODE_MODE_REPLACE, NODE_TARGET_BUMP));
-   // spheremat->addNode(new MaterialNode(new Texture("stonew_n.jpg"), glm::vec2(10), NODE_MODE_REPLACE, NODE_TARGET_NORMAL));
+  //  Material* testmat = game->asset->LoadMaterialFile("red.material");
 
+
+    Mesh3d * sphere = game->asset->LoadMeshFile("icosphere.mesh3d");
+   // sphere->getInstance(0)->transformation->translate(glm::vec3(0, 2, 0));
+   //  sphere->getLodLevel(0)->material = testmat;
+    
     /*
     //-----------------------//
 
@@ -114,13 +108,13 @@ int main()
         }
     }*/
     game->invoke([&]() {
-        sponza->updateBuffers();
+      //  sponza->updateBuffers();
         sphere->updateBuffers();
       //  eyes->updateBuffers();
      //   lashes->updateBuffers();
     });
 
-    game->world->scene->addMesh(sponza);
+    //game->world->scene->addMesh(sponza);
     game->world->scene->addMesh(sphere);
   //  game->world->scene->addMesh(eyes);
   //  game->world->scene->addMesh(lashes);
@@ -141,6 +135,8 @@ int main()
         if (key == GLFW_KEY_PAUSE) {
             game->shaders->materialShader->recompile();
             game->shaders->depthOnlyShader->recompile();
+            game->shaders->depthOnlyGeometryShader->recompile();
+            game->shaders->materialGeometryShader->recompile();
             game->renderer->recompileShaders();
         }
         if (key == GLFW_KEY_TAB) {

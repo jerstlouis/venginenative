@@ -1,0 +1,8 @@
+lodlevel
+start 0.0
+end 9999.0
+info3d lucy.raw
+material red.material
+
+instance
+translate 0 0 -2

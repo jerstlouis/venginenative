@@ -10,5 +10,6 @@ public:
     Camera *mainDisplayCamera;
     Scene *scene;
     void draw(ShaderProgram *shader, Camera *camera);
+    void setUniforms(ShaderProgram *shader, Camera *camera);
 };
 

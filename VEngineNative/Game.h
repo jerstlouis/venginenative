@@ -3,6 +3,7 @@
 #include "World.h";
 #include "Renderer.h";
 #include "GenericShaders.h";
+#include "AssetLoader.h";
 #include "EventHandler.h";
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -16,6 +17,7 @@ public:
     World *world;
     GenericShaders *shaders;
     Renderer *renderer;
+    AssetLoader *asset;
     Framebuffer *screenFbo;
     static Game *instance;
 

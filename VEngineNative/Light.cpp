@@ -55,9 +55,17 @@ void Light::refreshShadowMap()
 {
     if (shadowMappingEnabled) {
         mapper->use(true);
+
         ShaderProgram *shader = Game::instance->shaders->depthOnlyShader;
         shader->use();
         shader->setUniform("CutOffDistance", cutOffDistance);
+        Game::instance->world->setUniforms(shader, lightCamera);
+
+        shader = Game::instance->shaders->depthOnlyGeometryShader;
+        shader->use();
+        shader->setUniform("CutOffDistance", cutOffDistance);
+        Game::instance->world->setUniforms(shader, lightCamera);
+
         lightCamera->transformation = transformation;
         lightCamera->createProjectionPerspective(angle, (float)shadowMapWidth / (float)shadowMapHeight, 0.1f, cutOffDistance);
         Game::instance->world->draw(shader, lightCamera);
