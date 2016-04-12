@@ -209,15 +209,16 @@ void Renderer::deferred()
 
         deferredShader->setUniform("LightColor", lights[i]->color);
         deferredShader->setUniform("LightPosition", lights[i]->transformation->position);
-        deferredShader->setUniform("LightOrientation", lights[i]->transformation->orientation);
+        deferredShader->setUniform("LightOrientation", glm::inverse(lights[i]->transformation->orientation));
         deferredShader->setUniform("LightAngle", lights[i]->angle);
+        deferredShader->setUniform("LightType", lights[i]->type);
         deferredShader->setUniform("LightCutOffDistance", lights[i]->cutOffDistance);
         deferredShader->setUniform("LightUseShadowMap", lights[i]->shadowMappingEnabled);
         if (lights[i]->shadowMappingEnabled) {
             deferredShader->setUniform("LightVPMatrix", lights[i]->lightCamera->projectionMatrix
                 * lights[i]->lightCamera->transformation->getInverseWorldTransform());
         }
-        lights[i]->bindShadowMap(4);
+        lights[i]->bindShadowMap(4, 5);
         quad3dInfo->draw();
     }
 

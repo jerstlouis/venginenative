@@ -8,3 +8,15 @@ texture floor1n.jpg
 uvscale 2.0
 mix REPLACE
 target NORMAL
+
+node
+texture floor1n.jpg
+uvscale 12.0
+mix ADD
+target NORMAL
+
+node
+texture floor1n.jpg
+uvscale 62.0
+mix ADD
+target NORMAL

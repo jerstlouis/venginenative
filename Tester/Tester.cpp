@@ -108,24 +108,18 @@ int main()
         }
     }*/
     game->invoke([&]() {
-      //  sponza->updateBuffers();
+        sponza->updateBuffers();
         sphere->updateBuffers();
       //  eyes->updateBuffers();
      //   lashes->updateBuffers();
     });
 
-    //game->world->scene->addMesh(sponza);
+    game->world->scene->addMesh(sponza);
     game->world->scene->addMesh(sphere);
   //  game->world->scene->addMesh(eyes);
   //  game->world->scene->addMesh(lashes);
 
-    Light* light = new Light();
-    light->switchShadowMapping(true);
-    light->cutOffDistance = 100.0;
-    light->color = glm::vec3(1);
-    light->angle = deg2rad(90.0f);
-    light->resizeShadowMap(2048, 2048);
-    light->transformation->translate(glm::vec3(0, 2, 0));
+    Light* light = game->asset->LoadLightFile("test.light");
 
     game->world->scene->addLight(light);
 

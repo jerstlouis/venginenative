@@ -1,5 +1,6 @@
 #pragma once
 #include "Mesh3d.h"
+#include "Light.h"
 #include "Material.h"
 #include "MaterialNode.h"
 #include "Object3dInfo.h"
@@ -14,6 +15,9 @@ public:
 
     Mesh3d *LoadMeshString(string source);
     Mesh3d *LoadMeshFile(string source);
+
+    Light *LoadLightString(string source);
+    Light *LoadLightFile(string source);
 
 private:
     void splitByLines(vector<string>& output, string src);

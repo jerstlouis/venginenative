@@ -9,6 +9,7 @@ layout(binding = 1) uniform sampler2D mrt_Normal_Metalness_Tex;
 layout(binding = 2) uniform sampler2D mrt_Distance_Bump_Tex;
 layout(binding = 3) uniform samplerCube skyboxTex;
 layout(binding = 4) uniform sampler2D shadowMapSingle;
+layout(binding = 5) uniform samplerCube shadowMapCube;
 
 uniform mat4 VPMatrix;
 uniform vec3 CameraPosition;
@@ -17,10 +18,14 @@ uniform vec3 FrustumConeLeftBottom;
 uniform vec3 FrustumConeBottomLeftToBottomRight;
 uniform vec3 FrustumConeBottomLeftToTopLeft;
 
+#define LIGHT_SPOT 0
+#define LIGHT_POINT 1
+
 uniform vec3 LightColor;
 uniform vec3 LightPosition;
 uniform vec4 LightOrientation;
 uniform float LightAngle;
+uniform int LightType;
 uniform int LightUseShadowMap;
 uniform mat4 LightVPMatrix;
 uniform float LightCutOffDistance;
@@ -28,6 +33,7 @@ uniform float LightCutOffDistance;
 vec3 dfNormal;
 
 #include Shade.glsl
+#include Quaternions.glsl
 
 struct PostProceessingData
 {
@@ -92,10 +98,10 @@ float PCFDeferred(vec2 uvi, float comparison){
     for (float y = -bound; y <= bound; y += PCFEDGE){
         for (float x = -bound; x <= bound; x += PCFEDGE){
             vec2 uv = vec2(uvi+ vec2(x,y)* pixSize);
-            shadow +=  1.0 - step(comparison + 0.0005, texture(shadowMapSingle, uv).r);
+            shadow += step(comparison + 0.0005, texture(shadowMapSingle, uv).r);
         }
     }
-    return shadow / (KERNEL * KERNEL);
+    return 1.0 - shadow / (KERNEL * KERNEL);
 }
 
 float toLogDepth(float depth, float far){
@@ -207,21 +213,36 @@ vec3 ApplyLighting(PostProceessingData data)
     vec3 radiance = MakeShading(data);
     
     if(LightUseShadowMap == 1){
-        vec4 lightClipSpace = LightVPMatrix * vec4(data.worldPos, 1.0);
-        if(lightClipSpace.z > 0.0){
-            vec3 lightScreenSpace = (lightClipSpace.xyz / lightClipSpace.w) * 0.5 + 0.5;   
+        if(LightType == LIGHT_SPOT){
+            vec4 lightClipSpace = LightVPMatrix * vec4(data.worldPos, 1.0);
+            if(lightClipSpace.z > 0.0){
+                vec3 lightScreenSpace = (lightClipSpace.xyz / lightClipSpace.w) * 0.5 + 0.5;   
 
-            float percent = 0;
-            if(lightScreenSpace.x >= 0.0 && lightScreenSpace.x <= 1.0 && lightScreenSpace.y >= 0.0 && lightScreenSpace.y <= 1.0) {
-                percent = PCFDeferred(lightScreenSpace.xy, 1.0 - toLogDepth(distance(data.worldPos, LightPosition), LightCutOffDistance)); 
-                
+                float percent = 0;
+                if(lightScreenSpace.x >= 0.0 && lightScreenSpace.x <= 1.0 && lightScreenSpace.y >= 0.0 && lightScreenSpace.y <= 1.0) {
+                    percent = PCFDeferred(lightScreenSpace.xy, 1.0 - toLogDepth(distance(data.worldPos, LightPosition), LightCutOffDistance));
+                }
+                result += radiance * (percent);
             }
+        } else if(LightType == LIGHT_POINT){
+            float target = 1.0 - toLogDepth(distance(data.worldPos, LightPosition), LightCutOffDistance);
+            float percent = smoothstep(-0.001, 0.0, target - textureLod(shadowMapCube, normalize(data.worldPos - LightPosition), 0).r);
             result += radiance * percent;
         }
         
     } else if(LightUseShadowMap == 0){
+        
+
         result += radiance;
     }
+    if(LightType == LIGHT_SPOT) {
+        float percent = 1.0;
+        vec3 ldir = -quat_mul_vec(LightOrientation, vec3(0,0,-1));
+        float dt = -dot(normalize(data.worldPos - LightPosition), ldir);
+        float angle =  (cos(LightAngle / 1.41) * 0.5 + 0.5);
+        percent = smoothstep(angle, angle + (angle * 0.006), dt);
+        result *= percent;
+    }    
     return result; // * (1.0 - smoothstep(0.0, LightCutOffDistance, distance(LightPosition, data.worldPos)));
 }
 
@@ -231,7 +252,7 @@ void main(){
     vec3 color = vec3(0);
     if(currentData.cameraDistance > 0){
         color += ApplyLighting(currentData);
-        color += MMAL(currentData)*0.5;
+        color += MMAL(currentData)*0.05;
     }
     outColor = vec4(color, 1.0);
 }

@@ -200,7 +200,7 @@ Mesh3d * AssetLoader::LoadMeshString(string source)
                 if (words.size() >= 2) {
                     stringstream ss;
                     for (int a = 1; a < words.size(); a++)ss << (a == 1 ? "" : " ") << words[a];
-                    
+
                     unsigned char* bytes;
                     int bytescount = Media::readBinary(ss.str(), &bytes);
                     GLfloat * floats = (GLfloat*)bytes;
@@ -216,7 +216,7 @@ Mesh3d * AssetLoader::LoadMeshString(string source)
                 if (words.size() >= 2) {
                     stringstream ss;
                     for (int a = 1; a < words.size(); a++)ss << (a == 1 ? "" : " ") << words[a];
-                    
+
                     lodlevel->material = LoadMaterialFile(ss.str());
                 }
             }
@@ -238,7 +238,7 @@ Mesh3d * AssetLoader::LoadMeshString(string source)
                     instance->transformation->scale(glm::vec3(
                         atof(words[1].c_str())
                     ));
-                }                
+                }
                 if (words.size() == 4) {
                     instance->transformation->scale(glm::vec3(
                         atof(words[1].c_str()),
@@ -283,6 +283,113 @@ Mesh3d * AssetLoader::LoadMeshString(string source)
 Mesh3d * AssetLoader::LoadMeshFile(string source)
 {
     return LoadMeshString(Media::readString(source));
+}
+
+
+Light * AssetLoader::LoadLightString(string source)
+{
+    vector<string> meshLines;
+    splitByLines(meshLines, source);
+    Light *light = new Light();
+    for (int i = 0; i < meshLines.size(); i++) {
+        vector<string> words;
+        splitBySpaces(words, meshLines[i]);
+        if (words[0] == "cutoff") {
+            if (words.size() == 2) {
+                light->cutOffDistance = atof(words[1].c_str());
+            }
+        }
+        if (words[0] == "angle") {
+            if (words.size() == 2) {
+                light->angle = atof(words[1].c_str());
+            }
+        }
+        if (words[0] == "type") {
+            if (words.size() == 2) {
+                light->type = words[1].c_str() == "POINT" ? LIGHT_POINT : LIGHT_SPOT;
+            }
+        }
+        if (words[0] == "shadowmap") {
+            if (words.size() == 2) {
+                light->switchShadowMapping(words[1] == "TRUE" ? true : false);
+            }
+        }
+        if (words[0] == "resolution") {
+            if (words.size() == 3) {
+                light->resizeShadowMap(
+                    atof(words[1].c_str()),
+                    atof(words[2].c_str())
+                );
+            }
+        }
+        if (words[0] == "color") {
+            if (words.size() == 2) {
+                light->color = glm::vec3(
+                    atof(words[1].c_str())
+                );
+            }
+            if (words.size() == 4) {
+                light->color = glm::vec3(
+                    atof(words[1].c_str()),
+                    atof(words[2].c_str()),
+                    atof(words[3].c_str())
+                );
+            }
+        }
+
+        if (words[0] == "translate") {
+            if (words.size() == 4) {
+                light->transformation->translate(glm::vec3(
+                    atof(words[1].c_str()),
+                    atof(words[2].c_str()),
+                    atof(words[3].c_str())
+                ));
+            }
+
+        }
+        if (words[0] == "rotate") {
+            if (words.size() == 5) {
+                light->transformation->rotate(glm::quat(
+                    atof(words[1].c_str()),
+                    atof(words[2].c_str()),
+                    atof(words[3].c_str()),
+                    atof(words[4].c_str())
+                ));
+            }
+
+        }
+        if (words[0] == "rotate_axis") {
+            if (words.size() == 5) {
+                light->transformation->rotate(glm::angleAxis(
+                    (float)deg2rad(atof(words[1].c_str())),
+                    glm::vec3(
+                        atof(words[2].c_str()),
+                        atof(words[3].c_str()),
+                        atof(words[4].c_str())
+                    )
+                ));
+            }
+        }
+        if (words[0] == "lookat") {
+            if (words.size() == 4) {
+                light->transformation->setOrientation(glm::quat_cast(glm::lookAt(
+                    light->transformation->position,
+                    glm::vec3(
+                        atof(words[1].c_str()),
+                        atof(words[2].c_str()),
+                        atof(words[3].c_str())
+                    ),
+                    glm::vec3(0,1,0)
+                )));
+            }
+        }
+    }
+    return light;
+}
+
+Light * AssetLoader::LoadLightFile(string source)
+{
+    return LoadLightString(Media::readString(source));
 }
 
 // this looks like c
