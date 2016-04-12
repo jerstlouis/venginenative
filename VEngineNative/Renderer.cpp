@@ -150,6 +150,7 @@ void Renderer::draw(Camera *camera)
     Game::instance->world->setUniforms(Game::instance->shaders->materialShader, camera);
     Game::instance->world->draw(Game::instance->shaders->materialShader, camera);
     deferred();
+    ambientLight();
 }
 
 void Renderer::bloom()
@@ -166,6 +167,7 @@ void Renderer::output()
     mrtDistanceTexture->use(2);
     skyboxTexture->use(3);
     deferredTexture->use(5);
+    ambientLightTexture->use(6);
     FrustumCone *cone = Game::instance->world->mainDisplayCamera->cone;
     outputShader->setUniform("FrustumConeLeftBottom", cone->leftBottom);
     outputShader->setUniform("FrustumConeBottomLeftToBottomRight", cone->rightBottom - cone->leftBottom);
@@ -201,7 +203,6 @@ void Renderer::deferred()
     mrtAlbedoRoughnessTex->use(0);
     mrtNormalMetalnessTex->use(1);
     mrtDistanceTexture->use(2);
-    skyboxTexture->use(3);
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
 
@@ -227,6 +228,18 @@ void Renderer::deferred()
 
 void Renderer::ambientLight()
 {
+    ambientLightFbo->use(true);
+    ambientLightShader->use();
+    skyboxTexture->use(3);
+    FrustumCone *cone = Game::instance->world->mainDisplayCamera->cone;
+    glm::mat4 vpmatrix = Game::instance->world->mainDisplayCamera->projectionMatrix * Game::instance->world->mainDisplayCamera->transformation->getInverseWorldTransform();
+    ambientLightShader->setUniform("VPMatrix", vpmatrix);
+    ambientLightShader->setUniform("Resolution", glm::vec2(Game::instance->width, Game::instance->height));
+    ambientLightShader->setUniform("CameraPosition", Game::instance->world->mainDisplayCamera->transformation->position);
+    ambientLightShader->setUniform("FrustumConeLeftBottom", cone->leftBottom);
+    ambientLightShader->setUniform("FrustumConeBottomLeftToBottomRight", cone->rightBottom - cone->leftBottom);
+    ambientLightShader->setUniform("FrustumConeBottomLeftToTopLeft", cone->leftTop - cone->leftBottom);
+    quad3dInfo->draw();
 }
 
 void Renderer::ambientOcclusion()

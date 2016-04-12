@@ -1,0 +1,63 @@
+in vec2 UV;
+out vec4 outColor;
+
+layout(binding = 0) uniform sampler2D mrt_Albedo_Roughness_Tex;
+layout(binding = 1) uniform sampler2D mrt_Normal_Metalness_Tex;
+layout(binding = 2) uniform sampler2D mrt_Distance_Bump_Tex;
+
+uniform mat4 VPMatrix;
+uniform vec3 CameraPosition;
+uniform vec2 Resolution;
+uniform vec3 FrustumConeLeftBottom;
+uniform vec3 FrustumConeBottomLeftToBottomRight;
+uniform vec3 FrustumConeBottomLeftToTopLeft;
+
+struct PostProceessingData
+{
+    vec3 diffuseColor;
+    vec3 normal;
+    vec3 worldPos;
+    vec3 cameraPos;
+    float cameraDistance;
+    float roughness;
+    float metalness;
+};
+
+PostProceessingData currentData;
+
+vec3 reconstructCameraSpaceDistance(vec2 uv, float dist){
+    vec3 dir = normalize((FrustumConeLeftBottom + FrustumConeBottomLeftToBottomRight * uv.x + FrustumConeBottomLeftToTopLeft * uv.y));
+    return dir * dist;
+}
+
+vec3 ToCameraSpace(vec3 position){
+    return position + CameraPosition;
+}
+
+vec3 FromCameraSpace(vec3 position){
+    return position - -CameraPosition;
+}
+
+void createData(){
+    vec4 albedo_roughness = textureLod(mrt_Albedo_Roughness_Tex, UV, 0).rgba;
+    vec4 normal_metalness = textureLod(mrt_Normal_Metalness_Tex, UV, 0).rgba;
+    float dist = textureLod(mrt_Distance_Bump_Tex, UV, 0).r;
+    vec3 cameraSpace = reconstructCameraSpaceDistance(UV, dist);
+    vec3 worldSpace = FromCameraSpace(cameraSpace);
+        
+    currentData = PostProceessingData(
+    albedo_roughness.rgb,
+    normal_metalness.rgb,
+    worldSpace,
+    cameraSpace,
+    dist,
+    albedo_roughness.a,
+    normal_metalness.a
+    );
+}
+vec4 shade();
+void main(){
+    createData();
+    vec4 color = shade();
+    outColor = vec4(color);
+}

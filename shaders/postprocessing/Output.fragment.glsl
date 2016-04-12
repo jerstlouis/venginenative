@@ -17,6 +17,7 @@ vec3 reconstructCameraSpaceDistance(vec2 uv, float dist){
 layout(binding = 2) uniform sampler2D mrt_Distance_Tex;
 layout(binding = 3) uniform samplerCube skyboxTex;
 layout(binding = 5) uniform sampler2D inTex;
+layout(binding = 6) uniform sampler2D inTex2;
 
 const float SRGB_ALPHA = 0.055;
 float linear_to_srgb(float channel) {
@@ -34,7 +35,7 @@ vec3 rgb_to_srgb(vec3 rgb) {
 }
 
 void main(){    
-    vec3 color = texture(inTex, UV).rgb;
+    vec3 color = texture(inTex, UV).rgb + texture(inTex2, UV).rgb;
     color += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Tex, UV, 0).r)) * textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb;
     outColor = vec4(rgb_to_srgb(color), 1.0);
 }
