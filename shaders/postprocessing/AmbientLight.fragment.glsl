@@ -65,7 +65,7 @@ vec3 MMAL(PostProceessingData data){
 vec4 shade(){
     vec4 color = vec4(0);
     if(currentData.cameraDistance > 0){
-        color.rgb += MMAL(currentData) *0.05;
+        color.rgb += MMAL(currentData) * 0.1;
     }
     return color;
 }

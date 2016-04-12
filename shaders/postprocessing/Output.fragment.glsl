@@ -1,23 +1,11 @@
 #version 430 core
 
-in vec2 UV;
+#include PostProcessEffectBase.glsl
 
-out vec4 outColor;
-
-uniform vec3 CameraPosition;
-uniform vec3 FrustumConeLeftBottom;
-uniform vec3 FrustumConeBottomLeftToBottomRight;
-uniform vec3 FrustumConeBottomLeftToTopLeft;
-    
-vec3 reconstructCameraSpaceDistance(vec2 uv, float dist){
-    vec3 dir = normalize((FrustumConeLeftBottom + FrustumConeBottomLeftToBottomRight * uv.x + FrustumConeBottomLeftToTopLeft * uv.y));
-    return dir * dist;
-}
-
-layout(binding = 2) uniform sampler2D mrt_Distance_Tex;
 layout(binding = 3) uniform samplerCube skyboxTex;
-layout(binding = 5) uniform sampler2D inTex;
-layout(binding = 6) uniform sampler2D inTex2;
+layout(binding = 5) uniform sampler2D directTex;
+layout(binding = 6) uniform sampler2D alTex;
+layout(binding = 7) uniform sampler2D aoTex;
 
 const float SRGB_ALPHA = 0.055;
 float linear_to_srgb(float channel) {
@@ -34,8 +22,8 @@ vec3 rgb_to_srgb(vec3 rgb) {
     );
 }
 
-void main(){    
-    vec3 color = texture(inTex, UV).rgb + texture(inTex2, UV).rgb;
-    color += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Tex, UV, 0).r)) * textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb;
-    outColor = vec4(rgb_to_srgb(color), 1.0);
+vec4 shade(){    
+    vec3 color = texture(directTex, UV).rgb + texture(alTex, UV).rgb * texture(aoTex, UV).r;
+    color += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r)) * textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb;
+    return vec4(rgb_to_srgb(color), 1.0);
 }

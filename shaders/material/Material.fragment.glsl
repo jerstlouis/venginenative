@@ -68,7 +68,8 @@ void main(){
         vec4 data = node.soureColor;
         if(node.source == MODSOURCE_TEXTURE) data = sampleNode(node.samplerIndex, UV * node.uvScale);
         
-        if(bitcheck(node.modifier, MODMODIFIER_NEGATIVE))data = 1.0-data;
+        if(bitcheck(node.modifier, MODMODIFIER_NEGATIVE) && node.target == MODTARGET_NORMAL)data.rgb = vec3(1.0 - data.r, 1.0 - data.g, data.b);
+        if(bitcheck(node.modifier, MODMODIFIER_NEGATIVE) && node.target != MODTARGET_NORMAL)data = 1.0-data;
         if(bitcheck(node.modifier, MODMODIFIER_LINEARIZE))data = pow(data, vec4(2.4));
         if(bitcheck(node.modifier, MODMODIFIER_SATURATE))data.rgb = saturation(data.rgb, node.data.r);
         if(bitcheck(node.modifier, MODMODIFIER_HUE)){
