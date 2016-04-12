@@ -58,7 +58,7 @@ void Mesh3dLodLevel::draw()
     int nodes = 0;
     for (int i = 0; i < material->nodes.size(); i++) {
         MaterialNode * node = material->nodes[i];
-        if (node->target == NODE_TARGET_BUMP) useGeometryShader = true;
+        if (node->target == NODE_TARGET_DISPLACEMENT) useGeometryShader = true;
         samplerIndices.push_back(samplerIndex);
         modes.push_back(node->mixingMode);
         targets.push_back(node->target);

@@ -23,6 +23,7 @@ private:
     int genMode;
     const int genModeFromFile = 1;
     const int genModeEmptyFromDesc = 2;
+    void* glitextureptr;
     GLint internalFormatRequested;
     GLenum formatRequested;
     GLenum typeRequested;

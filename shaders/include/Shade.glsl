@@ -124,5 +124,5 @@ bool ignoreAtt
     cameraRelativeToVPos,
     normal,
     roughness,
-    albedo) * CalculateFallof(distance(lightPosition, fragmentPosition));
+    albedo);
 }

@@ -14,13 +14,19 @@ Texture::Texture(GLuint ihandle)
 
 Texture::Texture(string filekey)
 {
-    int x, y, n;
-    data = stbi_load(Media::getPath(filekey).c_str(), &x, &y, &n, 0);
-    width = x;
-    height = y;
-    components = n;
-    generated = false;
-    genMode = genModeFromFile;
+    if (strstr(filekey.c_str(), ".dds") != nullptr) {
+        glitextureptr = (void*)(&gli::load(Media::getPath(filekey)));
+    }
+    else {
+        glitextureptr = (void*)nullptr;
+        int x, y, n;
+        data = stbi_load(Media::getPath(filekey).c_str(), &x, &y, &n, 0);
+        width = x;
+        height = y;
+        components = n;
+        generated = false;
+        genMode = genModeFromFile;
+    }
 }
 
 Texture::Texture(int iwidth, int iheight, GLint internalFormat, GLenum format, GLenum type)
@@ -65,27 +71,63 @@ void Texture::generate()
     glGenTextures(1, &handle);
     glBindTexture(GL_TEXTURE_2D, handle);
     if (genMode == genModeFromFile) {
-        GLint internalFormat;
-        GLenum format;
-        if (components == 1) {
-            internalFormat = GL_RED;
-            format = GL_RED;
-        }
-        else if (components == 2) {
-            internalFormat = GL_RG;
-            format = GL_RG;
-        }
-        else if (components == 3) {
-            internalFormat = GL_RGB;
-            format = GL_RGB;
+        if (glitextureptr != nullptr) {
+            auto glitexture = static_cast<gli::texture*>(glitextureptr);
+            gli::gl GL(gli::gl::PROFILE_GL33);
+            gli::gl::format const Format = GL.translate(glitexture->format(), glitexture->swizzles());
+            // GLenum Target = GL.translate(Texture.target());
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(glitexture->levels() - 1));
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, Format.Swizzles[0]);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, Format.Swizzles[1]);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, Format.Swizzles[2]);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, Format.Swizzles[3]);
+            glm::tvec3<GLsizei> const Extent(glitexture->extent());
+            glTexStorage2D(
+                GL_TEXTURE_2D, static_cast<GLint>(glitexture->levels()), Format.Internal,
+                Extent.x, Extent.y);
+            if (gli::is_compressed(glitexture->format())) {
+                glCompressedTexSubImage2D(
+                    GL_TEXTURE_2D, static_cast<GLint>(0),
+                    0, 0,
+                    Extent.x,
+                    Extent.y,
+                    Format.Internal, static_cast<GLsizei>(glitexture->size(0)),
+                    glitexture->data(0, 0, 0));
+            }
+            else {
+                glTexSubImage2D(
+                    GL_TEXTURE_2D, static_cast<GLint>(0),
+                    0, 0,
+                    Extent.x,
+                    Extent.y,
+                    Format.External, Format.Type,
+                    glitexture->data(0, 0, 0));
+            }
         }
         else {
-            internalFormat = GL_RGBA;
-            format = GL_RGBA;
+            GLint internalFormat;
+            GLenum format;
+            if (components == 1) {
+                internalFormat = GL_RED;
+                format = GL_RED;
+            }
+            else if (components == 2) {
+                internalFormat = GL_RG;
+                format = GL_RG;
+            }
+            else if (components == 3) {
+                internalFormat = GL_RGB;
+                format = GL_RGB;
+            }
+            else {
+                internalFormat = GL_RGBA;
+                format = GL_RGBA;
+            }
+            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+            stbi_image_free(data);
         }
-
-        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        stbi_image_free(data);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -101,7 +143,8 @@ void Texture::generate()
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-       // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE_ARB);
+        if(formatRequested == GL_DEPTH_COMPONENT)
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
     }
 
     generated = true;

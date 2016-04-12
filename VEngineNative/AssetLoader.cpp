@@ -12,7 +12,7 @@ AssetLoader::~AssetLoader()
 {
 }
 
-Material * AssetLoader::LoadMaterialString(string source)
+Material * AssetLoader::loadMaterialString(string source)
 {
     vector<string> materialLines;
     splitByLines(materialLines, source);
@@ -158,12 +158,12 @@ Material * AssetLoader::LoadMaterialString(string source)
     return material;
 }
 
-Material * AssetLoader::LoadMaterialFile(string source)
+Material * AssetLoader::loadMaterialFile(string source)
 {
-    return LoadMaterialString(Media::readString(source));
+    return loadMaterialString(Media::readString(source));
 }
 
-Mesh3d * AssetLoader::LoadMeshString(string source)
+Mesh3d * AssetLoader::loadMeshString(string source)
 {
     vector<string> meshLines;
     splitByLines(meshLines, source);
@@ -217,7 +217,7 @@ Mesh3d * AssetLoader::LoadMeshString(string source)
                     stringstream ss;
                     for (int a = 1; a < words.size(); a++)ss << (a == 1 ? "" : " ") << words[a];
 
-                    lodlevel->material = LoadMaterialFile(ss.str());
+                    lodlevel->material = loadMaterialFile(ss.str());
                 }
             }
         }
@@ -251,12 +251,12 @@ Mesh3d * AssetLoader::LoadMeshString(string source)
         if (words[0] == "rotate") {
             if (instance != nullptr) {
                 if (words.size() == 5) {
-                    instance->transformation->rotate(glm::quat(
-                        atof(words[1].c_str()),
-                        atof(words[2].c_str()),
-                        atof(words[3].c_str()),
-                        atof(words[4].c_str())
-                    ));
+                    glm::quat qt;
+                    qt.x = atof(words[1].c_str());
+                    qt.y = atof(words[2].c_str());
+                    qt.z = atof(words[3].c_str());
+                    qt.w = atof(words[4].c_str());
+                    instance->transformation->rotate(qt);
                 }
             }
         }
@@ -280,13 +280,13 @@ Mesh3d * AssetLoader::LoadMeshString(string source)
     return mesh;
 }
 
-Mesh3d * AssetLoader::LoadMeshFile(string source)
+Mesh3d * AssetLoader::loadMeshFile(string source)
 {
-    return LoadMeshString(Media::readString(source));
+    return loadMeshString(Media::readString(source));
 }
 
 
-Light * AssetLoader::LoadLightString(string source)
+Light * AssetLoader::loadLightString(string source)
 {
     vector<string> meshLines;
     splitByLines(meshLines, source);
@@ -379,7 +379,7 @@ Light * AssetLoader::LoadLightString(string source)
                         atof(words[2].c_str()),
                         atof(words[3].c_str())
                     ),
-                    glm::vec3(0,1,0)
+                    glm::vec3(0, 1, 0)
                 )));
             }
         }
@@ -387,9 +387,40 @@ Light * AssetLoader::LoadLightString(string source)
     return light;
 }
 
-Light * AssetLoader::LoadLightFile(string source)
+Light * AssetLoader::loadLightFile(string source)
 {
-    return LoadLightString(Media::readString(source));
+    return loadLightString(Media::readString(source));
+}
+
+Scene * AssetLoader::loadSceneString(string source)
+{
+    vector<string> meshLines;
+    splitByLines(meshLines, source);
+    Scene *scene = new Scene();
+    for (int i = 0; i < meshLines.size(); i++) {
+        vector<string> words;
+        splitBySpaces(words, meshLines[i]);
+        if (words[0] == "mesh3d") {
+            if (words.size() >= 2) {
+                stringstream ss;
+                for (int a = 1; a < words.size(); a++)ss << (a == 1 ? "" : " ") << words[a];
+                scene->addMesh(loadMeshFile(ss.str()));
+            }
+        }
+        if (words[0] == "light") {
+            if (words.size() >= 2) {
+                stringstream ss;
+                for (int a = 1; a < words.size(); a++)ss << (a == 1 ? "" : " ") << words[a];
+                scene->addLight(loadLightFile(ss.str()));
+            }
+        }
+    }
+    return scene;
+}
+
+Scene * AssetLoader::loadSceneFile(string source)
+{
+    return loadSceneString(Media::readString(source));
 }
 
 // this looks like c

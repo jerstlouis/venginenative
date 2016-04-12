@@ -127,103 +127,42 @@ void ShaderProgram::setUniformVector(const string &name, const vector<glm::vec2>
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
-    vector<float> floats;
-    for (int i = 0; i < value.size(); i++) {
-        floats.push_back(value[i].x);
-        floats.push_back(value[i].y);
-    }
-    glUniform2fv(location, (GLsizei)value.size(), floats.data());
+    glUniform2fv(location, (GLsizei)value.size(), (GLfloat*)value.data());
 }
 
 void ShaderProgram::setUniformVector(const string &name, const vector<glm::vec3> &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
-    vector<float> floats;
-    for (int i = 0; i < value.size(); i++) {
-        floats.push_back(value[i].x);
-        floats.push_back(value[i].y);
-        floats.push_back(value[i].z);
-    }
-    glUniform3fv(location, (GLsizei)value.size(), floats.data());
+    glUniform3fv(location, (GLsizei)value.size(), (GLfloat*)value.data());
 }
 
 void ShaderProgram::setUniformVector(const string &name, const vector<glm::vec4> &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
-    vector<float> floats;
-    for (int i = 0; i < value.size(); i++) {
-        floats.push_back(value[i].x);
-        floats.push_back(value[i].y);
-        floats.push_back(value[i].z);
-        floats.push_back(value[i].w);
-    }
-    glUniform4fv(location, (GLsizei)value.size(), floats.data());
+    glUniform4fv(location, (GLsizei)value.size(), (GLfloat*)value.data());
 }
 
 void ShaderProgram::setUniformVector(const string &name, const vector<glm::quat> &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
-    vector<float> floats;
-    for (int i = 0; i < value.size(); i++) {
-        floats.push_back(value[i].x);
-        floats.push_back(value[i].y);
-        floats.push_back(value[i].z);
-        floats.push_back(value[i].w);
-    }
-    glUniform4fv(location, (GLsizei)value.size(), floats.data());
+    glUniform4fv(location, (GLsizei)value.size(), (GLfloat*)value.data());
 }
 
 void ShaderProgram::setUniformVector(const string &name, const vector<glm::mat3> &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
-    vector<float> floats;
-    for (int i = 0; i < value.size(); i++) {
-        floats.push_back(value[i][0][0]);
-        floats.push_back(value[i][0][1]);
-        floats.push_back(value[i][0][2]);
-
-        floats.push_back(value[i][1][0]);
-        floats.push_back(value[i][1][1]);
-        floats.push_back(value[i][1][2]);
-
-        floats.push_back(value[i][2][0]);
-        floats.push_back(value[i][2][1]);
-        floats.push_back(value[i][2][2]);
-    }
-    glUniformMatrix3fv(location, (GLsizei)value.size(), GL_FALSE, floats.data());
+    glUniformMatrix3fv(location, (GLsizei)value.size(), GL_FALSE, (GLfloat*)value.data());
 }
 
 void ShaderProgram::setUniformVector(const string &name, const vector<glm::mat4> &value)
 {
     GLint location = getUniformLocation(name);
     if (location < 0) return;
-    vector<float> floats;
-    for (int i = 0; i < value.size(); i++) {
-        floats.push_back(value[i][0][0]);
-        floats.push_back(value[i][0][1]);
-        floats.push_back(value[i][0][2]);
-        floats.push_back(value[i][0][3]);
-
-        floats.push_back(value[i][1][0]);
-        floats.push_back(value[i][1][1]);
-        floats.push_back(value[i][1][2]);
-        floats.push_back(value[i][1][3]);
-
-        floats.push_back(value[i][2][0]);
-        floats.push_back(value[i][2][1]);
-        floats.push_back(value[i][2][2]);
-        floats.push_back(value[i][2][3]);
-
-        floats.push_back(value[i][3][0]);
-        floats.push_back(value[i][3][1]);
-        floats.push_back(value[i][3][2]);
-        floats.push_back(value[i][3][3]);
-    }
-    glUniformMatrix4fv(location, (GLsizei)value.size(), GL_FALSE, floats.data());
+    glUniformMatrix4fv(location, (GLsizei)value.size(), GL_FALSE, (GLfloat*)value.data());
 }
 
 GLint ShaderProgram::getUniformLocation(const string &name)

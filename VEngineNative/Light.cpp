@@ -48,8 +48,8 @@ void Light::switchShadowMapping(bool value)
 void Light::bindShadowMap(int spot, int cube)
 {
     if (shadowMappingEnabled) {
-        depthMap->use(spot);
-        depthCubeMap->use(cube);
+        depthMap->use(spot); 
+        depthCubeMap->use(cube); 
     }
 }
 
@@ -57,7 +57,8 @@ void Light::refreshShadowMap()
 {
     if (shadowMappingEnabled) {
 
-
+        glClearDepth(0);
+        glDepthFunc(GL_GEQUAL);
         if (type == LIGHT_SPOT) {
             mapper->use(true);
 
@@ -94,26 +95,22 @@ void Light::refreshShadowMap()
                 Game::instance->world->draw(shader, cam);
             }
         }
+        glClearDepth(1);
+        glDepthFunc(GL_LEQUAL);
     }
 }
 
 void Light::recreateFbo()
 {
     destroyFbo();
-    Texture* helperDepthBuffer = new Texture(shadowMapWidth, shadowMapHeight,
-        GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
     depthMap = new Texture(shadowMapWidth, shadowMapHeight,
-        GL_R32F, GL_RED, GL_FLOAT);
-    mapper = new Framebuffer();
-    mapper->attachTexture(helperDepthBuffer, GL_DEPTH_ATTACHMENT);
-    mapper->attachTexture(depthMap, GL_COLOR_ATTACHMENT0);
-
-    CubeMapTexture* helperCubeDepthBuffer = new CubeMapTexture(shadowMapWidth, shadowMapHeight,
         GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
+    mapper = new Framebuffer();
+    mapper->attachTexture(depthMap, GL_DEPTH_ATTACHMENT);
+
     depthCubeMap = new CubeMapTexture(shadowMapWidth, shadowMapHeight,
-        GL_R32F, GL_RED, GL_FLOAT);
+        GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
     cubeMapper = new CubeMapFramebuffer();
-    cubeMapper->attachTexture(helperCubeDepthBuffer, GL_DEPTH_ATTACHMENT);
     cubeMapper->attachTexture(depthCubeMap, GL_COLOR_ATTACHMENT0);
 }
 

@@ -49,4 +49,13 @@ using namespace std;
 #define rad2deg(a) (a * (180.0f / PI))
 #define deg2rad(a) (a * (PI / 180.0f))
 
-#include "btBulletCollisionCommon.h"#include "btBulletDynamicsCommon.h"
+#include "gli/gli.hpp"
+#include "gli/texture.hpp"
+#include "gli/texture2d.hpp"
+#include "gli/convert.hpp"
+#include "gli/generate_mipmaps.hpp"
+#include "gli/load.hpp"
+
+#include "btBulletCollisionCommon.h"
+#include "btBulletDynamicsCommon.h"
+

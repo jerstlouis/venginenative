@@ -1,6 +1,7 @@
 #pragma once
 #include "Mesh3d.h"
 #include "Light.h"
+#include "Scene.h"
 #include "Material.h"
 #include "MaterialNode.h"
 #include "Object3dInfo.h"
@@ -10,14 +11,17 @@ public:
     AssetLoader();
     ~AssetLoader();
 
-    Material *LoadMaterialString(string source);
-    Material *LoadMaterialFile(string source);
+    Material *loadMaterialString(string source);
+    Material *loadMaterialFile(string source);
 
-    Mesh3d *LoadMeshString(string source);
-    Mesh3d *LoadMeshFile(string source);
+    Mesh3d *loadMeshString(string source);
+    Mesh3d *loadMeshFile(string source);
 
-    Light *LoadLightString(string source);
-    Light *LoadLightFile(string source);
+    Light *loadLightString(string source);
+    Light *loadLightFile(string source);
+
+    Scene *loadSceneString(string source);
+    Scene *loadSceneFile(string source);
 
 private:
     void splitByLines(vector<string>& output, string src);

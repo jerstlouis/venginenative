@@ -29,17 +29,24 @@
 
 using namespace std;
 
-#include "../VEngineNative/glm/vec3.hpp" // glm::vec3
-#include "../VEngineNative/glm/vec4.hpp" // glm::vec4
-#include "../VEngineNative/glm/mat4x4.hpp" // glm::mat4
-#include "../VEngineNative/glm/gtc/matrix_transform.hpp" // glm::translate, glm::rotate, glm::scale, glm::perspective
-#include "../VEngineNative/glm/gtc/constants.hpp" // glm::pi 
-#include "../VEngineNative/glm/gtc/quaternion.hpp"
-#include "../VEngineNative/glm/gtc/type_ptr.hpp"
+#include "glm/vec3.hpp" // glm::vec3
+#include "glm/vec4.hpp" // glm::vec4
+#include "glm/mat4x4.hpp" // glm::mat4
+#include "glm/gtc/matrix_transform.hpp" // glm::translate, glm::rotate, glm::scale, glm::perspective
+#include "glm/gtc/constants.hpp" // glm::pi 
+#include "glm/gtc/quaternion.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
-#include "../VEngineNative/Media.h";
+#include "Media.h";
 
-#include "../VEngineNative/Game.h";
+#include "Game.h";
+
+#include "gli/gli.hpp"
+#include "gli/texture.hpp"
+#include "gli/texture2d.hpp"
+#include "gli/convert.hpp"
+#include "gli/generate_mipmaps.hpp"
+#include "gli/load.hpp"
 
 #define PI 3.141592f
 #define rad2deg(a) (a * (180.0f / PI))

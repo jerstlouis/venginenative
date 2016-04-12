@@ -1,5 +1,0 @@
-# sponza scene
-mesh3d sponza.mesh3d
-translate 0 0 1
-
-light generic.light

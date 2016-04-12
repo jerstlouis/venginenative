@@ -1,8 +1,7 @@
 
 struct ModelInfo{
     vec4 Rotation;
-    vec3 Translation;
-    uint Id;
+    vec4 Translation;
     vec4 Scale;
 };
 

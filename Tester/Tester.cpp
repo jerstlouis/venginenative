@@ -48,78 +48,9 @@ int main()
 
     // mesh loading
 
-    Mesh3d * sponza = loadRawMesh("sponza.raw");
+    game->world->scene = game->asset->loadSceneFile("sponza.scene");
 
-    Material *sponzamat = sponza->getLodLevel(0)->material;
-    sponzamat->diffuseColor = glm::vec3(1);
-    sponzamat->roughness = 0.7;
-    sponzamat->metalness = 0.2;
-
-    Texture *grass = new Texture("floor1a.jpg");
-    sponzamat->addNode(new MaterialNode(new Texture("floor1a.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE, NODE_MODIFIER_LINEARIZE));
-   // sponzamat->addNode(new MaterialNode(new Texture("blood.png"), glm::vec2(1), NODE_MODE_ALPHA, NODE_TARGET_DIFFUSE, NODE_MODIFIER_LINEARIZE));
-    sponzamat->addNode(new MaterialNode(new Texture("floor1n.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_NORMAL));
-   // sponzamat->addNode(new MaterialNode(new Texture("waterspec.png"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_METALNESS));
-   // sponzamat->addNode(new MaterialNode(new Texture("waterspec.png"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_ROUGHNESS));
-   // sponzamat->addNode(new MaterialNode(new Texture("stonew_a.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE));
-   // sponzamat->addNode(new MaterialNode(new Texture("stonew_n.jpg"), glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_NORMAL));
-    //sponzamat->addNode(new MaterialNode(new Texture("asdasd.png"), glm::vec2(3), NODE_MODE_REPLACE, NODE_TARGET_BUMP));
-   // sponzamat->addNode(new MaterialNode(new Texture("asdasd.png"), glm::vec2(31), NODE_MODE_REPLACE, NODE_TARGET_BUMP_AS_NORMAL));
-
-    //sponzamat->addNode(new MaterialNode(grass, glm::vec2(1), NODE_MODE_REPLACE, NODE_TARGET_ROUGHNESS, NODE_MODIFIER_NEGATIVE | NODE_MODIFIER_HUE, 0.5));
-    //sponzamat->addNode(new MaterialNode(glm::vec4(0.5), glm::vec2(1), NODE_MODE_ALPHA, NODE_TARGET_ROUGHNESS));
-   // sponzamat->addNode(new MaterialNode(normtt, glm::vec2(10), NODE_MODE_REPLACE, NODE_TARGET_NORMAL));
-
-    //-----------------------//
-    // now a sphere
-
-  //  Material* testmat = game->asset->LoadMaterialFile("red.material");
-
-
-    Mesh3d * sphere = game->asset->LoadMeshFile("icosphere.mesh3d");
-   // sphere->getInstance(0)->transformation->translate(glm::vec3(0, 2, 0));
-   //  sphere->getLodLevel(0)->material = testmat;
-    
-    /*
-    //-----------------------//
-
-    // now eyes
-
-    Mesh3d * eyes = loadRawMesh("emilyeyes.raw");
-    eyes->getInstance(0)->transformation->translate(glm::vec3(0, 2, 0));
-    Material * eyesmat = eyes->getLodLevel(0)->material;
-    eyesmat->diffuseColor = glm::vec3(0, 0, 1);
-    eyesmat->roughness = 0.1;
-    eyesmat->metalness = 0.0;
-    eyesmat->addNode(new MaterialNode(new Texture("Eye_Outter_Color_01.png"), glm::vec2(1, -1), NODE_MODE_REPLACE, NODE_TARGET_DIFFUSE));
-
-    // lashesh
-    Mesh3d * lashes = loadRawMesh("emilylashes.raw");
-    lashes->getInstance(0)->transformation->translate(glm::vec3(0, 2, 0));
-    Material * lashesmat = lashes->getLodLevel(0)->material;
-    lashesmat->diffuseColor = glm::vec3(0, 0, 0);
-    lashesmat->roughness = 0.9;
-    lashesmat->metalness = 0.0;
-
-
-    for (int x = 0; x < 10; x++) {
-        for (int y = 0; y < 10; y++) {
-        //    sponza->addInstance(new Mesh3dInstance(new TransformationManager(glm::vec3(x * 40, 0, y * 20))));
-        }
-    }*/
-    game->invoke([&]() {
-        sponza->updateBuffers();
-        sphere->updateBuffers();
-      //  eyes->updateBuffers();
-     //   lashes->updateBuffers();
-    });
-
-    game->world->scene->addMesh(sponza);
-    game->world->scene->addMesh(sphere);
-  //  game->world->scene->addMesh(eyes);
-  //  game->world->scene->addMesh(lashes);
-
-    Light* light = game->asset->LoadLightFile("test.light");
+    Light* light = game->asset->loadLightFile("test.light");
 
     game->world->scene->addLight(light);
 

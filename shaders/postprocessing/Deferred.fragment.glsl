@@ -8,8 +8,8 @@ layout(binding = 0) uniform sampler2D mrt_Albedo_Roughness_Tex;
 layout(binding = 1) uniform sampler2D mrt_Normal_Metalness_Tex;
 layout(binding = 2) uniform sampler2D mrt_Distance_Bump_Tex;
 layout(binding = 3) uniform samplerCube skyboxTex;
-layout(binding = 4) uniform sampler2D shadowMapSingle;
-layout(binding = 5) uniform samplerCube shadowMapCube;
+layout(binding = 4) uniform sampler2DShadow shadowMapSingle;
+layout(binding = 5) uniform samplerCubeShadow shadowMapCube;
 
 uniform mat4 VPMatrix;
 uniform vec3 CameraPosition;
@@ -97,8 +97,8 @@ float PCFDeferred(vec2 uvi, float comparison){
     bound *= PCFEDGE;
     for (float y = -bound; y <= bound; y += PCFEDGE){
         for (float x = -bound; x <= bound; x += PCFEDGE){
-            vec2 uv = vec2(uvi+ vec2(x,y)* pixSize);
-            shadow += step(comparison + 0.0005, texture(shadowMapSingle, uv).r);
+            vec3 uv = vec3(uvi+ vec2(x,y)* pixSize, comparison + 0.001);
+            shadow += texture(shadowMapSingle, uv);
         }
     }
     return 1.0 - shadow / (KERNEL * KERNEL);
@@ -120,20 +120,16 @@ vec3 shadingMetalic(PostProceessingData data){
 }
 
 vec3 shadingNonMetalic(PostProceessingData data){
-    float fresnel = fresnel_again(data.normal, data.cameraPos, 0.08);
-    float fresnelR = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.r);
-    float fresnelG = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.g);
-    float fresnelB = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.b);
-    vec3 newBase = vec3(fresnelR, fresnelG, fresnelB);
+    float fresnel = fresnel_again(data.normal, data.cameraPos, 0.08) * (1.0 - data.roughness * 0.9);
     
-    vec3 radiance =  shade(CameraPosition, vec3(fresnel), data.normal, data.worldPos, LightPosition, LightColor, max(MIN_ROUGHNESS_DIRECT, data.roughness), false);    
+    vec3 radiance = shade(CameraPosition, vec3(fresnel), data.normal, data.worldPos, LightPosition, LightColor, max(MIN_ROUGHNESS_DIRECT, data.roughness), false);    
     
     vec3 difradiance = shadeDiffuse(CameraPosition, data.diffuseColor, data.normal, data.worldPos, LightPosition, LightColor, data.roughness, false);
     return radiance + difradiance ;
 }
 
 vec3 MakeShading(PostProceessingData data){
-    return mix(shadingNonMetalic(data), shadingMetalic(data), data.metalness);
+    return mix(shadingNonMetalic(data), shadingMetalic(data), 1.0);
 }
 
 float rand2s(vec2 co){
@@ -226,7 +222,7 @@ vec3 ApplyLighting(PostProceessingData data)
             }
         } else if(LightType == LIGHT_POINT){
             float target = 1.0 - toLogDepth(distance(data.worldPos, LightPosition), LightCutOffDistance);
-            float percent = smoothstep(-0.001, 0.0, target - textureLod(shadowMapCube, normalize(data.worldPos - LightPosition), 0).r);
+            float percent = texture(shadowMapCube, vec4(normalize(data.worldPos - LightPosition), target));
             result += radiance * percent;
         }
         
@@ -252,7 +248,7 @@ void main(){
     vec3 color = vec3(0);
     if(currentData.cameraDistance > 0){
         color += ApplyLighting(currentData);
-        color += MMAL(currentData)*0.05;
+        color += MMAL(currentData) *0.05;
     }
     outColor = vec4(color, 1.0);
 }
