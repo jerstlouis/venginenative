@@ -26,4 +26,3 @@ private:
     vector<Mesh3dInstance*> instances;
     vector<Mesh3dLodLevel*> lodLevels;
 };
-

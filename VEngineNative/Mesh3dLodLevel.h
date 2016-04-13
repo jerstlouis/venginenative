@@ -21,4 +21,3 @@ private:
     ShaderStorageBuffer *modelInfosBuffer;
     size_t instancesFiltered;
 };
-

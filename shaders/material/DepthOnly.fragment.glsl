@@ -20,7 +20,7 @@ float toLogDepth(float depth, float far){
 }
 
 void main(){
-    float bump = getBump(Input.TexCoord);
-    if(Input.Data.x < 1.0 && bump >= Input.Data.x) discard;
+    //float bump = getBump(Input.TexCoord);
+    //if(Input.Data.x < 1.0 && bump >= Input.Data.x) discard;
     gl_FragDepth = 1.0 - toLogDepth(distance(CameraPosition, Input.WorldPos), CutOffDistance);
 }

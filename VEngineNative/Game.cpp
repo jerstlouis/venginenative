@@ -21,14 +21,13 @@ Game::Game(int windowwidth, int windowheight)
     onKeyRepeat = new EventHandler<int>();
 }
 
-
 Game::~Game()
 {
 }
 
 void Game::start()
 {
-    thread renderthread (bind(&Game::renderThread, this));
+    thread renderthread(bind(&Game::renderThread, this));
     renderthread.detach();
 }
 
@@ -179,4 +178,3 @@ void Game::onRenderFrameFunc()
         renderer->renderToFramebuffer(world->mainDisplayCamera, screenFbo);
     }
 }
-

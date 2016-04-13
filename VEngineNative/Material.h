@@ -15,4 +15,3 @@ public:
 
     void addNode(MaterialNode *node);
 };
-

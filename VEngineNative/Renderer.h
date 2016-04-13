@@ -30,7 +30,7 @@ private:
     Texture *mrtNormalMetalnessTex;
     Texture *mrtDistanceTexture;
     Texture *depthTexture;
-    
+
     // Effects part
     ShaderProgram *deferredShader;
     Framebuffer *deferredFbo;
@@ -56,7 +56,7 @@ private:
     Framebuffer *motionBlurFbo;
     Texture *motionBlurTexture;
     void motionBlur();
-    
+
     ShaderProgram *bloomShader;
     Framebuffer *bloomFbo;
     Texture *bloomXTexture;
@@ -71,7 +71,4 @@ private:
     // Output to output fbo
     ShaderProgram *outputShader;
     void output();
-
-
 };
-

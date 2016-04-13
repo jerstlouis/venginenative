@@ -62,7 +62,7 @@ vec3 shadingNonMetalic(PostProceessingData data){
 }
 
 vec3 MakeShading(PostProceessingData data){
-    return mix(shadingNonMetalic(data), shadingMetalic(data), 1.0);
+    return mix(shadingNonMetalic(data), shadingMetalic(data), data.metalness);
 }
 
 vec3 ApplyLighting(PostProceessingData data)

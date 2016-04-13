@@ -7,7 +7,6 @@ FrustumCone::FrustumCone()
 {
 }
 
-
 FrustumCone::~FrustumCone()
 {
 }

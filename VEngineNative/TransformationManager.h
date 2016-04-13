@@ -26,4 +26,3 @@ public:
     glm::mat4 getWorldTransform();
     glm::mat4 getInverseWorldTransform();
 };
-

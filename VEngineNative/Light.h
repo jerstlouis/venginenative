@@ -33,4 +33,3 @@ private:
     void recreateFbo();
     void destroyFbo();
 };
-

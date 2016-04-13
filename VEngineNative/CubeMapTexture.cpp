@@ -2,7 +2,6 @@
 #include "CubeMapTexture.h"
 #include "Media.h"
 
-
 CubeMapTexture::CubeMapTexture(GLuint ihandle)
 {
     handle = ihandle;

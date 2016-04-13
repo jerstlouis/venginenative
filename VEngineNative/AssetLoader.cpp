@@ -2,11 +2,9 @@
 #include "AssetLoader.h"
 #include "Media.h"
 
-
 AssetLoader::AssetLoader()
 {
 }
-
 
 AssetLoader::~AssetLoader()
 {
@@ -285,7 +283,6 @@ Mesh3d * AssetLoader::loadMeshFile(string source)
     return loadMeshString(Media::readString(source));
 }
 
-
 Light * AssetLoader::loadLightString(string source)
 {
     vector<string> meshLines;
@@ -345,7 +342,6 @@ Light * AssetLoader::loadLightString(string source)
                     atof(words[3].c_str())
                 ));
             }
-
         }
         if (words[0] == "rotate") {
             if (words.size() == 5) {
@@ -356,7 +352,6 @@ Light * AssetLoader::loadLightString(string source)
                     atof(words[4].c_str())
                 ));
             }
-
         }
         if (words[0] == "rotate_axis") {
             if (words.size() == 5) {

@@ -52,7 +52,6 @@ TransformationManager::TransformationManager(glm::quat iorientation, glm::vec3 i
     orientation = iorientation;
 }
 
-
 TransformationManager::~TransformationManager()
 {
 }

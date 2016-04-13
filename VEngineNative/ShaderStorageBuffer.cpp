@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "ShaderStorageBuffer.h"
 
-
 ShaderStorageBuffer::ShaderStorageBuffer()
 {
     generated = false;
@@ -12,7 +11,6 @@ ShaderStorageBuffer::ShaderStorageBuffer(GLuint ihandle)
     handle = handle;
     generated = true;
 }
-
 
 ShaderStorageBuffer::~ShaderStorageBuffer()
 {

@@ -24,4 +24,3 @@ private:
     vector<Camera*> facesCameras;
     void generate();
 };
-

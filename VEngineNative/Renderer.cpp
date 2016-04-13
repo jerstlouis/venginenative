@@ -3,7 +3,6 @@
 #include "Game.h"
 #include "FrustumCone.h"
 
-
 Renderer::Renderer(int iwidth, int iheight)
 {
     width = iwidth;
@@ -38,7 +37,7 @@ void Renderer::resize(int width, int height)
 
 void Renderer::initializeFbos()
 {
-    mrtAlbedoRoughnessTex = new Texture(width, height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
+    mrtAlbedoRoughnessTex = new Texture(width, height, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE);
     mrtNormalMetalnessTex = new Texture(width, height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
     mrtDistanceTexture = new Texture(width, height, GL_R32F, GL_RED, GL_FLOAT);
     depthTexture = new Texture(width, height, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT); // most probably overkill
@@ -171,6 +170,9 @@ void Renderer::output()
     ambientLightTexture->use(6);
     ambientOcclusionTexture->use(7);
     FrustumCone *cone = Game::instance->world->mainDisplayCamera->cone;
+ //   outputShader->setUniform("VPMatrix", vpmatrix);
+    outputShader->setUniform("Resolution", glm::vec2(Game::instance->width, Game::instance->height));
+    outputShader->setUniform("CameraPosition", Game::instance->world->mainDisplayCamera->transformation->position);
     outputShader->setUniform("FrustumConeLeftBottom", cone->leftBottom);
     outputShader->setUniform("FrustumConeBottomLeftToBottomRight", cone->rightBottom - cone->leftBottom);
     outputShader->setUniform("FrustumConeBottomLeftToTopLeft", cone->leftTop - cone->leftBottom);
@@ -185,7 +187,6 @@ void Renderer::recompileShaders()
     outputShader->recompile();
 }
 
-
 void Renderer::deferred()
 {
     vector<Light*> lights = Game::instance->world->scene->getLights();
@@ -193,7 +194,7 @@ void Renderer::deferred()
     for (int i = 0; i < lights.size(); i++) {
         lights[i]->refreshShadowMap();
     }
-    
+
     deferredFbo->use(true);
     deferredShader->use();
     FrustumCone *cone = Game::instance->world->mainDisplayCamera->cone;
@@ -211,7 +212,6 @@ void Renderer::deferred()
     glBlendFunc(GL_ONE, GL_ONE);
 
     for (int i = 0; i < lights.size(); i++) {
-
         deferredShader->setUniform("LightColor", lights[i]->color);
         deferredShader->setUniform("LightPosition", lights[i]->transformation->position);
         deferredShader->setUniform("LightOrientation", glm::inverse(lights[i]->transformation->orientation));
@@ -251,20 +251,20 @@ void Renderer::ambientLight()
 
 void Renderer::ambientOcclusion()
 {
-        ambientOcclusionFbo->use(true);
-        ambientOcclusionShader->use();
-        mrtAlbedoRoughnessTex->use(0);
-        mrtNormalMetalnessTex->use(1);
-        mrtDistanceTexture->use(2);
-        FrustumCone *cone = Game::instance->world->mainDisplayCamera->cone;
-        glm::mat4 vpmatrix = Game::instance->world->mainDisplayCamera->projectionMatrix * Game::instance->world->mainDisplayCamera->transformation->getInverseWorldTransform();
-        ambientOcclusionShader->setUniform("VPMatrix", vpmatrix);
-        ambientOcclusionShader->setUniform("Resolution", glm::vec2(Game::instance->width, Game::instance->height));
-        ambientOcclusionShader->setUniform("CameraPosition", Game::instance->world->mainDisplayCamera->transformation->position);
-        ambientOcclusionShader->setUniform("FrustumConeLeftBottom", cone->leftBottom);
-        ambientOcclusionShader->setUniform("FrustumConeBottomLeftToBottomRight", cone->rightBottom - cone->leftBottom);
-        ambientOcclusionShader->setUniform("FrustumConeBottomLeftToTopLeft", cone->leftTop - cone->leftBottom);
-        quad3dInfo->draw();
+    ambientOcclusionFbo->use(true);
+    ambientOcclusionShader->use();
+    mrtAlbedoRoughnessTex->use(0);
+    mrtNormalMetalnessTex->use(1);
+    mrtDistanceTexture->use(2);
+    FrustumCone *cone = Game::instance->world->mainDisplayCamera->cone;
+    glm::mat4 vpmatrix = Game::instance->world->mainDisplayCamera->projectionMatrix * Game::instance->world->mainDisplayCamera->transformation->getInverseWorldTransform();
+    ambientOcclusionShader->setUniform("VPMatrix", vpmatrix);
+    ambientOcclusionShader->setUniform("Resolution", glm::vec2(Game::instance->width, Game::instance->height));
+    ambientOcclusionShader->setUniform("CameraPosition", Game::instance->world->mainDisplayCamera->transformation->position);
+    ambientOcclusionShader->setUniform("FrustumConeLeftBottom", cone->leftBottom);
+    ambientOcclusionShader->setUniform("FrustumConeBottomLeftToBottomRight", cone->rightBottom - cone->leftBottom);
+    ambientOcclusionShader->setUniform("FrustumConeBottomLeftToTopLeft", cone->leftTop - cone->leftBottom);
+    quad3dInfo->draw();
 }
 
 void Renderer::fog()
@@ -274,5 +274,3 @@ void Renderer::fog()
 void Renderer::motionBlur()
 {
 }
-
-

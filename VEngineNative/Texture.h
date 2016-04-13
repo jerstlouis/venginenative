@@ -8,8 +8,6 @@ public:
     Texture(int iwidth, int iheight, GLint internalFormat, GLenum format, GLenum type);
     ~Texture();
 
-
-
     GLuint handle;
     int components;
     int width, height;
@@ -28,4 +26,3 @@ private:
     GLenum formatRequested;
     GLenum typeRequested;
 };
-

@@ -1,12 +1,10 @@
 #include "stdafx.h"
 #include "Scene.h"
 
-
 Scene::Scene()
 {
     meshes = {};
 }
-
 
 Scene::~Scene()
 {

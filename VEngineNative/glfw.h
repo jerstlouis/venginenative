@@ -34,7 +34,6 @@
 extern "C" {
 #endif
 
-
     /*************************************************************************
     * Doxygen documentation
     *************************************************************************/
@@ -66,7 +65,6 @@ extern "C" {
     *  including creation, deletion and event polling.  For more information, see
     *  the @ref window.
     */
-
 
     /*************************************************************************
     * Compiler- and platform-specific preprocessor work
@@ -185,7 +183,6 @@ extern "C" {
     /* We are building or calling GLFW as a static library */
 #define GLFWAPI
 #endif
-
 
     /*************************************************************************
     * GLFW API tokens
@@ -692,7 +689,6 @@ extern "C" {
 
 #define GLFW_DONT_CARE              -1
 
-
     /*************************************************************************
     * GLFW API types
     *************************************************************************/
@@ -1041,7 +1037,6 @@ extern "C" {
         */
         unsigned char* pixels;
     } GLFWimage;
-
 
     /*************************************************************************
     * GLFW API functions
@@ -3331,7 +3326,6 @@ extern "C" {
     */
     GLFWAPI GLFWglproc glfwGetProcAddress(const char* procname);
 
-
     /*************************************************************************
     * Global definition cleanup
     *************************************************************************/
@@ -3350,10 +3344,8 @@ extern "C" {
 
     /* -------------------- END SYSTEM/COMPILER SPECIFIC --------------------- */
 
-
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* _glfw3_h_ */
-

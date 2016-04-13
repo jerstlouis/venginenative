@@ -13,4 +13,3 @@ public:
 private:
     glm::vec3 getDir(glm::vec3 origin, glm::vec2 uv, glm::mat4 inv);
 };
-

@@ -12,4 +12,3 @@ public:
     void draw(ShaderProgram *shader, Camera *camera);
     void setUniforms(ShaderProgram *shader, Camera *camera);
 };
-

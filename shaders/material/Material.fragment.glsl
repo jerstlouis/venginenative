@@ -42,9 +42,14 @@ vec3 hsv2rgb(vec3 c)
     return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
+float toLogDepth(float depth, float far){
+    float badass_depth = log2(max(1e-6, 1.0 + depth)) / (log2(far));
+    return badass_depth;
+}
+
 void main(){
-    float bump = getBump(Input.TexCoord);
-    if(Input.Data.x < 1.0 && bump >= Input.Data.x) discard;
+    //float bump = getBump(Input.TexCoord);
+    //if(Input.Data.x < 1.0 && bump >= Input.Data.x) discard;
     vec3 diffuseColor = DiffuseColor;
     vec3 normal = normalize(Input.Normal);
     vec3 normalmap = vec3(0,0,1);
@@ -55,7 +60,7 @@ void main(){
     
     vec3 tangent = normalize(Input.Tangent.rgb);
     
-    float tangentSign = Input.Tangent.w == 0 ? 1.0 : Input.Tangent.w;
+    float tangentSign = Input.Tangent.w;
 
     mat3 TBN = mat3(
         normalize(tangent),

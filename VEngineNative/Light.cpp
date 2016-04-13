@@ -3,7 +3,6 @@
 #include "Light.h"
 #include "Camera.h"
 
-
 Light::Light()
 {
     initTransformation();
@@ -27,7 +26,7 @@ void Light::resizeShadowMap(int width, int height)
     if (shadowMapWidth == width && shadowMapHeight == height) return;
 
     shadowMapWidth = width;
-    shadowMapHeight = height; 
+    shadowMapHeight = height;
 
     recreateFbo();
 }
@@ -48,15 +47,14 @@ void Light::switchShadowMapping(bool value)
 void Light::bindShadowMap(int spot, int cube)
 {
     if (shadowMappingEnabled) {
-        depthMap->use(spot); 
-        depthCubeMap->use(cube); 
+        depthMap->use(spot);
+        depthCubeMap->use(cube);
     }
 }
 
 void Light::refreshShadowMap()
 {
     if (shadowMappingEnabled) {
-
         glClearDepth(0);
         glDepthFunc(GL_GEQUAL);
         if (type == LIGHT_SPOT) {

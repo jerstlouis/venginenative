@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "Framebuffer.h"
 
-
 Framebuffer::Framebuffer()
 {
     attachedTextures = {};
@@ -17,7 +16,6 @@ Framebuffer::Framebuffer(int iwidth, int iheight, GLuint ihandle)
     height = iheight;
     generated = true;
 }
-
 
 Framebuffer::~Framebuffer()
 {
@@ -35,13 +33,13 @@ void Framebuffer::attachTexture(Texture * tex, GLenum attachment)
 
 void Framebuffer::use(bool clear)
 {
-    if (!generated) 
+    if (!generated)
         generate();
 
     glBindFramebuffer(GL_FRAMEBUFFER, handle);
 
     glViewport(0, 0, width, height);
-    if (clear) 
+    if (clear)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -53,7 +51,7 @@ void Framebuffer::generate()
     for (int i = 0; i < attachedTextures.size(); i++) {
         attachedTextures[i]->texture->pregenerate();
         glFramebufferTexture(GL_FRAMEBUFFER, attachedTextures[i]->attachment, attachedTextures[i]->texture->handle, 0);
-        if(attachedTextures[i]->attachment < GL_DEPTH_ATTACHMENT)buffers.push_back(attachedTextures[i]->attachment);
+        if (attachedTextures[i]->attachment < GL_DEPTH_ATTACHMENT)buffers.push_back(attachedTextures[i]->attachment);
     }
     glDrawBuffers((GLsizei)buffers.size(), buffers.data());
 

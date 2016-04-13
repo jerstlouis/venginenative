@@ -138,7 +138,6 @@
 *-----------------------------------------------------------------------*/
 #if (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || defined(__GNUC__) || defined(__SCO__) || defined(__USLC__)
 
-
 /*
 * Using <stdint.h>
 */
@@ -216,7 +215,6 @@ typedef uint64_t                khronos_uint64_t;
 #define KHRONOS_SUPPORT_FLOAT   1
 
 #endif
-
 
 /*
 * Types that are (so far) the same on all platforms

@@ -15,4 +15,3 @@ private:
     vector<Mesh3d*> meshes;
     vector<Light*> lights;
 };
-

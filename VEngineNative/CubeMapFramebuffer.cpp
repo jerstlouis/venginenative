@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "CubeMapFramebuffer.h"
 
-
 CubeMapFramebuffer::CubeMapFramebuffer()
 {
     attachedTextures = {};
@@ -17,7 +16,6 @@ CubeMapFramebuffer::CubeMapFramebuffer(int iwidth, int iheight, GLuint ihandle)
     height = iheight;
     generated = true;
 }
-
 
 CubeMapFramebuffer::~CubeMapFramebuffer()
 {
@@ -105,5 +103,4 @@ void CubeMapFramebuffer::generate()
         printf("Framebuffer not complete");
     }
     generated = true;
-
 }

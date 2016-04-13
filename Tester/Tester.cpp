@@ -49,11 +49,23 @@ int main()
     // mesh loading
 
     game->world->scene = game->asset->loadSceneFile("sponza.scene");
+    
+    /*for (int i = 0; i < 11; i++) {
+
+        for (int g = 0; g < 11; g++) {
+            float rough = (float)i / 11.0f;
+            float met = (float)g / 11.0f;
+            Mesh3d* mesh = game->asset->loadMeshFile("icosphere.mesh3d");
+            mesh->getLodLevel(0)->material->roughness = rough;
+            mesh->getLodLevel(0)->material->metalness = met;
+            mesh->getInstance(0)->transformation->translate(glm::vec3(i, 0, g) * 8.0f);
+            game->world->scene->addMesh(mesh);
+        }
+    }*/
 
     Light* light = game->asset->loadLightFile("test.light");
 
     game->world->scene->addLight(light);
-
 
     bool cursorFree = false;
     game->onKeyPress->add([&game, &cursorFree](int key) {
@@ -139,7 +151,6 @@ int main()
     });
 
     while (!game->shouldClose) {
-        
     }
     return 0;
 }

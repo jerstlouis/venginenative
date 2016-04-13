@@ -14,7 +14,7 @@ vec3 stupidBRDF(vec3 dir, float level, float roughness){
     vec3 aaprc = vec3(0.0);
     float xx=rand2s(UV);
     float xx2=rand2s(UV.yx);
-    for(int x = 0; x < 15; x++){
+    for(int x = 0; x < 4; x++){
         vec3 rd = vec3(
             rand2s(vec2(xx, xx2)),
             rand2s(vec2(-xx2, xx)),
@@ -26,7 +26,7 @@ vec3 stupidBRDF(vec3 dir, float level, float roughness){
         xx += 0.01;
         xx2 -= 0.02123;
     }
-    return aaprc / 15;
+    return pow(aaprc / 4.0, vec3(2.4));
 }
 
 vec3 MMALSkybox(vec3 dir, float roughness){
@@ -65,7 +65,7 @@ vec3 MMAL(PostProceessingData data){
 vec4 shade(){
     vec4 color = vec4(0);
     if(currentData.cameraDistance > 0){
-        color.rgb += MMAL(currentData) * 0.1;
+        color.rgb += MMAL(currentData) *0.08;
     }
     return color;
 }

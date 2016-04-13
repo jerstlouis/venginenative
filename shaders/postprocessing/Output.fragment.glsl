@@ -22,8 +22,30 @@ vec3 rgb_to_srgb(vec3 rgb) {
     );
 }
 
+float lookupAO(vec2 fuv, float radius){
+    float ratio = Resolution.y/Resolution.x;
+    float outc = 0;
+    float counter = 0;
+    float depthCenter = currentData.cameraDistance;
+    vec3 normalcenter = currentData.normal;
+    for(float g = 0; g < 6.283; g+=0.9)
+    {
+        for(float g2 = 0; g2 < 1.0; g2+=0.33)
+        {
+            vec2 gauss = clamp(fuv + vec2(sin(g + g2*6)*ratio, cos(g + g2*6)) * (g2 * 0.012 * radius), 0.0, 1.0);
+            float color = textureLod(aoTex, gauss, 0).r;
+            float depthThere = texture(mrt_Distance_Bump_Tex, gauss).a;
+            vec3 normalthere = texture(mrt_Normal_Metalness_Tex, gauss).rgb;
+            float weight = pow(max(0, dot(normalthere, normalcenter)), 32);
+            outc += color * weight;
+            counter+=weight;
+        }
+    }
+    return counter == 0 ? textureLod(aoTex, fuv, 0).r : outc / counter;
+ }
+
 vec4 shade(){    
-    vec3 color = texture(directTex, UV).rgb + texture(alTex, UV).rgb * texture(aoTex, UV).r;
-    color += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r)) * textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb;
+    vec3 color = texture(directTex, UV).rgb + texture(alTex, UV).rgb * lookupAO(UV, 1.0);
+    color += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r)) * pow(textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb, vec3(2.4));
     return vec4(rgb_to_srgb(color), 1.0);
 }

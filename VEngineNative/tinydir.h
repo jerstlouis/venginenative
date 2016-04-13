@@ -37,7 +37,7 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 #ifdef _MSC_VER
-//# define WIN32_LEAN_AND_MEAN
+    //# define WIN32_LEAN_AND_MEAN
 # include <windows.h>
 # pragma warning (disable : 4996)
 #else
@@ -46,7 +46,6 @@ extern "C" {
 # include <sys/stat.h>
 # include <stddef.h>
 #endif
-
 
     /* types */
 
@@ -135,7 +134,6 @@ extern "C" {
 #endif
     } tinydir_dir;
 
-
     /* declarations */
 
     _TINYDIR_FUNC
@@ -164,7 +162,6 @@ extern "C" {
         size_t _tinydir_dirent_buf_size(DIR *dirp);
 #endif
 #endif
-
 
     /* definitions*/
 

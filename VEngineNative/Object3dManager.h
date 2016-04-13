@@ -5,4 +5,3 @@ public:
     Object3dManager();
     ~Object3dManager();
 };
-

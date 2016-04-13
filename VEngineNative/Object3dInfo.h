@@ -23,4 +23,3 @@ private:
     GLuint vboHandle, vaoHandle;
     GLsizei vertexCount;
 };
-

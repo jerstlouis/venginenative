@@ -57,4 +57,3 @@ public:
     int modifierflags;
     int source;
 };
-

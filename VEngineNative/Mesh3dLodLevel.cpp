@@ -34,7 +34,6 @@ Mesh3dLodLevel::Mesh3dLodLevel()
     modelInfosBuffer = new ShaderStorageBuffer();
 }
 
-
 Mesh3dLodLevel::~Mesh3dLodLevel()
 {
 }
@@ -137,5 +136,4 @@ void Mesh3dLodLevel::updateBuffer(const vector<Mesh3dInstance*> &instances)
         floats.push_back(1);
     }
     modelInfosBuffer->mapData(4 * floats.size(), floats.data());
-
 }

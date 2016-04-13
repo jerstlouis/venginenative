@@ -28,4 +28,3 @@ private:
     void splitBySpaces(vector<string>& output, string src);
     int replaceEnum(string enumstr);
 };
-

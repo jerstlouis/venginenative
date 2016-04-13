@@ -10,4 +10,3 @@ public:
     ShaderProgram *depthOnlyGeometryShader;
     ShaderProgram *depthOnlyShader;
 };
-

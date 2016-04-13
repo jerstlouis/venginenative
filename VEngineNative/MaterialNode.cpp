@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "MaterialNode.h"
 
-
 MaterialNode::MaterialNode(glm::vec4 icolor, glm::vec2 uvScaling, int mixMode, int nodeTarget)
 {
     source = NODE_SOURCE_COLOR;
@@ -109,7 +108,6 @@ MaterialNode::MaterialNode()
     mixingMode = NODE_MODE_REPLACE;
     target = NODE_TARGET_DIFFUSE;
 }
-
 
 MaterialNode::~MaterialNode()
 {

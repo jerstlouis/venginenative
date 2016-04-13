@@ -1,7 +1,6 @@
 #pragma once
 class ShaderProgram
 {
-
 public:
     ShaderProgram(string vertex, string fragment, string geometry = "", string tesscontrol = "", string tesseval = "");
     ~ShaderProgram();
@@ -52,4 +51,3 @@ private:
     string resolveIncludes(string source);
     GLuint compileSingleShader(GLenum type, string filename, string source);
 };
-

@@ -12,6 +12,4 @@ private:
 
     static map<string, string> mediaMap;
     static void searchRecursive(string path);
-
 };
-

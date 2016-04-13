@@ -38,11 +38,15 @@ vec3 FromCameraSpace(vec3 position){
     return position - -CameraPosition;
 }
 
+float reverseLog(float dd, float far){
+	//return pow(2, dd * log2(far+1.0) ) - 1;
+	return pow(2, dd * log2(far)) - 1.0;
+}
 void createData(){
     vec4 albedo_roughness = textureLod(mrt_Albedo_Roughness_Tex, UV, 0).rgba;
     vec4 normal_metalness = textureLod(mrt_Normal_Metalness_Tex, UV, 0).rgba;
     float dist = textureLod(mrt_Distance_Bump_Tex, UV, 0).r;
-    vec3 cameraSpace = reconstructCameraSpaceDistance(UV, dist);
+    vec3 cameraSpace = reconstructCameraSpaceDistance(UV,dist);
     vec3 worldSpace = FromCameraSpace(cameraSpace);
         
     currentData = PostProceessingData(

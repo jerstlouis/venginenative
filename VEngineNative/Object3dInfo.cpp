@@ -11,10 +11,9 @@ Object3dInfo::Object3dInfo(vector<GLfloat> &vboin)
 {
     vbo = move(vboin);
     generated = false;
-    vertexCount = (GLsizei) (vbo.size() / 12);
+    vertexCount = (GLsizei)(vbo.size() / 12);
     drawMode = GL_TRIANGLES;
 }
-
 
 Object3dInfo::~Object3dInfo()
 {
@@ -27,7 +26,7 @@ Object3dInfo::~Object3dInfo()
 
 void Object3dInfo::draw()
 {
-    if (!generated) 
+    if (!generated)
         generate();
     glBindVertexArray(vaoHandle);
     glDrawArrays(drawMode, 0, vertexCount);
@@ -35,13 +34,13 @@ void Object3dInfo::draw()
 
 void Object3dInfo::drawInstanced(size_t instances)
 {
-    if (!generated) 
+    if (!generated)
         generate();
     glBindVertexArray(vaoHandle);
     glDrawArraysInstanced(drawMode, 0, vertexCount, (GLsizei)instances);
 }
 
-void Object3dInfo::generate() 
+void Object3dInfo::generate()
 {
     glGenVertexArrays(1, &vaoHandle);
     glGenBuffers(1, &vboHandle);
@@ -55,10 +54,10 @@ void Object3dInfo::generate()
     glEnableVertexAttribArray(2);
     glEnableVertexAttribArray(3);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(GLfloat) * 12,  (void*)(sizeof(GLfloat) * 0));
-    glVertexAttribPointer(1, 2, GL_FLOAT, false, sizeof(GLfloat) * 12,  (void*)(sizeof(GLfloat) * 3));
-    glVertexAttribPointer(2, 3, GL_FLOAT, false, sizeof(GLfloat) * 12,  (void*)(sizeof(GLfloat) * 5));
-    glVertexAttribPointer(3, 4, GL_FLOAT, false, sizeof(GLfloat) * 12,  (void*)(sizeof(GLfloat) * 8));
+    glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeof(GLfloat) * 12, (void*)(sizeof(GLfloat) * 0));
+    glVertexAttribPointer(1, 2, GL_FLOAT, false, sizeof(GLfloat) * 12, (void*)(sizeof(GLfloat) * 3));
+    glVertexAttribPointer(2, 3, GL_FLOAT, false, sizeof(GLfloat) * 12, (void*)(sizeof(GLfloat) * 5));
+    glVertexAttribPointer(3, 4, GL_FLOAT, false, sizeof(GLfloat) * 12, (void*)(sizeof(GLfloat) * 8));
 
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

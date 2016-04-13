@@ -33,7 +33,6 @@ int get_file_contents_binary(unsigned char** out_bytes, const char* path) {
     return size;
 }
 
-
 void Media::loadFileMap(string path)
 {
     searchRecursive(path);
@@ -46,7 +45,7 @@ string Media::readString(string key)
 
 string Media::getPath(string key)
 {
-    if (mediaMap.find(key) == mediaMap.end()) 
+    if (mediaMap.find(key) == mediaMap.end())
         throw sprintf("File %s not found in media map", key.c_str());
     return mediaMap.at(key);
 }
@@ -54,7 +53,7 @@ string Media::getPath(string key)
 int Media::readBinary(string key, unsigned char** out_bytes)
 {
     return get_file_contents_binary(out_bytes, getPath(key).c_str());
-} 
+}
 
 void Media::searchRecursive(string path)
 {

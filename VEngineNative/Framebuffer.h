@@ -21,4 +21,3 @@ private:
     int height;
     void generate();
 };
-

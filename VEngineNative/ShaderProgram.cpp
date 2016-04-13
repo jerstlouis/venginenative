@@ -235,9 +235,9 @@ string ShaderProgram::resolveIncludes(string source)
 
 GLuint ShaderProgram::compileSingleShader(GLenum type, string filename, string source)
 {
-  //  printf("Compiling shader %s\n", filename.c_str());
+    //  printf("Compiling shader %s\n", filename.c_str());
     string resolved = resolveIncludes(source);
- //   printf("Compiling source %s\n", resolved.c_str());
+    //   printf("Compiling source %s\n", resolved.c_str());
     GLuint shader = glCreateShader(type);
     const char* cstr = resolved.c_str();
     glShaderSource(shader, 1, &cstr, NULL);

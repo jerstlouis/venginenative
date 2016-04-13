@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <tchar.h>
 
-
 #include <stdlib.h>
 #include <string.h>
 #include <string>
@@ -33,7 +32,7 @@ using namespace std;
 #include "glm/vec4.hpp" // glm::vec4
 #include "glm/mat4x4.hpp" // glm::mat4
 #include "glm/gtc/matrix_transform.hpp" // glm::translate, glm::rotate, glm::scale, glm::perspective
-#include "glm/gtc/constants.hpp" // glm::pi 
+#include "glm/gtc/constants.hpp" // glm::pi
 #include "glm/gtc/quaternion.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
@@ -51,6 +50,5 @@ using namespace std;
 #define PI 3.141592f
 #define rad2deg(a) (a * (180.0f / PI))
 #define deg2rad(a) (a * (PI / 180.0f))
-
 
 // TODO: reference additional headers your program requires here

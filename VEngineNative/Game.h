@@ -45,4 +45,3 @@ private:
     void renderThread();
     void onRenderFrameFunc();
 };
-

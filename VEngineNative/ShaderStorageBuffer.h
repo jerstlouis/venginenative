@@ -12,4 +12,3 @@ private:
     bool generated;
     void generate();
 };
-

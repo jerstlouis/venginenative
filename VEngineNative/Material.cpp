@@ -11,7 +11,6 @@ Material::Material()
     nodes = {};
 }
 
-
 Material::~Material()
 {
 }
