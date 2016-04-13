@@ -54,5 +54,5 @@ using namespace std;
 #include "gli/generate_mipmaps.hpp"
 #include "gli/load.hpp"
 
-#include "btBulletCollisionCommon.h"
-#include "btBulletDynamicsCommon.h"
+//#include "btBulletCollisionCommon.h"
+//#include "btBulletDynamicsCommon.h"
