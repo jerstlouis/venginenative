@@ -76,6 +76,9 @@ int main()
             game->shaders->materialGeometryShader->recompile();
             game->renderer->recompileShaders();
         }
+        if (key == GLFW_KEY_0) {
+            game->renderer->useAmbientOcclusion = !game->renderer->useAmbientOcclusion;
+        }
         if (key == GLFW_KEY_TAB) {
             if (!cursorFree) {
                 cursorFree = true;

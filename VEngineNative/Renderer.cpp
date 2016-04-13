@@ -7,6 +7,9 @@ Renderer::Renderer(int iwidth, int iheight)
 {
     width = iwidth;
     height = iheight;
+
+    useAmbientOcclusion = true;
+
     vector<GLfloat> ppvertices = {
         -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
         1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
@@ -150,7 +153,9 @@ void Renderer::draw(Camera *camera)
     Game::instance->world->draw(Game::instance->shaders->materialShader, camera);
     deferred();
     ambientLight();
-    ambientOcclusion();
+    if (useAmbientOcclusion) {
+        ambientOcclusion();
+    }
 }
 
 void Renderer::bloom()
@@ -171,6 +176,7 @@ void Renderer::output()
     ambientOcclusionTexture->use(7);
     FrustumCone *cone = Game::instance->world->mainDisplayCamera->cone;
  //   outputShader->setUniform("VPMatrix", vpmatrix);
+    outputShader->setUniform("UseAO", useAmbientOcclusion);
     outputShader->setUniform("Resolution", glm::vec2(Game::instance->width, Game::instance->height));
     outputShader->setUniform("CameraPosition", Game::instance->world->mainDisplayCamera->transformation->position);
     outputShader->setUniform("FrustumConeLeftBottom", cone->leftBottom);
@@ -223,7 +229,7 @@ void Renderer::deferred()
             deferredShader->setUniform("LightVPMatrix", lights[i]->lightCamera->projectionMatrix
                 * lights[i]->lightCamera->transformation->getInverseWorldTransform());
         }
-        lights[i]->bindShadowMap(4, 5);
+        lights[i]->bindShadowMap(14, 15);
         quad3dInfo->draw();
     }
 

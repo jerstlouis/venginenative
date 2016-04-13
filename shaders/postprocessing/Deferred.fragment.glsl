@@ -2,8 +2,8 @@
 
 #include PostProcessEffectBase.glsl
 
-layout(binding = 4) uniform sampler2DShadow shadowMapSingle;
-layout(binding = 5) uniform samplerCubeShadow shadowMapCube;
+layout(binding = 14) uniform sampler2DShadow shadowMapSingle;
+layout(binding = 15) uniform samplerCubeShadow shadowMapCube;
 
 #define LIGHT_SPOT 0
 #define LIGHT_POINT 1

@@ -7,6 +7,8 @@ layout(binding = 5) uniform sampler2D directTex;
 layout(binding = 6) uniform sampler2D alTex;
 layout(binding = 7) uniform sampler2D aoTex;
 
+uniform int UseAO;
+
 const float SRGB_ALPHA = 0.055;
 float linear_to_srgb(float channel) {
     if(channel <= 0.0031308)
@@ -23,25 +25,29 @@ vec3 rgb_to_srgb(vec3 rgb) {
 }
 
 float lookupAO(vec2 fuv, float radius){
-    float ratio = Resolution.y/Resolution.x;
-    float outc = 0;
-    float counter = 0;
-    float depthCenter = currentData.cameraDistance;
-    vec3 normalcenter = currentData.normal;
-    for(float g = 0; g < 6.283; g+=0.9)
-    {
-        for(float g2 = 0; g2 < 1.0; g2+=0.33)
+    if(UseAO == 0) {
+        return 1.0;
+    } else {
+        float ratio = Resolution.y/Resolution.x;
+        float outc = 0;
+        float counter = 0;
+        float depthCenter = currentData.cameraDistance;
+        vec3 normalcenter = currentData.normal;
+        for(float g = 0; g < 6.283; g+=0.9)
         {
-            vec2 gauss = clamp(fuv + vec2(sin(g + g2*6)*ratio, cos(g + g2*6)) * (g2 * 0.012 * radius), 0.0, 1.0);
-            float color = textureLod(aoTex, gauss, 0).r;
-            float depthThere = texture(mrt_Distance_Bump_Tex, gauss).a;
-            vec3 normalthere = texture(mrt_Normal_Metalness_Tex, gauss).rgb;
-            float weight = pow(max(0, dot(normalthere, normalcenter)), 32);
-            outc += color * weight;
-            counter+=weight;
+            for(float g2 = 0; g2 < 1.0; g2+=0.33)
+            {
+                vec2 gauss = clamp(fuv + vec2(sin(g + g2*6)*ratio, cos(g + g2*6)) * (g2 * 0.012 * radius), 0.0, 1.0);
+                float color = textureLod(aoTex, gauss, 0).r;
+                float depthThere = texture(mrt_Distance_Bump_Tex, gauss).a;
+                vec3 normalthere = texture(mrt_Normal_Metalness_Tex, gauss).rgb;
+                float weight = pow(max(0, dot(normalthere, normalcenter)), 32);
+                outc += color * weight;
+                counter+=weight;
+            }
         }
+        return counter == 0 ? textureLod(aoTex, fuv, 0).r : outc / counter;
     }
-    return counter == 0 ? textureLod(aoTex, fuv, 0).r : outc / counter;
  }
 
 vec4 shade(){    

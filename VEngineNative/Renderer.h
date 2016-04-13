@@ -14,6 +14,7 @@ public:
     void renderToFramebuffer(Camera *camera, Framebuffer *fbo);
     void recompileShaders();
     void resize(int iwidth, int iheight);
+    bool useAmbientOcclusion;
 private:
     int width;
     int height;
