@@ -7,6 +7,7 @@
 
 #define LIGHT_SPOT 0
 #define LIGHT_POINT 1
+#define LIGHT_AMBIENT 2
 
 class Light : public AbsTransformable
 {

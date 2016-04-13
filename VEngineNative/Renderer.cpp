@@ -151,11 +151,11 @@ void Renderer::draw(Camera *camera)
     Game::instance->world->setUniforms(Game::instance->shaders->materialGeometryShader, camera);
     Game::instance->world->setUniforms(Game::instance->shaders->materialShader, camera);
     Game::instance->world->draw(Game::instance->shaders->materialShader, camera);
-    deferred();
-    ambientLight();
     if (useAmbientOcclusion) {
         ambientOcclusion();
     }
+    deferred();
+    ambientLight();
 }
 
 void Renderer::bloom()
@@ -205,6 +205,7 @@ void Renderer::deferred()
     deferredShader->use();
     FrustumCone *cone = Game::instance->world->mainDisplayCamera->cone;
     glm::mat4 vpmatrix = Game::instance->world->mainDisplayCamera->projectionMatrix * Game::instance->world->mainDisplayCamera->transformation->getInverseWorldTransform();
+    deferredShader->setUniform("UseAO", useAmbientOcclusion);
     deferredShader->setUniform("VPMatrix", vpmatrix);
     deferredShader->setUniform("Resolution", glm::vec2(Game::instance->width, Game::instance->height));
     deferredShader->setUniform("CameraPosition", Game::instance->world->mainDisplayCamera->transformation->position);
@@ -214,6 +215,7 @@ void Renderer::deferred()
     mrtAlbedoRoughnessTex->use(0);
     mrtNormalMetalnessTex->use(1);
     mrtDistanceTexture->use(2);
+    ambientOcclusionTexture->use(16);
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
 
@@ -258,7 +260,7 @@ void Renderer::ambientLight()
 void Renderer::ambientOcclusion()
 {
     ambientOcclusionFbo->use(true);
-    ambientOcclusionShader->use();
+    ambientOcclusionShader->use();    
     mrtAlbedoRoughnessTex->use(0);
     mrtNormalMetalnessTex->use(1);
     mrtDistanceTexture->use(2);

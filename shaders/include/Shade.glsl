@@ -1,8 +1,8 @@
 
 #define PI 3.14159265
-
+bool ignoreFalloff = false;
 float CalculateFallof( float dist){
-    return 1.0 / (dist * dist + 0.01);
+    return 1.0 / (dist * dist * 0.01 + 1.0);
 }
 
 float fresnel_again(vec3 normal, vec3 cameraspace, float roughness){
@@ -94,7 +94,10 @@ bool ignoreAtt
     
     vec3 cameraRelativeToVPos = -normalize(fragmentPosition - camera);
     
-    vec3 specularComponent = LightingFuncGGX_REF(
+    float att = CalculateFallof(distance(fragmentPosition, lightPosition));
+    att = mix(1.0, att, roughness * roughness);
+    
+    vec3 specularComponent = att * LightingFuncGGX_REF(
     normal,
     cameraRelativeToVPos,
     lightRelativeToVPos,
@@ -120,7 +123,8 @@ bool ignoreAtt
     vec3 lightRelativeToVPos =normalize( lightPosition - fragmentPosition);
     
     vec3 cameraRelativeToVPos = -normalize(fragmentPosition - camera);
-    return  lightColor *  orenNayarDiffuse(lightRelativeToVPos,
+    float att = CalculateFallof(distance(fragmentPosition, lightPosition));
+    return  lightColor * att * orenNayarDiffuse(lightRelativeToVPos,
     cameraRelativeToVPos,
     normal,
     roughness,

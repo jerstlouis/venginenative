@@ -1,0 +1,5 @@
+type AMBIENT
+color 1.0
+shadowmap FALSE
+cutoff 100
+multiply 0.1

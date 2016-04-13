@@ -64,11 +64,13 @@ int main()
     }*/
 
     Light* light = game->asset->loadLightFile("test.light");
+    light->type = LIGHT_SPOT;
+    light->angle = 90;
 
     game->world->scene->addLight(light);
 
     bool cursorFree = false;
-    game->onKeyPress->add([&game, &cursorFree](int key) {
+    game->onKeyPress->add([&game, &cursorFree, &cam](int key) {
         if (key == GLFW_KEY_PAUSE) {
             game->shaders->materialShader->recompile();
             game->shaders->depthOnlyShader->recompile();
@@ -78,6 +80,18 @@ int main()
         }
         if (key == GLFW_KEY_0) {
             game->renderer->useAmbientOcclusion = !game->renderer->useAmbientOcclusion;
+        }
+        if (key == GLFW_KEY_F2) {
+            Light* ca = game->asset->loadLightFile("candle.light");
+            ca->transformation->position = cam->transformation->position;
+            ca->transformation->orientation = cam->transformation->orientation;
+            game->world->scene->addLight(ca);
+        }
+        if (key == GLFW_KEY_F3) {
+            Light* ca = game->asset->loadLightFile("corrector.light");
+            ca->transformation->position = cam->transformation->position;
+            ca->transformation->orientation = cam->transformation->orientation;
+            game->world->scene->addLight(ca);
         }
         if (key == GLFW_KEY_TAB) {
             if (!cursorFree) {

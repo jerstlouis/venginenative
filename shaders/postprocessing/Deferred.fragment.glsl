@@ -3,10 +3,40 @@
 #include PostProcessEffectBase.glsl
 
 layout(binding = 14) uniform sampler2DShadow shadowMapSingle;
-layout(binding = 15) uniform samplerCubeShadow shadowMapCube;
+layout(binding = 15) uniform samplerCube shadowMapCube;
+layout(binding = 16) uniform sampler2D aoxTex;
+
+uniform int UseAO;
+
+float lookupAO(vec2 fuv, float radius){
+    if(UseAO == 0) {
+        return 1.0;
+    } else {
+        float ratio = Resolution.y/Resolution.x;
+        float outc = 0;
+        float counter = 0;
+        float depthCenter = currentData.cameraDistance;
+        vec3 normalcenter = currentData.normal;
+        for(float g = 0; g < 6.283; g+=0.9)
+        {
+            for(float g2 = 0; g2 < 1.0; g2+=0.33)
+            {
+                vec2 gauss = clamp(fuv + vec2(sin(g + g2*6)*ratio, cos(g + g2*6)) * (g2 * 0.012 * radius), 0.0, 1.0);
+                float color = textureLod(aoxTex, gauss, 0).r;
+                float depthThere = texture(mrt_Distance_Bump_Tex, gauss).a;
+                vec3 normalthere = texture(mrt_Normal_Metalness_Tex, gauss).rgb;
+                float weight = pow(max(0, dot(normalthere, normalcenter)), 32);
+                outc += color * weight;
+                counter+=weight;
+            }
+        }
+        return  textureLod(aoxTex, fuv, 0).r ;
+    }
+}
 
 #define LIGHT_SPOT 0
 #define LIGHT_POINT 1
+#define LIGHT_AMBIENT 2
 
 uniform vec3 LightColor;
 uniform vec3 LightPosition;
@@ -65,9 +95,13 @@ vec3 MakeShading(PostProceessingData data){
     return mix(shadingNonMetalic(data), shadingMetalic(data), data.metalness);
 }
 
+float AO = 1.0;
+
 vec3 ApplyLighting(PostProceessingData data)
 {
+    AO = lookupAO(UV, 1.0);
     vec3 result = vec3(0);
+    if(LightType == LIGHT_AMBIENT) data.roughness = 1.0;
     vec3 radiance = MakeShading(data);
     
     if(LightUseShadowMap == 1){
@@ -84,14 +118,12 @@ vec3 ApplyLighting(PostProceessingData data)
             }
         } else if(LightType == LIGHT_POINT){
             float target = 1.0 - toLogDepth(distance(data.worldPos, LightPosition), LightCutOffDistance);
-            float percent = texture(shadowMapCube, vec4(normalize(data.worldPos - LightPosition), target));
+            float percent =  max(0, 1.0 - (texture(shadowMapCube, normalize(data.worldPos - LightPosition)).r - target) * 100);
             result += radiance * percent;
         }
         
-    } else if(LightUseShadowMap == 0){
-        
-
-        result += radiance;
+    } else if(LightUseShadowMap == 0){ 
+        result += radiance * AO;
     }
     if(LightType == LIGHT_SPOT) {
         float percent = 1.0;
@@ -99,7 +131,7 @@ vec3 ApplyLighting(PostProceessingData data)
         float dt = -dot(normalize(data.worldPos - LightPosition), ldir);
         float angle =  (cos(LightAngle / 1.41) * 0.5 + 0.5);
         percent = smoothstep(angle, angle + (angle * 0.006), dt);
-        result *= percent;
+        result *= max(percent, step(10.0, LightAngle));
     }    
     return result; // * (1.0 - smoothstep(0.0, LightCutOffDistance, distance(LightPosition, data.worldPos)));
 }
@@ -110,5 +142,6 @@ vec4 shade(){
     if(currentData.cameraDistance > 0){
         c.rgb += ApplyLighting(currentData);
     }
+    c.a = AO; 
     return c;
 }

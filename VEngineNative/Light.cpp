@@ -101,19 +101,19 @@ void Light::refreshShadowMap()
 void Light::recreateFbo()
 {
     destroyFbo();
-    depthMap = new Texture(type == LIGHT_SPOT ? shadowMapWidth : 1, type == LIGHT_SPOT ? shadowMapHeight : 1,
+    depthMap = new Texture(shadowMapWidth, shadowMapHeight,
         GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
     mapper = new Framebuffer();
     mapper->attachTexture(depthMap, GL_DEPTH_ATTACHMENT);
 
-    depthCubeMap = new CubeMapTexture(type != LIGHT_SPOT ? shadowMapWidth : 1, type == LIGHT_SPOT ? shadowMapHeight : 1,
+    depthCubeMap = new CubeMapTexture(shadowMapWidth, shadowMapHeight,
         GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
     cubeMapper = new CubeMapFramebuffer();
-    cubeMapper->attachTexture(depthCubeMap, GL_COLOR_ATTACHMENT0);
-    Game::instance->invoke([&]() {
+    cubeMapper->attachTexture(depthCubeMap, GL_DEPTH_ATTACHMENT);
+   /* Game::instance->invoke([&]() {
         mapper->use(true);
         cubeMapper->use();
-    });
+    });*/
 }
 
 void Light::destroyFbo()

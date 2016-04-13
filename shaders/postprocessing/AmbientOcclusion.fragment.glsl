@@ -1,8 +1,5 @@
 #version 430 core
 
-layout(binding = 5) uniform sampler2D directTex;
-layout(binding = 6) uniform sampler2D alTex;
-
 #include PostProcessEffectBase.glsl
 
 vec2 xsamples[] = vec2[](
@@ -253,52 +250,6 @@ vec2 projectvdao(vec3 pos){
 
 float rand2s(vec2 co){
         return fract(sin(dot(co.xy,vec2(12.9898,78.233))) * 43758.5453);
-}
-
-float AO(
-    vec3 position,
-	vec3 camerapos,
-    vec3 normal,
-    float roughness,
-    float hemisphereSize,
-    int quality
-){
-    float ratio = Resolution.y/Resolution.x;
-    float outc = 0.0;
-    float counter = 0.001;
-    float xaon =distance(CameraPosition, position);
-    float factor = 1.0 / (xaon+1);
-    vec2 multiplier = vec2(ratio, 1) * 0.09 * hemisphereSize * factor;
-	vec3 posc = camerapos;
-    float rot = rand2s(UV) * 3.1415 * 2;
-	
-	vec3 normalcenter = texture(mrt_Normal_Metalness_Tex, UV, 0).rgb;
-    vec2 normproj = multiplier * normalize(projectvdao(position + normalize(reflect(camerapos, normalcenter)) * 0.05) - UV);
-	
-    mat2 RM = mat2(cos(rot), -sin(rot), sin(rot), cos(rot));
-    for(int g=0;g < xsamples.length();g+=quality){
-		vec2 nuv = clamp(UV + mix(normproj, ((xsamples[g]  ) * multiplier), roughness * 0.9 + 0.1), 0.0, 1.0);
-		//if(nuv.x > 1.0 || nuv.x < 0.0 || nuv.y > 1.0 || nuv.y<0.0) continue;
-        float aondata = texture(mrt_Distance_Bump_Tex, nuv).r + 0.01;
-        vec3 normdata = texture(mrt_Normal_Metalness_Tex, nuv, 0).rgb;
-        vec3 coldata = texture(directTex, nuv).rgb + texture(alTex, nuv).rgb;
-		
-		//float indirectAmount = abs(dot(normdata.rgb, normalcenter));
-		
-		vec3 dir = normalize((FrustumConeLeftBottom + FrustumConeBottomLeftToBottomRight * nuv.x + FrustumConeBottomLeftToTopLeft * nuv.y));
-		vec3 dupa = dir * aondata;
-		
-		//float shadowing = dot(normdata.xyz, -normalize(dupa - posc));
-		//shadowing = smoothstep(0.0, 0.9, shadowing);
-		//shadowing = mix(0.0, shadowing, indirectAmount);
-		//float occ = mix(0.0, max(0, dot(normalize(dupa- posc), normalcenter)), indirectAmount);
-		float occ = max(0, dot(normalize(dupa- posc), normalcenter));
-		
-		float fact = 1.0 - clamp(abs(aondata - xaon) - hemisphereSize * 0.5, 0.0, 1.0);
-		outc += occ * fact;
-    
-    }
-    return outc / (xsamples.length()/quality);
 }
 
 float fastAO(float hemisphereSize, int quality){

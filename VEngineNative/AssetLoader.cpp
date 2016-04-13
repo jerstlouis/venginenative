@@ -303,7 +303,9 @@ Light * AssetLoader::loadLightString(string source)
         }
         if (words[0] == "type") {
             if (words.size() == 2) {
-                light->type = words[1].c_str() == "POINT" ? LIGHT_POINT : LIGHT_SPOT;
+                if (words[1] == "SPOT")light->type = LIGHT_SPOT;
+                if (words[1] == "POINT")light->type = LIGHT_POINT;
+                if (words[1] == "AMBIENT")light->type = LIGHT_AMBIENT;
             }
         }
         if (words[0] == "shadowmap") {
@@ -327,6 +329,20 @@ Light * AssetLoader::loadLightString(string source)
             }
             if (words.size() == 4) {
                 light->color = glm::vec3(
+                    atof(words[1].c_str()),
+                    atof(words[2].c_str()),
+                    atof(words[3].c_str())
+                );
+            }
+        }
+        if (words[0] == "multiply") {
+            if (words.size() == 2) {
+                light->color *= glm::vec3(
+                    atof(words[1].c_str())
+                );
+            }
+            if (words.size() == 4) {
+                light->color *= glm::vec3(
                     atof(words[1].c_str()),
                     atof(words[2].c_str()),
                     atof(words[3].c_str())
