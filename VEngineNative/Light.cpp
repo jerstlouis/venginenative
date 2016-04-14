@@ -14,6 +14,8 @@ Light::Light()
     type = LIGHT_SPOT;
     lightCamera = new Camera();
     delete lightCamera->transformation;
+    mapper = nullptr;
+    cubeMapper = nullptr;
 }
 
 Light::~Light()
@@ -46,7 +48,7 @@ void Light::switchShadowMapping(bool value)
 
 void Light::bindShadowMap(int spot, int cube)
 {
-    if (shadowMappingEnabled) {
+    if (shadowMappingEnabled && depthMap != nullptr && depthCubeMap != nullptr) {
         depthMap->use(spot);
         depthCubeMap->use(cube);
     }
@@ -58,39 +60,43 @@ void Light::refreshShadowMap()
         glClearDepth(0);
         glDepthFunc(GL_GEQUAL);
         if (type == LIGHT_SPOT) {
-            mapper->use(true);
+            if (mapper != nullptr) {
+                mapper->use(true);
 
-            lightCamera->transformation = transformation;
-            lightCamera->createProjectionPerspective(angle, (float)shadowMapWidth / (float)shadowMapHeight, 0.1f, cutOffDistance);
-
-            ShaderProgram *shader = Game::instance->shaders->depthOnlyShader;
-            shader->use();
-            shader->setUniform("CutOffDistance", cutOffDistance);
-            Game::instance->world->setUniforms(shader, lightCamera);
-
-            shader = Game::instance->shaders->depthOnlyGeometryShader;
-            shader->use();
-            shader->setUniform("CutOffDistance", cutOffDistance);
-            Game::instance->world->setUniforms(shader, lightCamera);
-            Game::instance->world->draw(shader, lightCamera);
-        }
-        else if (type == LIGHT_POINT) {
-            for (int i = 0; i < 6; i++) {
-                cubeMapper->use();
-                Camera *cam = cubeMapper->switchFace(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, true);
-                cam->transformation->setPosition(transformation->position);
+                lightCamera->transformation = transformation;
+                lightCamera->createProjectionPerspective(angle, (float)shadowMapWidth / (float)shadowMapHeight, 0.1f, cutOffDistance);
 
                 ShaderProgram *shader = Game::instance->shaders->depthOnlyShader;
                 shader->use();
                 shader->setUniform("CutOffDistance", cutOffDistance);
-                Game::instance->world->setUniforms(shader, cam);
+                Game::instance->world->setUniforms(shader, lightCamera);
 
                 shader = Game::instance->shaders->depthOnlyGeometryShader;
                 shader->use();
                 shader->setUniform("CutOffDistance", cutOffDistance);
-                Game::instance->world->setUniforms(shader, cam);
+                Game::instance->world->setUniforms(shader, lightCamera);
+                Game::instance->world->draw(shader, lightCamera);
+            }
+        }
+        else if (type == LIGHT_POINT) {
+            for (int i = 0; i < 6; i++) {
+                if (cubeMapper != nullptr) {
+                    cubeMapper->use();
+                    Camera *cam = cubeMapper->switchFace(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, true);
+                    cam->transformation->setPosition(transformation->position);
 
-                Game::instance->world->draw(shader, cam);
+                    ShaderProgram *shader = Game::instance->shaders->depthOnlyShader;
+                    shader->use();
+                    shader->setUniform("CutOffDistance", cutOffDistance);
+                    Game::instance->world->setUniforms(shader, cam);
+
+                    shader = Game::instance->shaders->depthOnlyGeometryShader;
+                    shader->use();
+                    shader->setUniform("CutOffDistance", cutOffDistance);
+                    Game::instance->world->setUniforms(shader, cam);
+
+                    Game::instance->world->draw(shader, cam);
+                }
             }
         }
         glClearDepth(1);
@@ -100,17 +106,19 @@ void Light::refreshShadowMap()
 
 void Light::recreateFbo()
 {
-    destroyFbo();
-    depthMap = new Texture(shadowMapWidth, shadowMapHeight,
-        GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
-    mapper = new Framebuffer();
-    mapper->attachTexture(depthMap, GL_DEPTH_ATTACHMENT);
+    Game::instance->invoke([&]() {
+        destroyFbo();
+        depthMap = new Texture(shadowMapWidth, shadowMapHeight,
+            GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
+        mapper = new Framebuffer();
+        mapper->attachTexture(depthMap, GL_DEPTH_ATTACHMENT);
 
-    depthCubeMap = new CubeMapTexture(shadowMapWidth, shadowMapHeight,
-        GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
-    cubeMapper = new CubeMapFramebuffer();
-    cubeMapper->attachTexture(depthCubeMap, GL_DEPTH_ATTACHMENT);
-   /* Game::instance->invoke([&]() {
+        depthCubeMap = new CubeMapTexture(shadowMapWidth, shadowMapHeight,
+            GL_DEPTH_COMPONENT32, GL_DEPTH_COMPONENT, GL_UNSIGNED_INT);
+        cubeMapper = new CubeMapFramebuffer();
+        cubeMapper->attachTexture(depthCubeMap, GL_DEPTH_ATTACHMENT);
+    });
+   /* 
         mapper->use(true);
         cubeMapper->use();
     });*/

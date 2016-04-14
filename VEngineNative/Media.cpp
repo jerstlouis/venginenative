@@ -3,6 +3,7 @@
 #include "tinydir.h"
 
 map<string, string> Media::mediaMap = {};
+map<string, void*> Media::cache = {};
 
 static int fsize(FILE* fh) {
     int prev = ftell(fh);
@@ -11,6 +12,7 @@ static int fsize(FILE* fh) {
     fseek(fh, prev, SEEK_SET);
     return sz;
 }
+
 
 char* get_file_contents(const char* path) {
     FILE* fh = fopen(path, "r");
@@ -53,6 +55,18 @@ string Media::getPath(string key)
 int Media::readBinary(string key, unsigned char** out_bytes)
 {
     return get_file_contents_binary(out_bytes, getPath(key).c_str());
+}
+
+void Media::saveCache(string key, void * data)
+{
+    cache[key] = data;
+}
+
+void * Media::checkCache(string key)
+{
+    if (cache.find(key) == cache.end())
+        return nullptr;
+    return cache.at(key);
 }
 
 void Media::searchRecursive(string path)

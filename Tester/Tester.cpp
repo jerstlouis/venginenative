@@ -49,8 +49,8 @@ int main()
     // mesh loading
 
     game->world->scene = game->asset->loadSceneFile("sponza.scene");
-    
-    /*for (int i = 0; i < 11; i++) {
+    /*
+    for (int i = 0; i < 11; i++) {
 
         for (int g = 0; g < 11; g++) {
             float rough = (float)i / 11.0f;

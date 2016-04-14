@@ -1,7 +1,7 @@
 lodlevel
 start 0.0
 end 9999.0
-info3d lucy.raw
+info3d sphere.raw
 material red.material
 
 instance

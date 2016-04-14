@@ -119,7 +119,14 @@ Material * AssetLoader::loadMaterialString(string source)
                 if (words.size() >= 2) {
                     stringstream ss;
                     for (int a = 1; a < words.size(); a++)ss << (a == 1 ? "" : " ") << words[a];
-                    node->texture = new Texture(ss.str());
+                    void * cached = Media::checkCache(ss.str());
+                    if (cached != nullptr) {
+                        node->texture = (Texture*)cached;
+                    }
+                    else {
+                        node->texture = new Texture(ss.str());
+                        Media::saveCache(ss.str(), node->texture);
+                    }
                 }
             }
         }
@@ -199,13 +206,20 @@ Mesh3d * AssetLoader::loadMeshString(string source)
                     stringstream ss;
                     for (int a = 1; a < words.size(); a++)ss << (a == 1 ? "" : " ") << words[a];
 
-                    unsigned char* bytes;
-                    int bytescount = Media::readBinary(ss.str(), &bytes);
-                    GLfloat * floats = (GLfloat*)bytes;
-                    int floatsCount = bytescount / 4;
-                    vector<GLfloat> flo(floats, floats + floatsCount);
+                    void * cached = Media::checkCache(ss.str());
+                    if (cached != nullptr) {
+                        lodlevel->info3d = (Object3dInfo*)cached;
+                    }
+                    else {
+                        unsigned char* bytes;
+                        int bytescount = Media::readBinary(ss.str(), &bytes);
+                        GLfloat * floats = (GLfloat*)bytes;
+                        int floatsCount = bytescount / 4;
+                        vector<GLfloat> flo(floats, floats + floatsCount);
 
-                    lodlevel->info3d = new Object3dInfo(flo);
+                        lodlevel->info3d = new Object3dInfo(flo);
+                        Media::saveCache(ss.str(), lodlevel->info3d);
+                    }
                 }
             }
         }

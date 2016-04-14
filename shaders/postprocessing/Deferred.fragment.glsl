@@ -79,15 +79,15 @@ vec3 shadingMetalic(PostProceessingData data){
     float fresnelG = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.g);
     float fresnelB = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.b);
     vec3 newBase = vec3(fresnelR, fresnelG, fresnelB);
-    return shade(CameraPosition, newBase, data.normal, data.worldPos, LightPosition, LightColor,  max(MIN_ROUGHNESS_DIRECT, data.roughness), false);
+    return shade(CameraPosition, newBase, data.normal, data.worldPos, LightPosition, abs(LightColor),  max(MIN_ROUGHNESS_DIRECT, data.roughness), false);
 }
 
 vec3 shadingNonMetalic(PostProceessingData data){
     float fresnel = fresnel_again(data.normal, data.cameraPos, 0.08) * (1.0 - data.roughness * 0.9);
     
-    vec3 radiance = shade(CameraPosition, vec3(fresnel), data.normal, data.worldPos, LightPosition, LightColor, max(MIN_ROUGHNESS_DIRECT, data.roughness), false);    
+    vec3 radiance = shade(CameraPosition, vec3(fresnel), data.normal, data.worldPos, LightPosition, abs(LightColor), max(MIN_ROUGHNESS_DIRECT, data.roughness), false);    
     
-    vec3 difradiance = shadeDiffuse(CameraPosition, data.diffuseColor, data.normal, data.worldPos, LightPosition, LightColor, data.roughness, false);
+    vec3 difradiance = shadeDiffuse(CameraPosition, data.diffuseColor, data.normal, data.worldPos, LightPosition, abs(LightColor), data.roughness, false);
     return radiance + difradiance ;
 }
 
@@ -140,8 +140,11 @@ vec3 ApplyLighting(PostProceessingData data)
 vec4 shade(){
     vec4 c = vec4(0);
     if(currentData.cameraDistance > 0){
-        c.rgb += ApplyLighting(currentData);
+        vec3 res = ApplyLighting(currentData);
+        res *= vec3(sign(LightColor.x), sign(LightColor.y), sign(LightColor.z));
+        AO += length(res) * step(0, -dot(res, vec3(-1)));
+        //c.rgb += clamp(res, 0.0, 1.0);
     }
-    c.a = AO; 
+    c.a = clamp(AO, 0.0, 1.0); 
     return c;
 }
