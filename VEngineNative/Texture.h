@@ -21,7 +21,8 @@ private:
     int genMode;
     const int genModeFromFile = 1;
     const int genModeEmptyFromDesc = 2;
-    void* glitextureptr;
+    string ddsFile;
+    bool usedds;
     GLint internalFormatRequested;
     GLenum formatRequested;
     GLenum typeRequested;

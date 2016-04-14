@@ -10,15 +10,17 @@ Texture::Texture(GLuint ihandle)
     height = 1;
     components = 4;
     data = nullptr;
+    usedds = false;
 }
 
 Texture::Texture(string filekey)
 {
     if (strstr(filekey.c_str(), ".dds") != nullptr) {
-        glitextureptr = (void*)(&gli::load(Media::getPath(filekey)));
+        ddsFile = filekey;
+        usedds = true;
+        genMode = genModeFromFile;
     }
     else {
-        glitextureptr = (void*)nullptr;
         int x, y, n;
         data = stbi_load(Media::getPath(filekey).c_str(), &x, &y, &n, 0);
         width = x;
@@ -26,6 +28,7 @@ Texture::Texture(string filekey)
         components = n;
         generated = false;
         genMode = genModeFromFile;
+        usedds = false;
     }
 }
 
@@ -71,29 +74,29 @@ void Texture::generate()
     glGenTextures(1, &handle);
     glBindTexture(GL_TEXTURE_2D, handle);
     if (genMode == genModeFromFile) {
-        if (glitextureptr != nullptr) {
-            auto glitexture = static_cast<gli::texture*>(glitextureptr);
+        if (usedds) {
+            auto glitexture = gli::load(Media::getPath(ddsFile));
             gli::gl GL(gli::gl::PROFILE_GL33);
-            gli::gl::format const Format = GL.translate(glitexture->format(), glitexture->swizzles());
+            gli::gl::format const Format = GL.translate(glitexture.format(), glitexture.swizzles());
             // GLenum Target = GL.translate(Texture.target());
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(glitexture->levels() - 1));
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(glitexture.levels() - 1));
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, Format.Swizzles[0]);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, Format.Swizzles[1]);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, Format.Swizzles[2]);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, Format.Swizzles[3]);
-            glm::tvec3<GLsizei> const Extent(glitexture->extent());
+            glm::tvec3<GLsizei> const Extent(glitexture.extent());
             glTexStorage2D(
-                GL_TEXTURE_2D, static_cast<GLint>(glitexture->levels()), Format.Internal,
+                GL_TEXTURE_2D, static_cast<GLint>(glitexture.levels()), Format.Internal,
                 Extent.x, Extent.y);
-            if (gli::is_compressed(glitexture->format())) {
+            if (gli::is_compressed(glitexture.format())) {
                 glCompressedTexSubImage2D(
                     GL_TEXTURE_2D, static_cast<GLint>(0),
                     0, 0,
                     Extent.x,
                     Extent.y,
-                    Format.Internal, static_cast<GLsizei>(glitexture->size(0)),
-                    glitexture->data(0, 0, 0));
+                    Format.Internal, static_cast<GLsizei>(glitexture.size(0)),
+                    glitexture.data(0, 0, 0));
             }
             else {
                 glTexSubImage2D(
@@ -102,7 +105,7 @@ void Texture::generate()
                     Extent.x,
                     Extent.y,
                     Format.External, Format.Type,
-                    glitexture->data(0, 0, 0));
+                    glitexture.data(0, 0, 0));
             }
         }
         else {
