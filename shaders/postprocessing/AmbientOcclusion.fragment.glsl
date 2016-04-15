@@ -257,7 +257,7 @@ float fastAO(float hemisphereSize, int quality){
     float outc = 0.0;
     
     float xaon = currentData.cameraDistance;
-    float factor = 1.0 / (xaon+1);
+    float factor = 1.0 / (xaon +1.0);
     vec2 multiplier = vec2(ratio, 1) * 0.09 * hemisphereSize * factor;
     
     float rot = rand2s(UV) * 3.1415 * 2;
@@ -267,7 +267,7 @@ float fastAO(float hemisphereSize, int quality){
 		
     mat2 RM = mat2(cos(rot), -sin(rot), sin(rot), cos(rot));
     for(int g=0;g < xsamples.length();g+=quality){
-        vec2 sampl =   xsamples[g];
+        vec2 sampl =  RM *  xsamples[g];
         sampl = faceforward(sampl, -sampl, normproj);
 		vec2 nuv = clamp(UV + ((sampl ) * multiplier), 0.0, 1.0);
 		//if(nuv.x > 1.0 || nuv.x < 0.0 || nuv.y > 1.0 || nuv.y<0.0) continue;
@@ -277,8 +277,9 @@ float fastAO(float hemisphereSize, int quality){
 		vec3 newpos = dir * aondata;
         
 		float occ = max(0, dot(normalize(newpos - currentData.cameraPos), normalcenter));
+      //  float occ =  smoothstep(0.0, hemisphereSize, xaon - aondata);
 		
-		float fact = 1.0 - clamp(abs(aondata - xaon) - hemisphereSize * 0.2, 0.0, 1.0);
+		float fact =  1.0 - clamp(distance(newpos, currentData.cameraPos) - hemisphereSize * factor, 0.0, 1.0);
 		outc += occ * fact;
     
     }
@@ -287,10 +288,10 @@ float fastAO(float hemisphereSize, int quality){
 
 float AmbientOcclusion(){
     //float ao = AO(currentData.worldPos, currentData.cameraPos, currentData.normal, currentData.roughness, 8.4,3));
-    float ao = fastAO(9.0, 1);
+    float ao = fastAO(8.0, 3);
    // ao += AO(currentData.worldPos, currentData.cameraPos, currentData.normal, currentData.roughness, 2.4,4);
     //ao *= 0.5;
-    #define aolog 25.0
+    #define aolog 225.0
     return clamp(1.0 - ( log2(ao*aolog + 1.0) / log2(aolog + 1.0) ), 0.0, 1.0);
 }
 
