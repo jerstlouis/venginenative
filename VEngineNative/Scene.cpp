@@ -1,9 +1,11 @@
 #include "stdafx.h"
 #include "Scene.h"
+#include "Game.h"
 
 Scene::Scene()
 {
     meshes = {};
+    lights = {};
 }
 
 Scene::~Scene()
@@ -12,8 +14,17 @@ Scene::~Scene()
 
 void Scene::draw()
 {
-    for (int i = 0; i < meshes.size(); i++) {
+    int x = meshes.size();
+    for (int i = 0; i < x; i++) {
         meshes[i]->draw();
+    }
+}
+
+void Scene::setUniforms()
+{
+    int x = meshes.size();
+    for (int i = 0; i < x; i++) {
+        meshes[i]->setUniforms();
     }
 }
 
@@ -32,7 +43,7 @@ vector<Mesh3d*>& Scene::getMeshes()
     return meshes;
 }
 
-vector<Light*>& Scene::getLights()
+vector<Light*> Scene::getLights()
 {
     return lights;
 }

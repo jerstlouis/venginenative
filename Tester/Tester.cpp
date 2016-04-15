@@ -67,7 +67,7 @@ int main()
     light->type = LIGHT_SPOT;
     light->angle = 90;
 
-    game->world->scene->addLight(light);
+    //game->world->scene->addLight(light);
 
     bool cursorFree = false;
     game->onKeyPress->add([&game, &cursorFree, &cam](int key) {

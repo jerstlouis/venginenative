@@ -21,6 +21,7 @@ public:
     void removeLodLevel(Mesh3dLodLevel* level);
     void updateBuffers();
     void draw();
+    void setUniforms();
     bool needBufferUpdate;
 private:
     vector<Mesh3dInstance*> instances;

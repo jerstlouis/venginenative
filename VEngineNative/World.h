@@ -11,4 +11,5 @@ public:
     Scene *scene;
     void draw(ShaderProgram *shader, Camera *camera);
     void setUniforms(ShaderProgram *shader, Camera *camera);
+    void setSceneUniforms();
 };

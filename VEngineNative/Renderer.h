@@ -24,6 +24,7 @@ private:
 
     CubeMapTexture *skyboxTexture;
     Object3dInfo *quad3dInfo;
+    Object3dInfo *sphere3dInfo;
 
     //MRT Buffers
     Framebuffer *mrtFbo;

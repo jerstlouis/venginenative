@@ -1,4 +1,10 @@
+uniform vec2 Resolution;
+
+#ifdef RECREATE_UV
+vec2 UV = gl_FragCoord.xy / Resolution.xy;
+#else
 in vec2 UV;
+#endif
 out vec4 outColor;
 
 layout(binding = 0) uniform sampler2D mrt_Albedo_Roughness_Tex;
@@ -7,7 +13,6 @@ layout(binding = 2) uniform sampler2D mrt_Distance_Bump_Tex;
 
 uniform mat4 VPMatrix;
 uniform vec3 CameraPosition;
-uniform vec2 Resolution;
 uniform vec3 FrustumConeLeftBottom;
 uniform vec3 FrustumConeBottomLeftToBottomRight;
 uniform vec3 FrustumConeBottomLeftToTopLeft;

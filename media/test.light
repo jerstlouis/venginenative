@@ -4,6 +4,6 @@ color 2.0
 shadowmap TRUE
 resolution 2048 2048
 angle 90
-cutoff 100
+cutoff 60
 translate 0 5 0
 lookat 0 0 0.01

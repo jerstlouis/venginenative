@@ -11,7 +11,17 @@ Mesh3dLodLevel::Mesh3dLodLevel(Object3dInfo *info, Material *imaterial, float di
     distanceStart = distancestart;
     distanceEnd = distanceend;
     instancesFiltered = 0;
-    modelInfosBuffer = new ShaderStorageBuffer();
+    modelInfosBuffer = new ShaderStorageBuffer();    
+    samplerIndices = {};
+    modes = {};
+    targets = {};
+    sources = {};
+    modifiers = {};
+    uvScales = {};
+    nodesDatas = {};
+    nodesColors = {};
+    modes = {};
+    textureBinds = {};
 }
 
 Mesh3dLodLevel::Mesh3dLodLevel(Object3dInfo *info, Material *imaterial)
@@ -22,6 +32,16 @@ Mesh3dLodLevel::Mesh3dLodLevel(Object3dInfo *info, Material *imaterial)
     distanceEnd = 99999.0;
     instancesFiltered = 0;
     modelInfosBuffer = new ShaderStorageBuffer();
+    samplerIndices = {};
+    modes = {};
+    targets = {};
+    sources = {};
+    modifiers = {};
+    uvScales = {};
+    nodesDatas = {};
+    nodesColors = {};
+    modes = {};
+    textureBinds = {};
 }
 
 Mesh3dLodLevel::Mesh3dLodLevel()
@@ -32,6 +52,16 @@ Mesh3dLodLevel::Mesh3dLodLevel()
     distanceEnd = 99999.0;
     instancesFiltered = 0;
     modelInfosBuffer = new ShaderStorageBuffer();
+    samplerIndices = {};
+    modes = {};
+    targets = {};
+    sources = {};
+    modifiers = {};
+    uvScales = {};
+    nodesDatas = {};
+    nodesColors = {};
+    modes = {};
+    textureBinds = {};
 }
 
 Mesh3dLodLevel::~Mesh3dLodLevel()
@@ -40,38 +70,7 @@ Mesh3dLodLevel::~Mesh3dLodLevel()
 
 void Mesh3dLodLevel::draw()
 {
-    // base properties
 
-    vector<int> samplerIndices;
-    vector<int> modes;
-    vector<int> targets;
-    vector<int> sources;
-    vector<int> modifiers;
-    vector<vec2> uvScales;
-    vector<vec4> nodesDatas;
-    vector<vec4> nodesColors;
-
-    bool useGeometryShader = false;
-
-    int samplerIndex = 0;
-    int nodes = 0;
-    for (int i = 0; i < material->nodes.size(); i++) {
-        MaterialNode * node = material->nodes[i];
-        if (node->target == NODE_TARGET_DISPLACEMENT) useGeometryShader = true;
-        samplerIndices.push_back(samplerIndex);
-        modes.push_back(node->mixingMode);
-        targets.push_back(node->target);
-        sources.push_back(node->source);
-        modifiers.push_back(node->modifierflags);
-        uvScales.push_back(node->uvScale);
-        nodesDatas.push_back(node->data);
-        nodesColors.push_back(node->color);
-        if (node->texture != nullptr && node->source == NODE_SOURCE_TEXTURE) {
-            node->texture->use(samplerIndex);
-            samplerIndex++;
-        }
-        nodes++;
-    }
     if (useGeometryShader && ShaderProgram::current == Game::instance->shaders->depthOnlyShader) {
         Game::instance->shaders->depthOnlyGeometryShader->use();
     }
@@ -89,7 +88,7 @@ void Mesh3dLodLevel::draw()
     shader->setUniform("Roughness", material->roughness);
     shader->setUniform("Metalness", material->metalness);
     shader->setUniform("DiffuseColor", material->diffuseColor);
-    shader->setUniform("NodesCount", nodes);
+    shader->setUniform("NodesCount", (int)material->nodes.size());
     shader->setUniformVector("SamplerIndexArray", samplerIndices);
     shader->setUniformVector("ModeArray", modes);
     shader->setUniformVector("TargetArray", targets);
@@ -101,7 +100,43 @@ void Mesh3dLodLevel::draw()
 
     modelInfosBuffer->use(0);
 
+    for (int i = 0; i < textureBinds.size(); i++) {
+        textureBinds[i]->use(i);
+    }
+
     info3d->drawInstanced(instancesFiltered);
+}
+
+void Mesh3dLodLevel::setUniforms()
+{
+    samplerIndices.clear();
+    modes.clear();
+    targets.clear();
+    sources.clear();
+    modifiers.clear();
+    uvScales.clear();
+    nodesDatas.clear();
+    nodesColors.clear();
+    modes.clear();
+    textureBinds.clear();
+
+    int samplerIndex = 0;
+    for (int i = 0; i < material->nodes.size(); i++) {
+        MaterialNode * node = material->nodes[i];
+        if (node->target == NODE_TARGET_DISPLACEMENT) useGeometryShader = true;
+        samplerIndices.push_back(samplerIndex);
+        modes.push_back(node->mixingMode);
+        targets.push_back(node->target);
+        sources.push_back(node->source);
+        modifiers.push_back(node->modifierflags);
+        uvScales.push_back(node->uvScale);
+        nodesDatas.push_back(node->data);
+        nodesColors.push_back(node->color);
+        if (node->texture != nullptr && node->source == NODE_SOURCE_TEXTURE) {
+            textureBinds.push_back(node->texture);
+            samplerIndex++;
+        }
+    }
 }
 
 void Mesh3dLodLevel::updateBuffer(const vector<Mesh3dInstance*> &instances)

@@ -97,7 +97,7 @@ bool ignoreAtt
     float att = CalculateFallof(distance(fragmentPosition, lightPosition));
     att = mix(1.0, att, roughness * roughness);
     
-    vec3 specularComponent = att * LightingFuncGGX_REF(
+    vec3 specularComponent = LightingFuncGGX_REF(
     normal,
     cameraRelativeToVPos,
     lightRelativeToVPos,
@@ -124,7 +124,7 @@ bool ignoreAtt
     
     vec3 cameraRelativeToVPos = -normalize(fragmentPosition - camera);
     float att = CalculateFallof(distance(fragmentPosition, lightPosition));
-    return  lightColor * att * orenNayarDiffuse(lightRelativeToVPos,
+    return  lightColor * orenNayarDiffuse(lightRelativeToVPos,
     cameraRelativeToVPos,
     normal,
     roughness,

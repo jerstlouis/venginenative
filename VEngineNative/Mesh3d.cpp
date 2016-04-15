@@ -96,10 +96,17 @@ void Mesh3d::updateBuffers()
 
 void Mesh3d::draw()
 {
+    for (int i = 0; i < lodLevels.size(); i++) {
+        lodLevels[i]->draw();
+    }
+}
+
+void Mesh3d::setUniforms()
+{
     if (needBufferUpdate) {
         updateBuffers();
     }
     for (int i = 0; i < lodLevels.size(); i++) {
-        lodLevels[i]->draw();
+        lodLevels[i]->setUniforms();
     }
 }

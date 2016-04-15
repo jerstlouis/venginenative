@@ -2,6 +2,7 @@
 #include "Renderer.h"
 #include "Game.h"
 #include "FrustumCone.h"
+#include "Media.h"
 
 Renderer::Renderer(int iwidth, int iheight)
 {
@@ -19,8 +20,16 @@ Renderer::Renderer(int iwidth, int iheight)
     quad3dInfo = new Object3dInfo(ppvertices);
     quad3dInfo->drawMode = GL_TRIANGLE_STRIP;
 
+    unsigned char* bytes;
+    int bytescount = Media::readBinary("deferredsphere.raw", &bytes);
+    GLfloat * floats = (GLfloat*)bytes;
+    int floatsCount = bytescount / 4;
+    vector<GLfloat> flo(floats, floats + floatsCount);
+
+    sphere3dInfo = new Object3dInfo(flo);
+
     outputShader = new ShaderProgram("PostProcess.vertex.glsl", "Output.fragment.glsl");
-    deferredShader = new ShaderProgram("PostProcess.vertex.glsl", "Deferred.fragment.glsl");
+    deferredShader = new ShaderProgram("PostProcessPerspective.vertex.glsl", "Deferred.fragment.glsl");
     ambientLightShader = new ShaderProgram("PostProcess.vertex.glsl", "AmbientLight.fragment.glsl");
     ambientOcclusionShader = new ShaderProgram("PostProcess.vertex.glsl", "AmbientOcclusion.fragment.glsl");
     fogShader = new ShaderProgram("PostProcess.vertex.glsl", "Fog.fragment.glsl");
@@ -44,7 +53,7 @@ void Renderer::initializeFbos()
     mrtNormalMetalnessTex = new Texture(width, height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
     mrtDistanceTexture = new Texture(width, height, GL_R32F, GL_RED, GL_FLOAT);
     depthTexture = new Texture(width, height, GL_DEPTH_COMPONENT32F, GL_DEPTH_COMPONENT, GL_FLOAT); // most probably overkill
-
+    
     mrtFbo = new Framebuffer();
     mrtFbo->attachTexture(mrtAlbedoRoughnessTex, GL_COLOR_ATTACHMENT0);
     mrtFbo->attachTexture(mrtNormalMetalnessTex, GL_COLOR_ATTACHMENT1);
@@ -150,6 +159,7 @@ void Renderer::draw(Camera *camera)
     mrtFbo->use(true);
     Game::instance->world->setUniforms(Game::instance->shaders->materialGeometryShader, camera);
     Game::instance->world->setUniforms(Game::instance->shaders->materialShader, camera);
+    Game::instance->world->setSceneUniforms();
     Game::instance->world->draw(Game::instance->shaders->materialShader, camera);
     if (useAmbientOcclusion) {
         ambientOcclusion();
@@ -216,6 +226,7 @@ void Renderer::deferred()
     mrtNormalMetalnessTex->use(1);
     mrtDistanceTexture->use(2);
     ambientOcclusionTexture->use(16);
+    glCullFace(GL_FRONT);
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE);
 
@@ -227,15 +238,18 @@ void Renderer::deferred()
         deferredShader->setUniform("LightType", lights[i]->type);
         deferredShader->setUniform("LightCutOffDistance", lights[i]->cutOffDistance);
         deferredShader->setUniform("LightUseShadowMap", lights[i]->shadowMappingEnabled);
+        lights[i]->transformation->setSize(glm::vec3(lights[i]->cutOffDistance));
+        deferredShader->setUniform("LightMMatrix", lights[i]->transformation->getWorldTransform());
         if (lights[i]->shadowMappingEnabled) {
             deferredShader->setUniform("LightVPMatrix", lights[i]->lightCamera->projectionMatrix
-                * lights[i]->lightCamera->transformation->getInverseWorldTransform());
+                * lights[i]->transformation->getInverseWorldTransform());
+            lights[i]->bindShadowMap(14, 15);
         }
-        lights[i]->bindShadowMap(14, 15);
-        quad3dInfo->draw();
+        sphere3dInfo->draw();
     }
 
     glDisable(GL_BLEND);
+    glCullFace(GL_BACK);
 }
 
 void Renderer::ambientLight()

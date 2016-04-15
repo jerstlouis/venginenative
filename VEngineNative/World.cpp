@@ -30,3 +30,8 @@ void World::setUniforms(ShaderProgram * shader, Camera *camera)
     shader->setUniform("CameraPosition", camera->transformation->position);
     shader->setUniform("MainCameraPosition", mainDisplayCamera->transformation->position);
 }
+
+void World::setSceneUniforms()
+{
+    scene->setUniforms();
+}

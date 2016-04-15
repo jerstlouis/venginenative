@@ -1,5 +1,5 @@
 type AMBIENT
-color -3.0
+color 1.0
 shadowmap FALSE
-cutoff 100
+cutoff 15
 multiply 0.1

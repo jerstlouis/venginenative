@@ -1,5 +1,5 @@
 #version 430 core
-
+#define RECREATE_UV
 #include PostProcessEffectBase.glsl
 
 layout(binding = 14) uniform sampler2DShadow shadowMapSingle;
@@ -133,7 +133,7 @@ vec3 ApplyLighting(PostProceessingData data)
         percent = smoothstep(angle, angle + (angle * 0.006), dt);
         result *= max(percent, step(10.0, LightAngle));
     }    
-    return result; // * (1.0 - smoothstep(0.0, LightCutOffDistance, distance(LightPosition, data.worldPos)));
+    return result * (1.0 - smoothstep(0.0, LightCutOffDistance, distance(LightPosition, data.worldPos)));
 }
 
 
@@ -143,7 +143,7 @@ vec4 shade(){
         vec3 res = ApplyLighting(currentData);
         res *= vec3(sign(LightColor.x), sign(LightColor.y), sign(LightColor.z));
         AO += length(res) * step(0, -dot(res, vec3(-1)));
-        //c.rgb += clamp(res, 0.0, 1.0);
+        c.rgb += clamp(res, 0.0, 1.0);
     }
     c.a = clamp(AO, 0.0, 1.0); 
     return c;
