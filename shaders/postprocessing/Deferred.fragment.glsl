@@ -9,9 +9,12 @@ layout(binding = 16) uniform sampler2D aoxTex;
 uniform int UseAO;
 
 float lookupAO(vec2 fuv, float radius){
+        
     if(UseAO == 0) {
         return 1.0;
     } else {
+        return  textureLod(aoxTex, fuv, 0).r ;
+        /*
         float ratio = Resolution.y/Resolution.x;
         float outc = 0;
         float counter = 0;
@@ -30,7 +33,7 @@ float lookupAO(vec2 fuv, float radius){
                 counter+=weight;
             }
         }
-        return  textureLod(aoxTex, fuv, 0).r ;
+        return  textureLod(aoxTex, fuv, 0).r ;*/
     }
 }
 

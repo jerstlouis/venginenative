@@ -267,7 +267,7 @@ float fastAO(float hemisphereSize, int quality){
 		
     mat2 RM = mat2(cos(rot), -sin(rot), sin(rot), cos(rot));
     for(int g=0;g < xsamples.length();g+=quality){
-        vec2 sampl = RM * xsamples[g];
+        vec2 sampl =   xsamples[g];
         sampl = faceforward(sampl, -sampl, normproj);
 		vec2 nuv = clamp(UV + ((sampl ) * multiplier), 0.0, 1.0);
 		//if(nuv.x > 1.0 || nuv.x < 0.0 || nuv.y > 1.0 || nuv.y<0.0) continue;
@@ -282,12 +282,12 @@ float fastAO(float hemisphereSize, int quality){
 		outc += occ * fact;
     
     }
-    return outc / (xsamples.length()/quality);
+    return outc / (float(xsamples.length()) / (float(quality)));
 }
 
 float AmbientOcclusion(){
     //float ao = AO(currentData.worldPos, currentData.cameraPos, currentData.normal, currentData.roughness, 8.4,3));
-    float ao = fastAO(9.0, 5);
+    float ao = fastAO(9.0, 1);
    // ao += AO(currentData.worldPos, currentData.cameraPos, currentData.normal, currentData.roughness, 2.4,4);
     //ao *= 0.5;
     #define aolog 25.0
