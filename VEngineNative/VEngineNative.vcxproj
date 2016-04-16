@@ -158,6 +158,7 @@
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CubeMapFramebuffer.h" />
     <ClInclude Include="CubeMapTexture.h" />
+    <ClInclude Include="EnvProbe.h" />
     <ClInclude Include="EventHandler.h" />
     <ClInclude Include="Framebuffer.h" />
     <ClInclude Include="FrustumCone.h" />
@@ -193,6 +194,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CubeMapFramebuffer.cpp" />
     <ClCompile Include="CubeMapTexture.cpp" />
+    <ClCompile Include="EnvProbe.cpp" />
     <ClCompile Include="Framebuffer.cpp" />
     <ClCompile Include="FrustumCone.cpp" />
     <ClCompile Include="Game.cpp" />

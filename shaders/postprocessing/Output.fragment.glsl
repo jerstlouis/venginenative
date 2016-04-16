@@ -26,7 +26,7 @@ vec3 rgb_to_srgb(vec3 rgb) {
 
 
 vec4 shade(){    
-    vec3 color = texture(directTex, UV).rgb + texture(alTex, UV).rgb * textureLod(aoxTex, UV, 0).r ;
-    color += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r)) * pow(textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb, vec3(2.4));
+    vec3 color = texture(directTex, UV).rgb + texture(alTex, UV).rgb ;
+   // color += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r)) * pow(textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb, vec3(2.4));
     return vec4(rgb_to_srgb(color), 1.0);
 }

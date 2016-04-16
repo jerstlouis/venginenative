@@ -61,13 +61,22 @@ int main()
             mesh->getInstance(0)->transformation->translate(glm::vec3(i, 0, g) * 8.0f);
             game->world->scene->addMesh(mesh);
         }
-    }*/
-
+    }
+    */
     Light* light = game->asset->loadLightFile("test.light");
     light->type = LIGHT_SPOT;
     light->angle = 90;
+    game->world->scene->addLight(light);
 
-    //game->world->scene->addLight(light);
+    Renderer * envRenderer = new Renderer(256, 256);
+    envRenderer->useAmbientOcclusion = false;
+    vector<EnvPlane*> planes = {};
+    planes.push_back(new EnvPlane(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)));
+    planes.push_back(new EnvPlane(glm::vec3(0, 0, -8), glm::vec3(0, 0, 1)));
+    planes.push_back(new EnvPlane(glm::vec3(0, 0, 6), glm::vec3(0, 0, -1)));
+    EnvProbe* probe = new EnvProbe(envRenderer, planes);
+    probe->transformation->translate(glm::vec3(0, 6, 0));
+    game->world->scene->addEnvProbe(probe);
 
     bool cursorFree = false;
     game->onKeyPress->add([&game, &cursorFree, &cam](int key) {
@@ -112,6 +121,7 @@ int main()
     game->setCursorMode(GLFW_CURSOR_DISABLED);
 
     game->onRenderFrame->add([&](int i) {
+        probe->refresh();
         if (!cursorFree) {
             float speed = 0.1f;
             if (game->getKeyStatus(GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {

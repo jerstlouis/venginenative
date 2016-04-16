@@ -38,12 +38,22 @@ void Scene::addLight(Light * light)
     lights.push_back(light);
 }
 
+void Scene::addEnvProbe(EnvProbe * env)
+{
+    envProbes.push_back(env);
+}
+
 vector<Mesh3d*>& Scene::getMeshes()
 {
     return meshes;
 }
 
-vector<Light*> Scene::getLights()
+vector<Light*>& Scene::getLights()
 {
     return lights;
+}
+
+vector<EnvProbe*>& Scene::getEnvProbes()
+{
+    return envProbes;
 }

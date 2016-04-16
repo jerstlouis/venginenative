@@ -29,6 +29,7 @@ public:
     void start();
     void invoke(const function<void(void)> &func);
     bool shouldClose;
+    float time;
 
     int getKeyStatus(int key);
     void setCursorMode(int mode);

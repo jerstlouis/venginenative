@@ -2,9 +2,3 @@ diffuse 1.0
 #diffuse 0.0
 roughness 0.5
 metalness 1.0
-
-node 
-texture stonew_n.jpg
-uvscale 10.0
-target NORMAL
-mix REPLACE

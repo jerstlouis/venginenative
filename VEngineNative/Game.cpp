@@ -156,6 +156,7 @@ void Game::renderThread()
     while (!glfwWindowShouldClose(window) && !shouldClose)
     {
         double currentTime = glfwGetTime();
+        time = currentTime;
         nbFrames++;
         if (currentTime - lastTime >= 1.0) {
             printf("%f ms/frame = Frames %d\n", 1.0 / double(nbFrames), nbFrames);

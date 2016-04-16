@@ -15,9 +15,10 @@ public:
     void recompileShaders();
     void resize(int iwidth, int iheight);
     bool useAmbientOcclusion;
-private:
+    float envProbesLightMultiplier;
     int width;
     int height;
+private:
     void draw(Camera *camera);
     void initializeFbos();
     void destroyFbos();
@@ -35,6 +36,7 @@ private:
 
     // Effects part
     ShaderProgram *deferredShader;
+    ShaderProgram *envProbesShader;
     Framebuffer *deferredFbo;
     Texture *deferredTexture;
     void deferred();
@@ -73,4 +75,6 @@ private:
     // Output to output fbo
     ShaderProgram *outputShader;
     void output();
+
+    Camera* currentCamera;
 };
