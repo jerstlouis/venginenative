@@ -11,6 +11,7 @@ Renderer::Renderer(int iwidth, int iheight)
     height = iheight;
 
     useAmbientOcclusion = true;
+    useGammaCorrection = true;
 
     vector<GLfloat> ppvertices = {
         -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
@@ -192,6 +193,7 @@ void Renderer::output()
     FrustumCone *cone = currentCamera->cone;
  //   outputShader->setUniform("VPMatrix", vpmatrix);
     outputShader->setUniform("UseAO", useAmbientOcclusion);
+    outputShader->setUniform("UseGamma", useGammaCorrection);
     outputShader->setUniform("Resolution", glm::vec2(width, height));
     outputShader->setUniform("CameraPosition", currentCamera->transformation->position);
     outputShader->setUniform("FrustumConeLeftBottom", cone->leftBottom);

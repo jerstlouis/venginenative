@@ -15,6 +15,7 @@ public:
     void recompileShaders();
     void resize(int iwidth, int iheight);
     bool useAmbientOcclusion;
+    bool useGammaCorrection;
     float envProbesLightMultiplier;
     int width;
     int height;

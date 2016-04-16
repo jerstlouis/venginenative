@@ -68,18 +68,23 @@ int main()
     light->angle = 90;
     game->world->scene->addLight(light);
 
-    Renderer * envRenderer = new Renderer(256, 256);
+    Renderer * envRenderer = new Renderer(512, 512);
     envRenderer->useAmbientOcclusion = false;
+    envRenderer->useGammaCorrection = false;
     vector<EnvPlane*> planes = {};
     planes.push_back(new EnvPlane(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)));
+    planes.push_back(new EnvPlane(glm::vec3(0, 90, 0), glm::vec3(0, -1, 0)));
     planes.push_back(new EnvPlane(glm::vec3(0, 0, -8), glm::vec3(0, 0, 1)));
     planes.push_back(new EnvPlane(glm::vec3(0, 0, 6), glm::vec3(0, 0, -1)));
+    planes.push_back(new EnvPlane(glm::vec3(-39, 0, 0), glm::vec3(1, 0, 0)));
+    planes.push_back(new EnvPlane(glm::vec3(40, 0, 0), glm::vec3(-1, 0, 0)));
     EnvProbe* probe = new EnvProbe(envRenderer, planes);
     probe->transformation->translate(glm::vec3(0, 6, 0));
     game->world->scene->addEnvProbe(probe);
 
     bool cursorFree = false;
-    game->onKeyPress->add([&game, &cursorFree, &cam](int key) {
+    bool envRefresh = true;
+    game->onKeyPress->add([&game, &cursorFree, &cam, &envRefresh](int key) {
         if (key == GLFW_KEY_PAUSE) {
             game->shaders->materialShader->recompile();
             game->shaders->depthOnlyShader->recompile();
@@ -102,6 +107,9 @@ int main()
             ca->transformation->orientation = cam->transformation->orientation;
             game->world->scene->addLight(ca);
         }
+        if (key == GLFW_KEY_F4) {
+            envRefresh = true;
+        }
         if (key == GLFW_KEY_TAB) {
             if (!cursorFree) {
                 cursorFree = true;
@@ -121,7 +129,10 @@ int main()
     game->setCursorMode(GLFW_CURSOR_DISABLED);
 
     game->onRenderFrame->add([&](int i) {
-        probe->refresh();
+      //  if (envRefresh) {
+            probe->refresh();
+            envRefresh = false;
+       // }
         if (!cursorFree) {
             float speed = 0.1f;
             if (game->getKeyStatus(GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {

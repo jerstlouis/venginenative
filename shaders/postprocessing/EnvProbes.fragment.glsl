@@ -4,6 +4,8 @@
 #include Shade.glsl
 
 layout(binding = 10) uniform samplerCube probeTex;
+layout(binding = 16) uniform sampler2D aoxTex;
+layout(binding = 3) uniform samplerCube skyboxTex;
 
 float rand2s(vec2 co){
         return fract(sin(dot(co.xy,vec2(12.9898,78.233))) * 43758.5453);
@@ -11,27 +13,12 @@ float rand2s(vec2 co){
 
 #define MMAL_LOD_REGULATOR 1024
 vec3 stupidBRDF(vec3 dir, float level, float roughness){
-    vec3 aaprc = vec3(0.0);
-    float xx=rand2s(UV);
-    float xx2=rand2s(UV.yx);
-    for(int x = 0; x < 4; x++){
-        vec3 rd = vec3(
-            rand2s(vec2(xx, xx2)),
-            rand2s(vec2(-xx2, xx)),
-            rand2s(vec2(xx2, xx))
-        ) *2-1;
-        vec3 displace = rd;
-        vec3 prc = textureLod(probeTex, dir , level).rgb;
-        aaprc += prc;
-        xx += 0.01;
-        xx2 -= 0.02123;
-    }
-    return aaprc / 4.0;
+    return textureLod(probeTex, dir , level).rgb;
 }
 
 vec3 MMALSkybox(vec3 dir, float roughness){
     //roughness = roughness * roughness;
-    float levels = max(0, float(textureQueryLevels(probeTex)));
+    float levels = max(0, float(textureQueryLevels(probeTex)) - 1.0);
     float mx = log2(roughness*MMAL_LOD_REGULATOR+1)/log2(MMAL_LOD_REGULATOR);
     vec3 result = stupidBRDF(dir, mx * levels, roughness);
     
@@ -51,7 +38,7 @@ float intersectPlane(vec3 origin, vec3 direction, vec3 point,vec3 normal)
     return dot(point - origin, normal) / dot(direction, normal);
 }
 
-float currentFalloff = 0.0;
+float currentFalloff = 1.0;
 vec3 ENVMMAL(PostProceessingData data, vec3 dir){
     
     float fresnel = fresnel_again(data.normal, data.cameraPos, 0.08);
@@ -81,8 +68,9 @@ vec3 raytracePlanes(vec3 origin, vec3 direction){
     if(mindist < 999990.0){
         vec3 newpos = (origin + direction * mindist);
         vec3 newdir = -normalize(EnvProbePosition - newpos);
+        //float att = CalculateFallof(0.05 * abs(dst - mindist));
       //  currentData.roughness = currentData.roughness * (distance(newpos, currentData.worldPos));
-        currentFalloff = 1;//CalculateFallof(0.01*distance(newpos, currentData.worldPos));
+        //currentFalloff = att;//CalculateFallof(0.01*distance(newpos, currentData.worldPos));
         c = ENVMMAL(currentData, newdir);
     } else {
         c = ENVMMAL(currentData, direction);
@@ -98,7 +86,9 @@ vec4 shade(){
     if(currentData.cameraDistance > 0){
         vec3 reflected = normalize(reflect(currentData.cameraPos, currentData.normal));
         vec3 dir = normalize(mix(reflected, currentData.normal, currentData.roughness));
-        color.rgb += raytracePlanes(currentData.worldPos, dir) *1;
+        float ao = EnvProbesLightMultiplier == 1.0 ? texture(aoxTex, UV).r : 1.0;
+        color.rgb += ao * raytracePlanes(currentData.worldPos, dir) *1;
     }
-    return color.rgbb;
+    //color.rgb += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r)) * pow(textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb, vec3(2.4));
+    return clamp(color.rgbb, 0.0, 11.0);
 }
