@@ -10,6 +10,7 @@ public:
     glm::vec3 diffuseColor;
     float roughness;
     float metalness;
+    bool disableFaceCull;
 
     vector<MaterialNode*> nodes;
 

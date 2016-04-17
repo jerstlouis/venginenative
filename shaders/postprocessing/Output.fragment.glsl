@@ -5,10 +5,12 @@
 layout(binding = 3) uniform samplerCube skyboxTex;
 layout(binding = 5) uniform sampler2D directTex;
 layout(binding = 6) uniform sampler2D alTex;
-layout(binding = 7) uniform sampler2D aoxTex;
+layout(binding = 16) uniform sampler2D aoxTex;
 
 uniform int UseAO;
 uniform int UseGamma;
+
+#include FXAA.glsl
 
 const float SRGB_ALPHA = 0.055;
 float linear_to_srgb(float channel) {
@@ -27,6 +29,6 @@ vec3 rgb_to_srgb(vec3 rgb) {
 
 
 vec4 shade(){    
-    vec3 color = texture(directTex, UV).rgb + texture(alTex, UV).rgb * (UseAO ? texture(aoxTex, UV).r : 1.0);
+    vec3 color = fxaa(directTex, UV).rgb + fxaa(alTex, UV).rgb * (fxaa(aoxTex, UV).r);
     return vec4(rgb_to_srgb(color), textureLod(mrt_Distance_Bump_Tex, UV, 0).r);
 }

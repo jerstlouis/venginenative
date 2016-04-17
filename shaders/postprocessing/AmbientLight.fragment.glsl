@@ -14,19 +14,19 @@ vec3 stupidBRDF(vec3 dir, float level, float roughness){
     vec3 aaprc = vec3(0.0);
     float xx=rand2s(UV);
     float xx2=rand2s(UV.yx);
-    for(int x = 0; x < 4; x++){
+    for(int x = 0; x < 14; x++){
         vec3 rd = vec3(
             rand2s(vec2(xx, xx2)),
             rand2s(vec2(-xx2, xx)),
             rand2s(vec2(xx2, xx))
         ) *2-1;
         vec3 displace = rd;
-        vec3 prc = textureLod(skyboxTex, dir + (displace * 0.5 * roughness), level).rgb;
+        vec3 prc = textureLod(skyboxTex, dir + (displace * 0.3 * roughness), level).rgb * 2.0;
         aaprc += prc;
         xx += 0.01;
         xx2 -= 0.02123;
     }
-    return pow(aaprc / 4.0, vec3(2.4));
+    return pow(aaprc / 14.0, vec3(2.4));
 }
 
 vec3 MMALSkybox(vec3 dir, float roughness){
@@ -67,7 +67,8 @@ uniform float Time;
 vec4 shade(){
     vec4 color = vec4(0);
     if(currentData.cameraDistance > 0){
-    ///    color.rgb += MMAL(currentData) *0.2;
+        color.rgb += MMAL(currentData) *1;
     }
+    color.rgb += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r)) * pow(textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb, vec3(2.4)) * 2.0;
     return clamp(color, 0.0, 1.0);
 }

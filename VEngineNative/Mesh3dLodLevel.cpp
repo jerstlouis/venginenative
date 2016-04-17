@@ -103,8 +103,9 @@ void Mesh3dLodLevel::draw()
     for (int i = 0; i < textureBinds.size(); i++) {
         textureBinds[i]->use(i);
     }
-
+    if (material->disableFaceCull)glDisable(GL_CULL_FACE);
     info3d->drawInstanced(instancesFiltered);
+    if (material->disableFaceCull)glEnable(GL_CULL_FACE);
 }
 
 void Mesh3dLodLevel::setUniforms()
@@ -121,6 +122,7 @@ void Mesh3dLodLevel::setUniforms()
     textureBinds.clear();
 
     int samplerIndex = 0;
+    useGeometryShader = false;
     for (int i = 0; i < material->nodes.size(); i++) {
         MaterialNode * node = material->nodes[i];
         if (node->target == NODE_TARGET_DISPLACEMENT) useGeometryShader = true;

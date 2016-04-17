@@ -6,3 +6,4 @@ material red.material
 
 instance
 translate 0 0 -2
+scale 10

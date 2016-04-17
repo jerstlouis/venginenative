@@ -80,6 +80,7 @@ uniform float Metalness;
 #define MODTARGET_ROUGHNESS 2
 #define MODTARGET_METALNESS 3
 #define MODTARGET_BUMP 4
+#define MODTARGET_DISPLACEMENT 6
 
 #define MODSOURCE_COLOR 0
 #define MODSOURCE_TEXTURE 1
@@ -153,7 +154,7 @@ float getBump(vec2 uv){
     float bump = 0;
     for(int i=0;i<NodesCount;i++){
         NodeImageModifier node = getModifier(i);
-        if(node.target == MODTARGET_BUMP){
+        if(node.target == MODTARGET_DISPLACEMENT){
             vec4 data = sampleNodeLod0(node.samplerIndex, uv * node.uvScale);
             bump = nodeCombine(bump, data.r, node.mode, data.a);
             RunParallax = true;

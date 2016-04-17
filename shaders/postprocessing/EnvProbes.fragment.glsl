@@ -80,27 +80,26 @@ vec3 raytracePlanes(vec3 origin, vec3 direction){
 
 vec3 rayMarchDepth(vec3 origin, vec3 direction){
     float mindist = 999999.0;
-    vec3 closest = origin;
+    vec3 closest = direction;
     vec3 meter = origin;
     float vis = 1.0;
     float vvis = 1.0;
     //roughness = roughness * roughness;
     float levels = max(0, float(textureQueryLevels(probeTex)) - 1.0);
     float mx = log2(currentData.roughness*MMAL_LOD_REGULATOR+1)/log2(MMAL_LOD_REGULATOR);
-    meter += direction * 0.25 * 50.0;
     for(int i=0;i<50;i++){
         float inter = textureLod(probeTex, normalize(meter - EnvProbePosition), mx * levels).a;
         float dst = abs(inter - distance(EnvProbePosition, meter));
-        if(  mindist > dst ) {
+        if(  1.1 > dst && inter != 0 ) {
             mindist = dst;
             closest = normalize(meter - EnvProbePosition);
            // vvis = vis;
         }
-        meter -= direction * 0.25;
+        meter += direction * 0.25;
         vis -= 0.02;
     }
     vec3 c = vec3(0);
-    if(mindist < 999990.0){ 
+    if(mindist < 99990.0){ 
        // currentData.roughness *= clamp(1.0 - vvis, 0.0, 1.0);
         c = ENVMMAL(currentData, closest);
     } else {

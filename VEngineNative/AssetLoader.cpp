@@ -514,6 +514,7 @@ int AssetLoader::replaceEnum(string enumstr)
     if (enumstr == "METALNESS") return NODE_TARGET_METALNESS;
     if (enumstr == "BUMP") return NODE_TARGET_BUMP;
     if (enumstr == "BUMP_NORMAL") return NODE_TARGET_BUMP_AS_NORMAL;
+    if (enumstr == "DISPLACEMENT") return NODE_TARGET_DISPLACEMENT;
 
     if (enumstr == "COLOR") return NODE_SOURCE_COLOR;
     if (enumstr == "TEXTURE") return NODE_SOURCE_TEXTURE;

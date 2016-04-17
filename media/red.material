@@ -2,3 +2,27 @@ diffuse 1.0
 #diffuse 0.0
 roughness 0.5
 metalness 1.0
+
+node
+uvscale 10 10
+texture 1aa.png
+target DIFFUSE
+mix REPLACE
+
+node
+uvscale 10 10
+texture 1h.png
+target DISPLACEMENT
+mix REPLACE
+
+node
+uvscale 10 10
+texture 1n.png
+target NORMAL
+mix REPLACE
+
+node
+uvscale 10 10
+texture 1r.png
+target ROUGHNESS
+mix REPLACE

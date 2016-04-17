@@ -14,7 +14,7 @@ EnvProbe::EnvProbe(Renderer * irenderer, vector<EnvPlane*>& iplanes)
 
 void EnvProbe::refresh()
 {
-    renderer->envProbesLightMultiplier = 0.9;
+    renderer->envProbesLightMultiplier = 0.1;
     renderer->renderToFramebuffer(transformation->position, framebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     texture->generateMipMaps();

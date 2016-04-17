@@ -48,8 +48,8 @@ float toLogDepth(float depth, float far){
 }
 
 void main(){
-    //float bump = getBump(Input.TexCoord);
-    //if(Input.Data.x < 1.0 && bump >= Input.Data.x) discard;
+    float bump = getBump(Input.TexCoord);
+    if(Input.Data.x < 1.0 && bump >= Input.Data.x) discard;
     vec3 diffuseColor = DiffuseColor;
     vec3 normal = normalize(Input.Normal);
     vec3 normalmap = vec3(0,0,1);

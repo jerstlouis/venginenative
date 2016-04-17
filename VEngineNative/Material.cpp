@@ -9,6 +9,7 @@ Material::Material()
     roughness = 1.0;
     metalness = 0.0;
     nodes = {};
+    disableFaceCull = false;
 }
 
 Material::~Material()

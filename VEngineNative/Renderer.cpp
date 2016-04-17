@@ -189,7 +189,7 @@ void Renderer::output()
     skyboxTexture->use(3);
     deferredTexture->use(5);
     ambientLightTexture->use(6);
-    ambientOcclusionTexture->use(7);
+    ambientOcclusionTexture->use(16);
     FrustumCone *cone = currentCamera->cone;
  //   outputShader->setUniform("VPMatrix", vpmatrix);
     outputShader->setUniform("UseAO", useAmbientOcclusion);

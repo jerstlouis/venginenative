@@ -40,7 +40,7 @@ int main()
     while (!ready);
 
     Camera *cam = new Camera();
-    cam->createProjectionPerspective(deg2rad(90.0f), (float)game->width / (float)game->height, 0.01f, 1000);
+    cam->createProjectionPerspective(deg2rad(45.0f), (float)game->width / (float)game->height, 0.01f, 1000);
     cam->transformation->translate(glm::vec3(0, 0, 4));
     glm::quat rot = glm::quat_cast(glm::lookAt(cam->transformation->position, glm::vec3(0), glm::vec3(0, 1, 0)));
     cam->transformation->setOrientation(rot);
@@ -48,7 +48,8 @@ int main()
 
     // mesh loading
 
-    game->world->scene = game->asset->loadSceneFile("sponza.scene");
+    //game->world->scene = game->asset->loadSceneFile("cerb.scene");
+    game->world->scene->addMesh(game->asset->loadMeshFile("icosphere.mesh3d"));
     /*
     for (int i = 0; i < 11; i++) {
 
@@ -72,15 +73,28 @@ int main()
     envRenderer->useAmbientOcclusion = false;
     envRenderer->useGammaCorrection = false;
     vector<EnvPlane*> planes = {};
-    planes.push_back(new EnvPlane(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)));
+   /* planes.push_back(new EnvPlane(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)));
     planes.push_back(new EnvPlane(glm::vec3(0, 90, 0), glm::vec3(0, -1, 0)));
     planes.push_back(new EnvPlane(glm::vec3(0, 0, -8), glm::vec3(0, 0, 1)));
     planes.push_back(new EnvPlane(glm::vec3(0, 0, 6), glm::vec3(0, 0, -1)));
     planes.push_back(new EnvPlane(glm::vec3(-39, 0, 0), glm::vec3(1, 0, 0)));
     planes.push_back(new EnvPlane(glm::vec3(40, 0, 0), glm::vec3(-1, 0, 0)));
-    EnvProbe* probe = new EnvProbe(envRenderer, planes);
-    probe->transformation->translate(glm::vec3(0, 6, 0));
-    game->world->scene->addEnvProbe(probe);
+    */
+  /*  EnvProbe* probe1 = new EnvProbe(envRenderer, planes);
+    probe1->transformation->translate(glm::vec3(-29, 9, 0));
+    game->world->scene->addEnvProbe(probe1);
+
+    EnvProbe* probe2 = new EnvProbe(envRenderer, planes);
+    probe2->transformation->translate(glm::vec3(29, 9, 0));
+    game->world->scene->addEnvProbe(probe2);
+
+    EnvProbe* probe3 = new EnvProbe(envRenderer, planes);
+    probe3->transformation->translate(glm::vec3(0, 9, -29));
+    game->world->scene->addEnvProbe(probe3);
+
+    EnvProbe* probe4 = new EnvProbe(envRenderer, planes);
+    probe4->transformation->translate(glm::vec3(0, 9, 29));
+    game->world->scene->addEnvProbe(probe4);*/
 
     bool cursorFree = false;
     bool envRefresh = true;
@@ -130,7 +144,10 @@ int main()
 
     game->onRenderFrame->add([&](int i) {
         if (envRefresh) {
-            probe->refresh();
+            //probe1->refresh();
+            //probe2->refresh();
+            //probe3->refresh();
+            //probe4->refresh();
             envRefresh = false;
         }
         if (!cursorFree) {
