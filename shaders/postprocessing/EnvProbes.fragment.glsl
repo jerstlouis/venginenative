@@ -18,7 +18,7 @@ vec3 stupidBRDF(vec3 dir, float level, float roughness){
 
 vec3 MMALSkybox(vec3 dir, float roughness){
     //roughness = roughness * roughness;
-    float levels = max(0, float(textureQueryLevels(probeTex)) - 1.0);
+    float levels = max(0, float(textureQueryLevels(probeTex)) - 2.0);
     float mx = log2(roughness*MMAL_LOD_REGULATOR+1)/log2(MMAL_LOD_REGULATOR);
     vec3 result = stupidBRDF(dir, mx * levels, roughness);
     
@@ -85,27 +85,26 @@ vec3 rayMarchDepth(vec3 origin, vec3 direction){
     float vis = 1.0;
     float vvis = 1.0;
     //roughness = roughness * roughness;
-    float levels = max(0, float(textureQueryLevels(probeTex)) - 1.0);
+    float levels = max(0, float(textureQueryLevels(probeTex)) - 2.0);
     float mx = log2(currentData.roughness*MMAL_LOD_REGULATOR+1)/log2(MMAL_LOD_REGULATOR);
+    vec3 colo = vec3(0);
+    float weight = 0.0;
+    float weight2 = 1.0;
     for(int i=0;i<50;i++){
-        float inter = textureLod(probeTex, normalize(meter - EnvProbePosition), mx * levels).a;
-        float dst = abs(inter - distance(EnvProbePosition, meter));
-        if(  1.1 > dst && inter != 0 ) {
-            mindist = dst;
-            closest = normalize(meter - EnvProbePosition);
-           // vvis = vis;
-        }
+        float inter = textureLod(probeTex, normalize(meter - EnvProbePosition), 0).a;
+        float dst = abs(inter - distance(EnvProbePosition, meter)) * 0.1;
+        
+        closest = normalize(meter - EnvProbePosition);
+        weight2 *= dst;
+        weight += dst;
+        colo += ENVMMAL(currentData, closest) * dst;
+        
         meter += direction * 0.25;
         vis -= 0.02;
     }
-    vec3 c = vec3(0);
-    if(mindist < 99990.0){ 
-       // currentData.roughness *= clamp(1.0 - vvis, 0.0, 1.0);
-        c = ENVMMAL(currentData, closest);
-    } else {
-     //   c = ENVMMAL(currentData, meter - EnvProbePosition);
-    }
-    return c * EnvProbesLightMultiplier;
+    colo /= max(0.01, weight);
+
+    return clamp(colo, 0.0, 1.0) * EnvProbesLightMultiplier;
 }
 
     

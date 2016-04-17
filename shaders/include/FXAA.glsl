@@ -1,12 +1,12 @@
 
 #ifndef FXAA_REDUCE_MIN
-    #define FXAA_REDUCE_MIN   (1.0/ 16.0)
+    #define FXAA_REDUCE_MIN   (1.0/ 64.0)
 #endif
 #ifndef FXAA_REDUCE_MUL
-    #define FXAA_REDUCE_MUL   (1.0 / 4.0)
+    #define FXAA_REDUCE_MUL   (1.0 / 24.0)
 #endif
 #ifndef FXAA_SPAN_MAX
-    #define FXAA_SPAN_MAX     6.0
+    #define FXAA_SPAN_MAX     16.0
 #endif
 
 //optimized version for mobile, where dependent 
@@ -30,7 +30,7 @@ vec4 fxaa(sampler2D tex, vec2 fragCoordF) {
     vec4 color;
     vec2 fragCoord = fragCoordF * Resolution;
     texcoords(fragCoord);
-    mediump vec2 inverseVP = vec2(1.0 / Resolution.x, 1.0 / Resolution.y);
+    vec2 inverseVP = vec2(1.0 / Resolution.x, 1.0 / Resolution.y);
     vec3 rgbNW = texture(tex, v_rgbNW).xyz;
     vec3 rgbNE = texture(tex, v_rgbNE).xyz;
     vec3 rgbSW = texture(tex, v_rgbSW).xyz;
@@ -46,7 +46,7 @@ vec4 fxaa(sampler2D tex, vec2 fragCoordF) {
     float lumaMin = min(lumaM, min(min(lumaNW, lumaNE), min(lumaSW, lumaSE)));
     float lumaMax = max(lumaM, max(max(lumaNW, lumaNE), max(lumaSW, lumaSE)));
     
-    mediump vec2 dir;
+    vec2 dir;
     dir.x = -((lumaNW + lumaNE) - (lumaSW + lumaSE));
     dir.y =  ((lumaNW + lumaSW) - (lumaNE + lumaSE));
     

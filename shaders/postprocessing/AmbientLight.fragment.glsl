@@ -21,7 +21,7 @@ vec3 stupidBRDF(vec3 dir, float level, float roughness){
             rand2s(vec2(xx2, xx))
         ) *2-1;
         vec3 displace = rd;
-        vec3 prc = textureLod(skyboxTex, dir + (displace * 0.3 * roughness), level).rgb * 2.0;
+        vec3 prc = textureLod(skyboxTex, dir + (displace * 0.1 * roughness), level).rgb * 1.0;
         aaprc += prc;
         xx += 0.01;
         xx2 -= 0.02123;
@@ -31,9 +31,9 @@ vec3 stupidBRDF(vec3 dir, float level, float roughness){
 
 vec3 MMALSkybox(vec3 dir, float roughness){
     //roughness = roughness * roughness;
-    float levels = max(0, float(textureQueryLevels(skyboxTex)) - 1);
+    float levels = max(0, float(textureQueryLevels(skyboxTex)) - 2);
     float mx = log2(roughness*MMAL_LOD_REGULATOR+1)/log2(MMAL_LOD_REGULATOR);
-    vec3 result = stupidBRDF(dir, mx * levels, roughness);
+    vec3 result = pow(textureLod(skyboxTex, dir, mx * levels).rgb, vec3(2.4));
     
     //return pow(result * 1.2, vec3(2.0));
     return result;
@@ -44,7 +44,7 @@ vec3 MMAL(PostProceessingData data){
     vec3 reflected = normalize(reflect(data.cameraPos, data.normal));
     vec3 dir = normalize(mix(reflected, data.normal, data.roughness));
     
-    float fresnel = fresnel_again(data.normal, data.cameraPos, 0.08);
+    float fresnel = fresnel_again(data.normal, data.cameraPos, 0.04);
     float fresnelR = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.r);
     float fresnelG = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.g);
     float fresnelB = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.b);
@@ -56,7 +56,7 @@ vec3 MMAL(PostProceessingData data){
     metallic += MMALSkybox(dir, data.roughness) * newBase;
     
     nonmetallic += MMALSkybox(dir, data.roughness) * fresnel;
-    nonmetallic += MMALSkybox(dir, 1.0) * data.diffuseColor;
+    nonmetallic += MMALSkybox(dir, 1.0) *  data.diffuseColor * 1;
     
     return mix(nonmetallic, metallic, data.metalness);
     
@@ -67,8 +67,8 @@ uniform float Time;
 vec4 shade(){
     vec4 color = vec4(0);
     if(currentData.cameraDistance > 0){
-        color.rgb += MMAL(currentData) *1;
+        color.rgb += MMAL(currentData) *0.1;
     }
-    color.rgb += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r)) * pow(textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb, vec3(2.4)) * 2.0;
+    color.rgb += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r)) * pow(textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb, vec3(2.4)) * 1.0;
     return clamp(color, 0.0, 1.0);
 }

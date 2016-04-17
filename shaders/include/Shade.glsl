@@ -10,7 +10,8 @@ float fresnel_again(vec3 normal, vec3 cameraspace, float roughness){
     float fz = roughness;
     float base =  1.0 - abs(dot(normalize(normal), dir));
     float fresnel = (fz + (1-fz)*(pow(base, 5.0)));
-    return fresnel;
+    float angle = 1.0 - base;
+    return fresnel;// + fresnel * pow(abs(angle - 0.62), 2);
 }
 float fresnel_again2(float base, float roughness){
     float fz = roughness;

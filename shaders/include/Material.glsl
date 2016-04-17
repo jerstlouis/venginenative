@@ -165,7 +165,7 @@ float getBump(vec2 uv){
 
 vec3 examineBumpMap(sampler2D bumpTex, vec2 iuv){
     float bc = texture(bumpTex, iuv).r;
-    vec2 dsp = 1.0 / vec2(textureSize(bumpTex, 0)) * 2;
+    vec2 dsp = 1.0 / vec2(textureSize(bumpTex, 0)) * 1;
     float bdx = texture(bumpTex, iuv).r - texture(bumpTex, iuv+vec2(dsp.x, 0)).r;
     float bdy = texture(bumpTex, iuv).r - texture(bumpTex, iuv+vec2(0, dsp.y)).r;
 

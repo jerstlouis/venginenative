@@ -1,28 +1,24 @@
-diffuse 1.0
+diffuse 0.0 0.33 0.95
 #diffuse 0.0
-roughness 0.5
+roughness 0.3
 metalness 1.0
 
-node
-uvscale 10 10
-texture 1aa.png
-target DIFFUSE
-mix REPLACE
+ 
+//node
+//uvscale 10 10
+//texture aaaaa.png
+//target BUMP
+//mix REPLACE
 
 node
 uvscale 10 10
-texture 1h.png
-target DISPLACEMENT
-mix REPLACE
-
-node
-uvscale 10 10
-texture 1n.png
-target NORMAL
-mix REPLACE
-
-node
-uvscale 10 10
-texture 1r.png
+texture aaaaa.png
 target ROUGHNESS
+modifier NEGATIVE
+mix REPLACE
+
+node
+uvscale 10 10
+texture aaaaa.png
+target METALNESS
 mix REPLACE
