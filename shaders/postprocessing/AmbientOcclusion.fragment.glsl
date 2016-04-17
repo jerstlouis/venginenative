@@ -291,14 +291,14 @@ float AmbientOcclusion(){
     float ao = fastAO(8.0, 3);
    // ao += AO(currentData.worldPos, currentData.cameraPos, currentData.normal, currentData.roughness, 2.4,4);
     //ao *= 0.5;
-    #define aolog 225.0
+    #define aolog 32.0
     return clamp(1.0 - ( log2(ao*aolog + 1.0) / log2(aolog + 1.0) ), 0.0, 1.0);
 }
 
 vec4 shade(){
     vec4 color = vec4(0);
     if(currentData.cameraDistance > 0){
-        color.r += AmbientOcclusion();
+        color.r += clamp(AmbientOcclusion(), 0.0, 1.0);
     }
     return color;
 }

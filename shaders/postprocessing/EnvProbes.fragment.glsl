@@ -78,7 +78,38 @@ vec3 raytracePlanes(vec3 origin, vec3 direction){
     return c * EnvProbesLightMultiplier;
 }
 
+vec3 rayMarchDepth(vec3 origin, vec3 direction){
+    float mindist = 999999.0;
+    vec3 closest = origin;
+    vec3 meter = origin;
+    float vis = 1.0;
+    float vvis = 1.0;
+    //roughness = roughness * roughness;
+    float levels = max(0, float(textureQueryLevels(probeTex)) - 1.0);
+    float mx = log2(currentData.roughness*MMAL_LOD_REGULATOR+1)/log2(MMAL_LOD_REGULATOR);
+    meter += direction * 0.25 * 50.0;
+    for(int i=0;i<50;i++){
+        float inter = textureLod(probeTex, normalize(meter - EnvProbePosition), mx * levels).a;
+        float dst = abs(inter - distance(EnvProbePosition, meter));
+        if(  mindist > dst ) {
+            mindist = dst;
+            closest = normalize(meter - EnvProbePosition);
+           // vvis = vis;
+        }
+        meter -= direction * 0.25;
+        vis -= 0.02;
+    }
+    vec3 c = vec3(0);
+    if(mindist < 999990.0){ 
+       // currentData.roughness *= clamp(1.0 - vvis, 0.0, 1.0);
+        c = ENVMMAL(currentData, closest);
+    } else {
+     //   c = ENVMMAL(currentData, meter - EnvProbePosition);
+    }
+    return c * EnvProbesLightMultiplier;
+}
 
+    
 uniform float Time;
 
 vec4 shade(){
@@ -87,7 +118,7 @@ vec4 shade(){
         vec3 reflected = normalize(reflect(currentData.cameraPos, currentData.normal));
         vec3 dir = normalize(mix(reflected, currentData.normal, currentData.roughness));
         float ao = EnvProbesLightMultiplier == 1.0 ? texture(aoxTex, UV).r : 1.0;
-        color.rgb += ao * raytracePlanes(currentData.worldPos, dir) *1;
+        color.rgb += ao * rayMarchDepth(currentData.worldPos, dir) *1;
     }
     //color.rgb += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r)) * pow(textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb, vec3(2.4));
     return clamp(color.rgbb, 0.0, 11.0);

@@ -129,10 +129,10 @@ int main()
     game->setCursorMode(GLFW_CURSOR_DISABLED);
 
     game->onRenderFrame->add([&](int i) {
-      //  if (envRefresh) {
+        if (envRefresh) {
             probe->refresh();
             envRefresh = false;
-       // }
+        }
         if (!cursorFree) {
             float speed = 0.1f;
             if (game->getKeyStatus(GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
