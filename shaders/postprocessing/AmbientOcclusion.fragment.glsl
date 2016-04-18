@@ -291,7 +291,7 @@ float AmbientOcclusion(){
     float ao = fastAO(8.0, 3);
    // ao += AO(currentData.worldPos, currentData.cameraPos, currentData.normal, currentData.roughness, 2.4,4);
     //ao *= 0.5;
-    #define aolog 132.0
+    #define aolog 12.0
     return clamp(1.0 - ( log2(ao*aolog + 1.0) / log2(aolog + 1.0) ), 0.0, 1.0);
 }
 

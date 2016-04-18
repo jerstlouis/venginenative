@@ -92,7 +92,7 @@ vec3 rayMarchDepth(vec3 origin, vec3 direction){
     float weight2 = 1.0;
     for(int i=0;i<50;i++){
         float inter = textureLod(probeTex, normalize(meter - EnvProbePosition), 0).a;
-        float dst = abs(inter - distance(EnvProbePosition, meter)) * 0.1;
+        float dst = 1.0 / (abs(inter - distance(EnvProbePosition, meter)) + 0.1);
         
         closest = normalize(meter - EnvProbePosition);
         weight2 *= dst;
@@ -118,6 +118,6 @@ vec4 shade(){
         float ao = EnvProbesLightMultiplier == 1.0 ? texture(aoxTex, UV).r : 1.0;
         color.rgb += ao * rayMarchDepth(currentData.worldPos, dir) *1;
     }
-    //color.rgb += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r)) * pow(textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb, vec3(2.4));
-    return clamp(color.rgbb, 0.0, 11.0);
+    color.rgb += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r)) * pow(textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb, vec3(2.4));
+    return clamp(color.rgbb, 0.0, 11.0) * 0.25;
 }

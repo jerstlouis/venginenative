@@ -48,8 +48,8 @@ int main()
 
     // mesh loading
 
-    game->world->scene = game->asset->loadSceneFile("sponza.scene");
-   // game->world->scene->addMesh(game->asset->loadMeshFile("icosphere.mesh3d"));
+    game->world->scene = game->asset->loadSceneFile("car.scene");
+  //  game->world->scene->addMesh(game->asset->loadMeshFile("car.mesh3d"));
     /*
     for (int i = 0; i < 11; i++) {
 
@@ -79,11 +79,11 @@ int main()
     planes.push_back(new EnvPlane(glm::vec3(0, 0, 6), glm::vec3(0, 0, -1)));
     planes.push_back(new EnvPlane(glm::vec3(-39, 0, 0), glm::vec3(1, 0, 0)));
     planes.push_back(new EnvPlane(glm::vec3(40, 0, 0), glm::vec3(-1, 0, 0)));
-    */
+    *//*
     EnvProbe* probe1 = new EnvProbe(envRenderer, planes);
-    probe1->transformation->translate(glm::vec3(0, 9, 0));
+    probe1->transformation->translate(glm::vec3(-29, 9, 0));
     game->world->scene->addEnvProbe(probe1);
-    /*
+    
     EnvProbe* probe2 = new EnvProbe(envRenderer, planes);
     probe2->transformation->translate(glm::vec3(29, 9, 0));
     game->world->scene->addEnvProbe(probe2);
@@ -94,8 +94,8 @@ int main()
 
     EnvProbe* probe4 = new EnvProbe(envRenderer, planes);
     probe4->transformation->translate(glm::vec3(0, 9, 29));
-    game->world->scene->addEnvProbe(probe4);*/
-
+    game->world->scene->addEnvProbe(probe4);
+    */
     bool cursorFree = false;
     bool envRefresh = true;
     game->onKeyPress->add([&game, &cursorFree, &cam, &envRefresh](int key) {
@@ -144,10 +144,10 @@ int main()
 
     game->onRenderFrame->add([&](int i) {
         if (envRefresh) {
-            probe1->refresh();
-            //probe2->refresh();
-            //probe3->refresh();
-            //probe4->refresh();
+           // probe1->refresh();
+           // probe2->refresh();
+          //  probe3->refresh();
+          //  probe4->refresh();
             envRefresh = false;
         }
         if (!cursorFree) {
