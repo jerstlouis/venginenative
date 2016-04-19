@@ -21,6 +21,7 @@ public:
     void updateBuffer(const vector<Mesh3dInstance*> &instances);    
 private:
     ShaderStorageBuffer *modelInfosBuffer;
+    ShaderStorageBuffer *drawInfoBuffer;
     vector<int> samplerIndices;
     vector<int> modes;
     vector<int> targets;

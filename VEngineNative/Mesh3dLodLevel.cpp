@@ -11,7 +11,8 @@ Mesh3dLodLevel::Mesh3dLodLevel(Object3dInfo *info, Material *imaterial, float di
     distanceStart = distancestart;
     distanceEnd = distanceend;
     instancesFiltered = 0;
-    modelInfosBuffer = new ShaderStorageBuffer();    
+    modelInfosBuffer = new ShaderStorageBuffer();   
+    drawInfoBuffer = new ShaderStorageBuffer();
     samplerIndices = {};
     modes = {};
     targets = {};
@@ -32,6 +33,7 @@ Mesh3dLodLevel::Mesh3dLodLevel(Object3dInfo *info, Material *imaterial)
     distanceEnd = 99999.0;
     instancesFiltered = 0;
     modelInfosBuffer = new ShaderStorageBuffer();
+    drawInfoBuffer = new ShaderStorageBuffer();
     samplerIndices = {};
     modes = {};
     targets = {};
@@ -52,6 +54,7 @@ Mesh3dLodLevel::Mesh3dLodLevel()
     distanceEnd = 99999.0;
     instancesFiltered = 0;
     modelInfosBuffer = new ShaderStorageBuffer();
+    drawInfoBuffer = new ShaderStorageBuffer();
     samplerIndices = {};
     modes = {};
     targets = {};
@@ -99,6 +102,7 @@ void Mesh3dLodLevel::draw()
     shader->setUniformVector("SourceColorsArray", nodesColors);
 
     modelInfosBuffer->use(0);
+    drawInfoBuffer->use(1);
 
     for (int i = 0; i < textureBinds.size(); i++) {
         textureBinds[i]->use(i);
@@ -110,6 +114,31 @@ void Mesh3dLodLevel::draw()
 
 void Mesh3dLodLevel::setUniforms()
 {
+    /*
+    the layout for buffer is as follows:
+    vec4 DIFFUSE COLOR + w 0
+    vec4 ROUGHNESS METALNESS 0 0
+    ivec4 NodesCount
+    array of struct Node
+
+    struct node is:
+    raw:
+    int sampler index
+    int mode
+    int target
+    int source
+    int modifier
+    vec2 uvscale
+    vec4 color
+    vec4 data
+
+    encoded padded
+    ivec4 sampler, mode, target, source
+    ivec4 modifier
+    vec4 uvscale
+    vec4 color
+    vec4 data
+    */
     samplerIndices.clear();
     modes.clear();
     targets.clear();

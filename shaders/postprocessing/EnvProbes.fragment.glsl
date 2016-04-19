@@ -33,27 +33,25 @@ uniform vec3 EnvProbePlanesPoints[MAX_ENV_PROBE_PLANES];
 uniform vec3 EnvProbePlanesNormals[MAX_ENV_PROBE_PLANES];
 uniform float EnvProbesLightMultiplier;
 
-float intersectPlane(vec3 origin, vec3 direction, vec3 point,vec3 normal)
-{
-    return dot(point - origin, normal) / dot(direction, normal);
-}
+float intersectPlane(vec3 origin, vec3 direction, vec3 point, vec3 normal)
+{ return dot(point - origin, normal) / dot(direction, normal); }
 
 float currentFalloff = 1.0;
 vec3 ENVMMAL(PostProceessingData data, vec3 dir){
     
-    float fresnel = fresnel_again(data.normal, data.cameraPos, 0.08);
+    float fresnel = fresnel_again(data.normal, data.cameraPos, 0.04);
     float fresnelR = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.r);
     float fresnelG = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.g);
     float fresnelB = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.b);
-    vec3 newBase = vec3(fresnelR, fresnelG, fresnelB);
+    vec3 newBase = mix(vec3(fresnelR, fresnelG, fresnelB), data.diffuseColor, data.roughness);
     
     vec3 metallic = vec3(0);
     vec3 nonmetallic = vec3(0);
     
-    metallic += MMALSkybox(dir, data.roughness) * newBase * mix(1.0, currentFalloff, data.roughness);
+    metallic += MMALSkybox(dir, data.roughness) * newBase;
     
-    nonmetallic += MMALSkybox(dir, data.roughness) * fresnel * mix(1.0, currentFalloff, data.roughness);
-    nonmetallic += MMALSkybox(dir, 1.0) * data.diffuseColor * currentFalloff;
+    nonmetallic += MMALSkybox(dir, data.roughness) * mix(fresnel * 1, 0.04, data.roughness);
+    nonmetallic += MMALSkybox(dir, 1.0) *  data.diffuseColor;
     
     return mix(nonmetallic, metallic, data.metalness);
     
@@ -119,5 +117,5 @@ vec4 shade(){
         color.rgb += ao * rayMarchDepth(currentData.worldPos, dir) *1;
     }
     color.rgb += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r)) * pow(textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb, vec3(2.4));
-    return clamp(color.rgbb, 0.0, 11.0) * 0.25;
+    return clamp(color.rgbb, 0.0, 11.0);
 }

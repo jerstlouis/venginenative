@@ -200,6 +200,8 @@ void Renderer::output()
     outputShader->setUniform("FrustumConeBottomLeftToBottomRight", cone->rightBottom - cone->leftBottom);
     outputShader->setUniform("FrustumConeBottomLeftToTopLeft", cone->leftTop - cone->leftBottom);
     quad3dInfo->draw();
+
+    Game::instance->firstFullDrawFinished = true;
 }
 
 void Renderer::recompileShaders()
@@ -214,11 +216,6 @@ void Renderer::recompileShaders()
 void Renderer::deferred()
 {
     vector<Light*> lights = Game::instance->world->scene->getLights();
-    vector<EnvProbe*> probes= Game::instance->world->scene->getEnvProbes();
-
-    for (int i = 0; i < lights.size(); i++) {
-        lights[i]->refreshShadowMap();
-    }
 
     deferredFbo->use(true);
     FrustumCone *cone = currentCamera->cone;
@@ -256,6 +253,9 @@ void Renderer::deferred()
         }
         sphere3dInfo->draw();
     }
+
+    vector<EnvProbe*> probes = Game::instance->world->scene->getEnvProbes();
+
     glCullFace(GL_BACK);
     envProbesShader->use();
     envProbesShader->setUniform("UseAO", useAmbientOcclusion);

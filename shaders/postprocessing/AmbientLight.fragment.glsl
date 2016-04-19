@@ -67,8 +67,8 @@ uniform float Time;
 vec4 shade(){
     vec4 color = vec4(0);
     if(currentData.cameraDistance > 0){
-        color.rgb += MMAL(currentData) *1;
+     //   color.rgb += MMAL(currentData) *1;
     }
-    color.rgb += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r)) * pow(textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb, vec3(2.4)) * 5.0;
+   // color.rgb += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r)) * pow(textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb, vec3(2.4)) * 5.0;
     return clamp(color, 0.0, 1.0);
 }

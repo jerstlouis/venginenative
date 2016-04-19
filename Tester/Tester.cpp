@@ -48,7 +48,7 @@ int main()
 
     // mesh loading
 
-    game->world->scene = game->asset->loadSceneFile("car.scene");
+    game->world->scene = game->asset->loadSceneFile("sponza.scene");
   //  game->world->scene->addMesh(game->asset->loadMeshFile("car.mesh3d"));
     /*
     for (int i = 0; i < 11; i++) {
@@ -79,11 +79,11 @@ int main()
     planes.push_back(new EnvPlane(glm::vec3(0, 0, 6), glm::vec3(0, 0, -1)));
     planes.push_back(new EnvPlane(glm::vec3(-39, 0, 0), glm::vec3(1, 0, 0)));
     planes.push_back(new EnvPlane(glm::vec3(40, 0, 0), glm::vec3(-1, 0, 0)));
-    *//*
+    */
     EnvProbe* probe1 = new EnvProbe(envRenderer, planes);
-    probe1->transformation->translate(glm::vec3(-29, 9, 0));
+    probe1->transformation->translate(glm::vec3(-0, 9, 0));
     game->world->scene->addEnvProbe(probe1);
-    
+    /*
     EnvProbe* probe2 = new EnvProbe(envRenderer, planes);
     probe2->transformation->translate(glm::vec3(29, 9, 0));
     game->world->scene->addEnvProbe(probe2);
@@ -143,13 +143,13 @@ int main()
     game->setCursorMode(GLFW_CURSOR_DISABLED);
 
     game->onRenderFrame->add([&](int i) {
-        if (envRefresh) {
-           // probe1->refresh();
+       // if (envRefresh) {
+            probe1->refresh();
            // probe2->refresh();
           //  probe3->refresh();
           //  probe4->refresh();
             envRefresh = false;
-        }
+       // }
         if (!cursorFree) {
             float speed = 0.1f;
             if (game->getKeyStatus(GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {

@@ -173,6 +173,7 @@ void Game::renderThread()
 
 void Game::onRenderFrameFunc()
 {
+    firstFullDrawFinished = false;
     while (invokeQueue.size() > 0) {
         invokeQueue.front()();
         invokeQueue.pop();
@@ -180,6 +181,10 @@ void Game::onRenderFrameFunc()
     onRenderFrame->invoke(0);
 
     if (world->mainDisplayCamera != nullptr) {
+        vector<Light*> lights = world->scene->getLights();
+        for (int i = 0; i < lights.size(); i++) {
+            lights[i]->refreshShadowMap();
+        }
         renderer->renderToFramebuffer(world->mainDisplayCamera, screenFbo);
     }
 }
