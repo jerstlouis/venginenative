@@ -81,17 +81,17 @@ int main()
     planes.push_back(new EnvPlane(glm::vec3(40, 0, 0), glm::vec3(-1, 0, 0)));
     */
     EnvProbe* probe1 = new EnvProbe(envRenderer, planes);
-    probe1->transformation->translate(glm::vec3(-0, 9, 0));
+    probe1->transformation->translate(glm::vec3(0, 3, 0));
     game->world->scene->addEnvProbe(probe1);
-    /*
+    
     EnvProbe* probe2 = new EnvProbe(envRenderer, planes);
-    probe2->transformation->translate(glm::vec3(29, 9, 0));
+    probe2->transformation->translate(glm::vec3(5, 3, 0));
     game->world->scene->addEnvProbe(probe2);
 
     EnvProbe* probe3 = new EnvProbe(envRenderer, planes);
-    probe3->transformation->translate(glm::vec3(0, 9, -29));
+    probe3->transformation->translate(glm::vec3(-5, 3, 0));
     game->world->scene->addEnvProbe(probe3);
-
+    /*
     EnvProbe* probe4 = new EnvProbe(envRenderer, planes);
     probe4->transformation->translate(glm::vec3(0, 9, 29));
     game->world->scene->addEnvProbe(probe4);
@@ -143,13 +143,13 @@ int main()
     game->setCursorMode(GLFW_CURSOR_DISABLED);
 
     game->onRenderFrame->add([&](int i) {
-       // if (envRefresh) {
+        if (envRefresh) {
             probe1->refresh();
-           // probe2->refresh();
-          //  probe3->refresh();
+            probe2->refresh();
+            probe3->refresh();
           //  probe4->refresh();
             envRefresh = false;
-       // }
+        }
         if (!cursorFree) {
             float speed = 0.1f;
             if (game->getKeyStatus(GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
