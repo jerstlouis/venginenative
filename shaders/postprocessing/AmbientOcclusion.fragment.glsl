@@ -258,29 +258,38 @@ float fastAO(float hemisphereSize, int quality){
     
     float xaon = currentData.cameraDistance;
     float factor = 1.0 / (xaon +1.0);
-    vec2 multiplier = vec2(ratio, 1) * 0.09 * hemisphereSize * factor;
+    vec2 multiplier = vec2(ratio, 1) * 0.03 * factor * hemisphereSize;
     
     float rot = rand2s(UV) * 3.1415 * 2;
 	
 	vec3 normalcenter = currentData.normal;
-    vec2 normproj = normalize(projectvdao(currentData.worldPos + normalize(reflect(currentData.cameraPos, currentData.normal)) * 0.05) - UV);
+    vec2 normproj = normalize(projectvdao(currentData.worldPos + normalcenter * 0.05) - UV);
+	vec3 projref = normalize(reflect(currentData.cameraPos, currentData.normal));
+    vec2 refproj = normalize(projectvdao(currentData.worldPos + projref * 0.05) - UV);
+    float iter = 0.0;
+    float stepsz = 1.0 / xsamples.length();
 		
     mat2 RM = mat2(cos(rot), -sin(rot), sin(rot), cos(rot));
     for(int g=0;g < xsamples.length();g+=quality){
-        vec2 sampl =  RM *  xsamples[g];
-        sampl = faceforward(sampl, -sampl, normproj);
-		vec2 nuv = clamp(UV + ((sampl ) * multiplier), 0.0, 1.0);
+        vec2 sampl = RM * xsamples[g];
+        sampl = faceforward(sampl, -sampl, normproj) * multiplier;
+       // sampl = mix(refproj  * iter * 0.4, sampl * multiplier, currentData.roughness);
+		vec2 nuv = UV + sampl;
 		//if(nuv.x > 1.0 || nuv.x < 0.0 || nuv.y > 1.0 || nuv.y<0.0) continue;
-        float aondata = texture(mrt_Distance_Bump_Tex, nuv).r + 0.0;        
+        float aondata = texture(mrt_Distance_Bump_Tex, nuv).r;    
+        vec3 normdata = texture(mrt_Normal_Metalness_Tex, nuv).rgb;        
 		
 		vec3 dir = normalize((FrustumConeLeftBottom + FrustumConeBottomLeftToBottomRight * nuv.x + FrustumConeBottomLeftToTopLeft * nuv.y));
 		vec3 newpos = dir * aondata;
         
+		float indirectAmount = 1.0 - max(0, dot(normalize(newpos - currentData.cameraPos), normdata)) ;
+      
 		float occ = max(0, dot(normalize(newpos - currentData.cameraPos), normalcenter));
       //  float occ =  smoothstep(0.0, hemisphereSize, xaon - aondata);
 		
-		float fact =  1.0 - clamp(distance(newpos, currentData.cameraPos) - hemisphereSize * factor, 0.0, 1.0);
+		float fact =  1.0 - clamp(distance(newpos, currentData.cameraPos) - 4.0, 0.0, 1.0);
 		outc += occ * fact;
+        iter += stepsz;
     
     }
     return outc / (float(xsamples.length()) / (float(quality)));
@@ -288,10 +297,11 @@ float fastAO(float hemisphereSize, int quality){
 
 float AmbientOcclusion(){
     //float ao = AO(currentData.worldPos, currentData.cameraPos, currentData.normal, currentData.roughness, 8.4,3));
-    float ao = fastAO(8.0, 3);
+    float ao = fastAO(28.0, 3);
+    ao = 1.0 - pow(1.0 - ao, 2.0);
    // ao += AO(currentData.worldPos, currentData.cameraPos, currentData.normal, currentData.roughness, 2.4,4);
     //ao *= 0.5;
-    #define aolog 12.0
+    #define aolog 1.0
     return clamp(1.0 - ( log2(ao*aolog + 1.0) / log2(aolog + 1.0) ), 0.0, 1.0);
 }
 

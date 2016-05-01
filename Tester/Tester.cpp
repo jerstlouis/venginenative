@@ -48,8 +48,11 @@ int main()
 
     // mesh loading
 
-    game->world->scene = game->asset->loadSceneFile("sponza.scene");
-  //  game->world->scene->addMesh(game->asset->loadMeshFile("car.mesh3d"));
+    game->world->scene = game->asset->loadSceneFile("classroom/classroom.scene");  
+    //game->world->scene->getMeshes()[0]->getInstance(0)->transformation->translate(glm::vec3(0, 2.5f, 0));
+    //game->world->scene->getMeshes()[0]->getInstance(0)->transformation->rotate(glm::angleAxis(deg2rad(73.75f), glm::vec3(-0.006f, -0.005f, 1.0f)));
+  //  game->world->scene->addMesh(game->asset->loadMeshFile("treeground.mesh3d"));
+    //game->world->scene->addMesh(game->asset->loadMeshFile("lucy.mesh3d"));
     /*
     for (int i = 0; i < 11; i++) {
 
@@ -67,35 +70,36 @@ int main()
     Light* light = game->asset->loadLightFile("test.light");
     light->type = LIGHT_SPOT;
     light->angle = 90;
+    light->cutOffDistance = 90;
     game->world->scene->addLight(light);
 
     Renderer * envRenderer = new Renderer(512, 512);
     envRenderer->useAmbientOcclusion = false;
     envRenderer->useGammaCorrection = false;
     vector<EnvPlane*> planes = {};
-   /* planes.push_back(new EnvPlane(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)));
+    planes.push_back(new EnvPlane(glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)));/*
     planes.push_back(new EnvPlane(glm::vec3(0, 90, 0), glm::vec3(0, -1, 0)));
     planes.push_back(new EnvPlane(glm::vec3(0, 0, -8), glm::vec3(0, 0, 1)));
     planes.push_back(new EnvPlane(glm::vec3(0, 0, 6), glm::vec3(0, 0, -1)));
     planes.push_back(new EnvPlane(glm::vec3(-39, 0, 0), glm::vec3(1, 0, 0)));
-    planes.push_back(new EnvPlane(glm::vec3(40, 0, 0), glm::vec3(-1, 0, 0)));
-    */
+    planes.push_back(new EnvPlane(glm::vec3(40, 0, 0), glm::vec3(-1, 0, 0)));*/
+    
     EnvProbe* probe1 = new EnvProbe(envRenderer, planes);
-    probe1->transformation->translate(glm::vec3(0, 3, 0));
+    probe1->transformation->translate(glm::vec3(15, 6, 15));
     game->world->scene->addEnvProbe(probe1);
     
     EnvProbe* probe2 = new EnvProbe(envRenderer, planes);
-    probe2->transformation->translate(glm::vec3(5, 3, 0));
+    probe2->transformation->translate(glm::vec3(15, 6, -15));
     game->world->scene->addEnvProbe(probe2);
 
     EnvProbe* probe3 = new EnvProbe(envRenderer, planes);
-    probe3->transformation->translate(glm::vec3(-5, 3, 0));
+    probe3->transformation->translate(glm::vec3(-15, 6, 15));
     game->world->scene->addEnvProbe(probe3);
-    /*
+    
     EnvProbe* probe4 = new EnvProbe(envRenderer, planes);
-    probe4->transformation->translate(glm::vec3(0, 9, 29));
+    probe4->transformation->translate(glm::vec3(-15, 6, -15));
     game->world->scene->addEnvProbe(probe4);
-    */
+    
     bool cursorFree = false;
     bool envRefresh = true;
     game->onKeyPress->add([&game, &cursorFree, &cam, &envRefresh](int key) {
@@ -147,7 +151,7 @@ int main()
             probe1->refresh();
             probe2->refresh();
             probe3->refresh();
-          //  probe4->refresh();
+            probe4->refresh();
             envRefresh = false;
         }
         if (!cursorFree) {

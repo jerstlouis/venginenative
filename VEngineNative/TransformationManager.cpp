@@ -83,7 +83,7 @@ void TransformationManager::scale(vec3 value)
 
 void TransformationManager::rotate(quat value)
 {
-    orientation *= value;
+    orientation = value * orientation;
 }
 
 mat4 TransformationManager::getWorldTransform()

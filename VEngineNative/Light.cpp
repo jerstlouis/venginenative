@@ -49,8 +49,8 @@ void Light::switchShadowMapping(bool value)
 void Light::bindShadowMap(int spot, int cube)
 {
     if (shadowMappingEnabled && depthMap != nullptr && depthCubeMap != nullptr) {
-        depthMap->use(spot);
-        depthCubeMap->use(cube);
+        if (type == LIGHT_SPOT) depthMap->use(spot);
+        else depthCubeMap->use(cube);
     }
 }
 

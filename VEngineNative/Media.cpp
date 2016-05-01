@@ -87,6 +87,15 @@ void Media::searchRecursive(string path)
                 foundDirs.push_back(file.path);
             }
             else {
+                string s = file.path;
+                int c = s.length() - 1;
+                while (s[c] != '/' && c > 0) c--;
+                c--;
+                if (c < 0) c = 0;
+                while (s[c] != '/' && c > 0) c--; // twice
+                c++;
+                s = s.substr(c);
+                mediaMap[s] = file.path;
                 mediaMap[file.name] = file.path;
             }
         }

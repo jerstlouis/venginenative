@@ -18,7 +18,7 @@ vec3 stupidBRDF(vec3 dir, float level, float roughness){
 
 vec3 MMALSkybox(vec3 dir, float roughness){
     //roughness = roughness * roughness;
-    float levels = max(0, float(textureQueryLevels(probeTex)) - 1.0);
+    float levels = max(0, float(textureQueryLevels(probeTex)) - 2.0);
     float mx = log2(roughness*MMAL_LOD_REGULATOR+1)/log2(MMAL_LOD_REGULATOR);
     vec3 result = stupidBRDF(dir, mx * levels, roughness);
     
@@ -71,7 +71,7 @@ vec3 ENVMMALNonMetallicDiffuse(PostProceessingData data, vec3 dir){
     
     return nonmetallic;
     
-}/*
+}
 vec3 raytracePlanes(vec3 origin, vec3 direction){
     float mindist = 999999.0;
     for(int i=0;i<EnvProbePlanesCount;i++){
@@ -85,13 +85,14 @@ vec3 raytracePlanes(vec3 origin, vec3 direction){
         //float att = CalculateFallof(0.05 * abs(dst - mindist));
       //  currentData.roughness = currentData.roughness * (distance(newpos, currentData.worldPos));
         //currentFalloff = att;//CalculateFallof(0.01*distance(newpos, currentData.worldPos));
-        c = ENVMMAL(currentData, newdir);
+        c += ENVMMALMetallic(currentData, newdir);
+        c += ENVMMALNonMetallicDiffuse(currentData, newdir);
     } else {
-        c = ENVMMAL(currentData, direction);
+        c = ENVMMALMetallic(currentData, direction);
     }
     return c * EnvProbesLightMultiplier;
 }
-*/
+
 vec3 rayMarchDepthSpeculars(vec3 origin, vec3 direction){
     vec3 closest = vec3(0,1,0);
     vec3 meter = origin;
@@ -147,9 +148,11 @@ vec4 shade(){
         vec3 reflected = normalize(reflect(currentData.cameraPos, currentData.normal));
         vec3 dir = normalize(mix(reflected, currentData.normal, currentData.roughness));
         float ao = EnvProbesLightMultiplier == 1.0 ? texture(aoxTex, UV).r : 1.0;
-        color.rgb += mix(1.0, ao, currentData.roughness) * rayMarchDepthSpeculars(currentData.worldPos, dir);
-        color.rgb += ao * rayMarchDepthDiffuse(currentData.worldPos, currentData.normal);
+        ao = mix(1.0, ao, currentData.roughness);
+      /*  color.rgb += mix(1.0, ao, currentData.roughness) * rayMarchDepthSpeculars(currentData.worldPos, dir);
+        color.rgb += ao * rayMarchDepthDiffuse(currentData.worldPos, currentData.normal);*/
+       // color.rgb += pow(ao, 3 * (1.0 - currentData.roughness) + 1.0) * raytracePlanes(currentData.worldPos, dir);
     }
-    color.rgb += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r)) * pow(textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb, vec3(2.4));
-    return clamp(color.rgbb, 0.0, 11.0) * 0.33;
+   // color.rgb += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r)) * pow(textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb, vec3(2.4));
+    return clamp(color.rgbb, 0.0, 11.0) * 0.25;
 }

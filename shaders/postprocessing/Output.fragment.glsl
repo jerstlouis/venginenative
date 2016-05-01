@@ -30,5 +30,6 @@ vec3 rgb_to_srgb(vec3 rgb) {
 
 vec4 shade(){    
     vec3 color = fxaa(directTex, UV).rgb + fxaa(alTex, UV).rgb * (UseAO ==1 ? fxaa(aoxTex, UV).r : 1.0);
+    //vec3 color = fxaa(aoxTex, UV).rrr;
     return vec4(rgb_to_srgb(color), textureLod(mrt_Distance_Bump_Tex, UV, 0).r);
 }
