@@ -17,3 +17,9 @@ vec3 transform_vertex(int info, vec3 vertex){
     result += ModelInfos[info].Translation.xyz;
     return result;
 }
+
+vec3 transform_normal(int info, vec3 normal){
+    vec3 result = normal;
+    result *= 1.0 / ModelInfos[info].Scale.xyz;
+    return result;
+}

@@ -31,6 +31,11 @@
 
 #define NODE_SOURCE_COLOR 0
 #define NODE_SOURCE_TEXTURE 1
+
+#define NODE_WRAP_REPEAT 0
+#define NODE_WRAP_MIRRORED 1
+#define NODE_WRAP_BORDER 2
+
 class MaterialNode
 {
 public:
@@ -56,4 +61,5 @@ public:
     int target;
     int modifierflags;
     int source;
+    int wrap;
 };

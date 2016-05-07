@@ -282,12 +282,12 @@ float fastAO(float hemisphereSize, int quality){
 		vec3 dir = normalize((FrustumConeLeftBottom + FrustumConeBottomLeftToBottomRight * nuv.x + FrustumConeBottomLeftToTopLeft * nuv.y));
 		vec3 newpos = dir * aondata;
         
-		float indirectAmount = 1.0 - max(0, dot(normalize(newpos - currentData.cameraPos), normdata)) ;
+		float indirectAmount =  max(0, dot(normalcenter, normdata)) ;
       
-		float occ = max(0, dot(normalize(newpos - currentData.cameraPos), normalcenter));
+		float occ = max(0, dot(normalize(newpos - currentData.cameraPos), normalcenter)) * indirectAmount;
       //  float occ =  smoothstep(0.0, hemisphereSize, xaon - aondata);
 		
-		float fact =  1.0 - clamp(distance(newpos, currentData.cameraPos) - 4.0, 0.0, 1.0);
+		float fact =  1.0 - clamp(distance(newpos, currentData.cameraPos) - 10.1, 0.0, 1.0);
 		outc += occ * fact;
         iter += stepsz;
     
@@ -297,7 +297,7 @@ float fastAO(float hemisphereSize, int quality){
 
 float AmbientOcclusion(){
     //float ao = AO(currentData.worldPos, currentData.cameraPos, currentData.normal, currentData.roughness, 8.4,3));
-    float ao = fastAO(28.0, 3);
+    float ao = fastAO(111.0, 3);
     ao = 1.0 - pow(1.0 - ao, 2.0);
    // ao += AO(currentData.worldPos, currentData.cameraPos, currentData.normal, currentData.roughness, 2.4,4);
     //ao *= 0.5;

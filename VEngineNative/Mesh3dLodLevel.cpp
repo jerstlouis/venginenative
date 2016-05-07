@@ -23,6 +23,7 @@ Mesh3dLodLevel::Mesh3dLodLevel(Object3dInfo *info, Material *imaterial, float di
     nodesColors = {};
     modes = {};
     textureBinds = {};
+    wrapModes = {};
 }
 
 Mesh3dLodLevel::Mesh3dLodLevel(Object3dInfo *info, Material *imaterial)
@@ -44,6 +45,7 @@ Mesh3dLodLevel::Mesh3dLodLevel(Object3dInfo *info, Material *imaterial)
     nodesColors = {};
     modes = {};
     textureBinds = {};
+    wrapModes = {};
 }
 
 Mesh3dLodLevel::Mesh3dLodLevel()
@@ -65,6 +67,7 @@ Mesh3dLodLevel::Mesh3dLodLevel()
     nodesColors = {};
     modes = {};
     textureBinds = {};
+    wrapModes = {};
 }
 
 Mesh3dLodLevel::~Mesh3dLodLevel()
@@ -100,6 +103,7 @@ void Mesh3dLodLevel::draw()
     shader->setUniformVector("UVScaleArray", uvScales);
     shader->setUniformVector("NodeDataArray", nodesDatas);
     shader->setUniformVector("SourceColorsArray", nodesColors);
+    shader->setUniformVector("WrapModesArray", wrapModes);
 
     modelInfosBuffer->use(0);
     drawInfoBuffer->use(1);
@@ -114,31 +118,6 @@ void Mesh3dLodLevel::draw()
 
 void Mesh3dLodLevel::setUniforms()
 {
-    /*
-    the layout for buffer is as follows:
-    vec4 DIFFUSE COLOR + w 0
-    vec4 ROUGHNESS METALNESS 0 0
-    ivec4 NodesCount
-    array of struct Node
-
-    struct node is:
-    raw:
-    int sampler index
-    int mode
-    int target
-    int source
-    int modifier
-    vec2 uvscale
-    vec4 color
-    vec4 data
-
-    encoded padded
-    ivec4 sampler, mode, target, source
-    ivec4 modifier
-    vec4 uvscale
-    vec4 color
-    vec4 data
-    */
     samplerIndices.clear();
     modes.clear();
     targets.clear();
@@ -149,6 +128,7 @@ void Mesh3dLodLevel::setUniforms()
     nodesColors.clear();
     modes.clear();
     textureBinds.clear();
+    wrapModes.clear();
 
     int samplerIndex = 0;
     useGeometryShader = false;
@@ -163,6 +143,7 @@ void Mesh3dLodLevel::setUniforms()
         uvScales.push_back(node->uvScale);
         nodesDatas.push_back(node->data);
         nodesColors.push_back(node->color);
+        wrapModes.push_back(node->wrap);
         if (node->texture != nullptr && node->source == NODE_SOURCE_TEXTURE) {
             textureBinds.push_back(node->texture);
             samplerIndex++;

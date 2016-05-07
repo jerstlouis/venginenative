@@ -27,6 +27,7 @@ private:
     vector<int> targets;
     vector<int> sources;
     vector<int> modifiers;
+    vector<int> wrapModes;
     vector<glm::vec2> uvScales;
     vector<glm::vec4> nodesDatas;
     vector<glm::vec4> nodesColors;

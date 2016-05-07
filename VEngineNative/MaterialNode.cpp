@@ -11,6 +11,7 @@ MaterialNode::MaterialNode(glm::vec4 icolor, glm::vec2 uvScaling, int mixMode, i
     uvScale = uvScaling;
     mixingMode = mixMode;
     target = nodeTarget;
+    wrap = NODE_WRAP_REPEAT;
 }
 
 MaterialNode::MaterialNode(Texture * tex, glm::vec2 uvScaling, int mixMode, int nodeTarget)
@@ -23,6 +24,7 @@ MaterialNode::MaterialNode(Texture * tex, glm::vec2 uvScaling, int mixMode, int 
     uvScale = uvScaling;
     mixingMode = mixMode;
     target = nodeTarget;
+    wrap = NODE_WRAP_REPEAT;
 }
 
 MaterialNode::MaterialNode(glm::vec4 icolor, glm::vec2 uvScaling, int mixMode, int nodeTarget, int modifier)
@@ -35,6 +37,7 @@ MaterialNode::MaterialNode(glm::vec4 icolor, glm::vec2 uvScaling, int mixMode, i
     uvScale = uvScaling;
     mixingMode = mixMode;
     target = nodeTarget;
+    wrap = NODE_WRAP_REPEAT;
 }
 
 MaterialNode::MaterialNode(Texture * tex, glm::vec2 uvScaling, int mixMode, int nodeTarget, int modifier)
@@ -47,6 +50,7 @@ MaterialNode::MaterialNode(Texture * tex, glm::vec2 uvScaling, int mixMode, int 
     uvScale = uvScaling;
     mixingMode = mixMode;
     target = nodeTarget;
+    wrap = NODE_WRAP_REPEAT;
 }
 
 MaterialNode::MaterialNode(glm::vec4 icolor, glm::vec2 uvScaling, int mixMode, int nodeTarget, int modifier, float idata)
@@ -59,6 +63,7 @@ MaterialNode::MaterialNode(glm::vec4 icolor, glm::vec2 uvScaling, int mixMode, i
     uvScale = uvScaling;
     mixingMode = mixMode;
     target = nodeTarget;
+    wrap = NODE_WRAP_REPEAT;
 }
 
 MaterialNode::MaterialNode(Texture * tex, glm::vec2 uvScaling, int mixMode, int nodeTarget, int modifier, float idata)
@@ -71,6 +76,7 @@ MaterialNode::MaterialNode(Texture * tex, glm::vec2 uvScaling, int mixMode, int 
     uvScale = uvScaling;
     mixingMode = mixMode;
     target = nodeTarget;
+    wrap = NODE_WRAP_REPEAT;
 }
 
 MaterialNode::MaterialNode(glm::vec4 icolor, glm::vec2 uvScaling, int mixMode, int nodeTarget, int modifier, glm::vec4 idata)
@@ -83,6 +89,7 @@ MaterialNode::MaterialNode(glm::vec4 icolor, glm::vec2 uvScaling, int mixMode, i
     uvScale = uvScaling;
     mixingMode = mixMode;
     target = nodeTarget;
+    wrap = NODE_WRAP_REPEAT;
 }
 
 MaterialNode::MaterialNode(Texture * tex, glm::vec2 uvScaling, int mixMode, int nodeTarget, int modifier, glm::vec4 idata)
@@ -95,6 +102,7 @@ MaterialNode::MaterialNode(Texture * tex, glm::vec2 uvScaling, int mixMode, int 
     uvScale = uvScaling;
     mixingMode = mixMode;
     target = nodeTarget;
+    wrap = NODE_WRAP_REPEAT;
 }
 
 MaterialNode::MaterialNode()
@@ -107,6 +115,7 @@ MaterialNode::MaterialNode()
     uvScale = glm::vec2(1);
     mixingMode = NODE_MODE_REPLACE;
     target = NODE_TARGET_DIFFUSE;
+    wrap = NODE_WRAP_REPEAT;
 }
 
 MaterialNode::~MaterialNode()

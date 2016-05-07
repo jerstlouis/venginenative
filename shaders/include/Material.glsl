@@ -85,12 +85,17 @@ uniform float Metalness;
 #define MODSOURCE_COLOR 0
 #define MODSOURCE_TEXTURE 1
 
+#define WRAP_REPEAT 0
+#define WRAP_MIRRORED 1
+#define WRAP_BORDER 2
+
 struct NodeImageModifier{
     int samplerIndex;
     int mode;
     int target;
     int modifier;
     int source;
+    int wrap;
     vec2 uvScale;
     vec4 data;
     vec4 soureColor;
@@ -102,6 +107,7 @@ uniform int ModeArray[MAX_NODES];
 uniform int TargetArray[MAX_NODES];
 uniform int SourcesArray[MAX_NODES];
 uniform int ModifiersArray[MAX_NODES];
+uniform int WrapModesArray[MAX_NODES];
 uniform vec2 UVScaleArray[MAX_NODES];
 uniform vec4 NodeDataArray[MAX_NODES];
 uniform vec4 SourceColorsArray[MAX_NODES];
@@ -113,6 +119,7 @@ NodeImageModifier getModifier(int i){
         TargetArray[i],
         ModifiersArray[i],
         SourcesArray[i],
+        WrapModesArray[i],
         UVScaleArray[i],
         NodeDataArray[i],
         SourceColorsArray[i]
@@ -170,6 +177,6 @@ vec3 examineBumpMap(sampler2D bumpTex, vec2 iuv){
     float bdy = texture(bumpTex, iuv).r - texture(bumpTex, iuv+vec2(0, dsp.y)).r;
 
 
-    return normalize(vec3( bdx * 3.1415 * 3.0, bdy * 3.1415 * 3.0,max(0, 1.0 - bdx - bdy)));
+    return normalize(vec3( bdx * 3.1415 * 1.0, bdy * 3.1415 * 1.0,max(0, 1.0 - bdx - bdy)));
 }
 
