@@ -37,6 +37,7 @@ public:
     glm::dvec2 getCursorPosition();
 
     EventHandler<int> *onRenderFrame;
+    EventHandler<int> *onRenderUIFrame;
     EventHandler<int> *onKeyPress;
     EventHandler<int> *onKeyRelease;
     EventHandler<int> *onKeyRepeat;

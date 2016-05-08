@@ -297,7 +297,7 @@ float fastAO(float hemisphereSize, int quality){
 
 float AmbientOcclusion(){
     //float ao = AO(currentData.worldPos, currentData.cameraPos, currentData.normal, currentData.roughness, 8.4,3));
-    float ao = fastAO(111.0, 3);
+    float ao = fastAO(18.0, 3);
     ao = 1.0 - pow(1.0 - ao, 2.0);
    // ao += AO(currentData.worldPos, currentData.cameraPos, currentData.normal, currentData.roughness, 2.4,4);
     //ao *= 0.5;

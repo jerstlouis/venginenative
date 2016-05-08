@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Game.h"
+#include "imgui_impl_glfw_gl3.h"
 
 Game * Game::instance = nullptr;
 
@@ -16,6 +17,7 @@ Game::Game(int windowwidth, int windowheight)
     shaders = new GenericShaders();
     screenFbo = new Framebuffer(width, height, 0);
     onRenderFrame = new EventHandler<int>();
+    onRenderUIFrame = new EventHandler<int>();
     onKeyPress = new EventHandler<int>();
     onKeyRelease = new EventHandler<int>();
     onKeyRepeat = new EventHandler<int>();
@@ -93,16 +95,6 @@ void APIENTRY debugCallback(GLenum source, GLenum type, GLuint id, GLenum severi
         debSource, debType, id, debSev, message);
 }
 
-void glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-    if (action == GLFW_PRESS)
-        Game::instance->onKeyPress->invoke(key);
-    if (action == GLFW_RELEASE)
-        Game::instance->onKeyRelease->invoke(key);
-    if (action == GLFW_REPEAT)
-        Game::instance->onKeyRepeat->invoke(key);
-}
-
 void Game::renderThread()
 {
     if (!glfwInit()) {
@@ -133,13 +125,15 @@ void Game::renderThread()
         return;
     }
 
-    glfwSetKeyCallback(window, glfwKeyCallback);
+//    glfwSetKeyCallback(window, glfwKeyCallback);
 
 #ifdef _DEBUG
     glDebugMessageCallback(&debugCallback, NULL);
 #endif
 
     printf("VERSION: %s\nVENDOR: %s", glGetString(GL_VERSION), glGetString(GL_VENDOR));
+
+    ImGui_ImplGlfwGL3_Init(window, true);
 
     glClearColor(0, 0, 0, 0);
     glClearDepth(1);
@@ -166,7 +160,6 @@ void Game::renderThread()
         onRenderFrameFunc();
 
         glfwSwapBuffers(window);
-        glfwPollEvents();
     }
     shouldClose = true;
 }
@@ -187,4 +180,12 @@ void Game::onRenderFrameFunc()
         }
         renderer->renderToFramebuffer(world->mainDisplayCamera, screenFbo);
     }
+    ImGui_ImplGlfwGL3_NewFrame();
+    glfwPollEvents();
+    onRenderUIFrame->invoke(0);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    ImGui::Render();
+    glDisable(GL_BLEND);
 }

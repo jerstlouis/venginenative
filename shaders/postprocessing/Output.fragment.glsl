@@ -204,9 +204,15 @@ vec3 intersectPlane(vec3 origin, vec3 dir, vec3 point, vec3 normal)
 vec3 getclouds(){
     vec3 p = intersectPlane(CameraPosition, normalize(reconstructCameraSpaceDistance(UV, 1.0)), vec3(0, 500, 0), vec3(0,-1,0));
 	vec2 surfacePosition = p.xz;
-	vec2 position = RM*( surfacePosition * 0.001);
+	vec2 position = RM*( surfacePosition * 0.0003);
 	float c = clouds(position) * fail;
-	return mix(vec3(1), pow(vec3(0.23, 0.33, 0.48), vec3(2.2)), c) * ((1.0 / max(1.0, (distance(CameraPosition, p) - 500.0) * 0.005)));		
+	return mix(vec3(1), pow(vec3(0.23, 0.33, 0.48), vec3(2.2)), c) * ((1.0 / max(1.0, (distance(CameraPosition, p) - 500.0) * 0.0005)));		
+}
+
+vec3 sun(vec3 camdir, vec3 sundir){
+    float dt = max(0, dot(camdir, sundir));
+    //return pow(smoothstep(0.99574189, 0.99996189, dt), 60.0) * vec3(1);
+    return pow(dt*dt*dt*dt*dt, 256.0) * vec3(10) + pow(dt, 128.0) * vec3(0.8);
 }
 
 vec3 atm(vec3 sunpos){
@@ -218,12 +224,12 @@ vec3 atm(vec3 sunpos){
         22.0,                           // intensity of the sun
         6371e3,                         // radius of the planet in meters
         6471e3,                         // radius of the atmosphere in meters
-        vec3(5.5e-6, 13.0e-6, 22.4e-6), // Rayleigh scattering coefficient
+        vec3(2.5e-6, 6.0e-6, 22.4e-6), // Rayleigh scattering coefficient
         21e-6,                          // Mie scattering coefficient
         8e3,                            // Rayleigh scale height
         1.2e3,                          // Mie scale height
         0.758                           // Mie preferred scattering direction
-    ) + getclouds();
+    ) + sun(normalize(reconstructCameraSpaceDistance(UV, 1.0)), sunpos) + smoothstep(0.0, 0.1, dot(vec3(0,-1,0), normalize(reconstructCameraSpaceDistance(UV, 1.0)))) * vec3(1);
     vec3 diffused = atmosphere(
         vec3(0, 1, 0),           // normalized ray direction
         vec3(0,6372e3,0),               // ray origin
@@ -231,7 +237,7 @@ vec3 atm(vec3 sunpos){
         22.0,                           // intensity of the sun
         6371e3,                         // radius of the planet in meters
         6471e3,                         // radius of the atmosphere in meters
-        vec3(5.5e-6, 13.0e-6, 22.4e-6), // Rayleigh scattering coefficient
+        vec3(2.5e-6, 6.0e-6, 22.4e-6), // Rayleigh scattering coefficient
         21e-6,                          // Mie scattering coefficient
         8e3,                            // Rayleigh scale height
         1.2e3,                          // Mie scale height
@@ -244,14 +250,14 @@ vec3 atm(vec3 sunpos){
         22.0,                           // intensity of the sun
         6371e3,                         // radius of the planet in meters
         6471e3,                         // radius of the atmosphere in meters
-        vec3(5.5e-6, 13.0e-6, 22.4e-6), // Rayleigh scattering coefficient
+        vec3(2.5e-6, 6.0e-6, 22.4e-6), // Rayleigh scattering coefficient
         21e-6,                          // Mie scattering coefficient
         8e3,                            // Rayleigh scale height
         1.2e3,                          // Mie scale height
         0.758                           // Mie preferred scattering direction
     );
     diffused *= 0.5;
-    vec3 colorObjects = diffused * (1.0 - (1.0 / (textureLod(mrt_Distance_Bump_Tex, UV, 0).r * 0.001 + 1.0)));
+    vec3 colorObjects = diffused * (1.0 - (1.0 / (textureLod(mrt_Distance_Bump_Tex, UV, 0).r * 0.005 + 1.0)));
     return colorSky * mult + colorObjects * (1.0 - mult);
 }
 
@@ -272,6 +278,6 @@ vec3 Uncharted2Tonemap(vec3 x)
 vec4 shade(){    
     vec3 color = fxaa(directTex, UV).rgb + fxaa(alTex, UV).rgb * (UseAO ==1 ? fxaa(aoxTex, UV).r : 1.0);
     //vec3 color = fxaa(aoxTex, UV).rrr;
-    color += atm(vec3(1,1,0));
-    return vec4(rgb_to_srgb((color )), textureLod(mrt_Distance_Bump_Tex, UV, 0).r);
+    color += atm(normalize(vec3(-1,1,0)));
+    return vec4(rgb_to_srgb((Uncharted2Tonemap(color*3))), textureLod(mrt_Distance_Bump_Tex, UV, 0).r);
 }
