@@ -363,6 +363,7 @@ void ImGui_ImplGlfwGL3_NewFrame()
         ImGui_ImplGlfwGL3_CreateDeviceObjects();
 
     ImGuiIO& io = ImGui::GetIO();
+    io.MouseDrawCursor = true;
 
     // Setup display size (every frame to accommodate for window resizing)
     int w, h;
@@ -400,7 +401,7 @@ void ImGui_ImplGlfwGL3_NewFrame()
     g_MouseWheel = 0.0f;
 
     // Hide OS mouse cursor if ImGui is drawing it
-    glfwSetInputMode(g_Window, GLFW_CURSOR, io.MouseDrawCursor ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
+   // glfwSetInputMode(g_Window, GLFW_CURSOR, io.MouseDrawCursor ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
 
     // Start the frame
     ImGui::NewFrame();

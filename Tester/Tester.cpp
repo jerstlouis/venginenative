@@ -49,19 +49,21 @@ int main()
 
     // mesh loading
 
-   // game->world->scene = game->asset->loadSceneFile("classroom/classroom.scene");  
+    game->world->scene = game->asset->loadSceneFile("sponza.scene");  
     //game->world->scene->getMeshes()[0]->getInstance(0)->transformation->translate(glm::vec3(0, 2.5f, 0));
     //game->world->scene->getMeshes()[0]->getInstance(0)->transformation->rotate(glm::angleAxis(deg2rad(73.75f), glm::vec3(-0.006f, -0.005f, 1.0f)));
   //  game->world->scene->addMesh(game->asset->loadMeshFile("treeground.mesh3d"));
-    auto t = game->asset->loadMeshFile("terrain.mesh3d");
-    game->world->scene->addMesh(t);
+   // auto t = game->asset->loadMeshFile("terrain.mesh3d");
+    //game->world->scene->addMesh(t);
     game->onRenderUIFrame->add([&](int zero) {
         static float f = 0.0f;
+   /*     ImGui::Begin("Test", (bool*)1, 0);
         ImGui::Text("Terrain roughness:");
         ImGui::SliderFloat("roughness", &t->getLodLevel(0)->material->roughness, 0.0f, 1.0f);
         ImGui::Text("Terrain metalness:");
         ImGui::SliderFloat("metalness", &t->getLodLevel(0)->material->metalness, 0.0f, 1.0f);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::End();*/
     });
     /*
     for (int i = 0; i < 11; i++) {

@@ -257,7 +257,7 @@ vec3 atm(vec3 sunpos){
         0.758                           // Mie preferred scattering direction
     );
     diffused *= 0.5;
-    vec3 colorObjects = diffused * (1.0 - (1.0 / (textureLod(mrt_Distance_Bump_Tex, UV, 0).r * 0.005 + 1.0)));
+    vec3 colorObjects = diffused * (1.0 - (1.0 / (textureLod(mrt_Distance_Bump_Tex, UV, 0).r * 0.001 + 1.0)));
     return colorSky * mult + colorObjects * (1.0 - mult);
 }
 
@@ -274,10 +274,17 @@ vec3 Uncharted2Tonemap(vec3 x)
    return ((x*(A*x+C*B)+D*E)/(x*(A*x+B)+D*F))-E/F;
 }
 
+vec3 tonemap(vec3 x){
+    vec3 a = Uncharted2Tonemap(2.0 * x);
+    vec3 white = vec3(1.0) / Uncharted2Tonemap(vec3(W));
+    vec3 c = a * white;
+    return rgb_to_srgb(c);
+}
+
 
 vec4 shade(){    
     vec3 color = fxaa(directTex, UV).rgb + fxaa(alTex, UV).rgb * (UseAO ==1 ? fxaa(aoxTex, UV).r : 1.0);
     //vec3 color = fxaa(aoxTex, UV).rrr;
     color += atm(normalize(vec3(-1,1,0)));
-    return vec4(rgb_to_srgb((Uncharted2Tonemap(color*3))), textureLod(mrt_Distance_Bump_Tex, UV, 0).r);
+    return vec4(tonemap(color), textureLod(mrt_Distance_Bump_Tex, UV, 0).r);
 }
