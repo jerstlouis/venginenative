@@ -49,7 +49,8 @@ vec3 tonemap(vec3 x){
     return rgb_to_srgb(c);
 }
 
-#define CLOUD_SAMPLES 16
+#define CLOUD_SAMPLES 64
+#define CLOUDCOVERAGE_DENSITY 50
 #include Atmosphere.glsl
 
 vec4 shade(){    
