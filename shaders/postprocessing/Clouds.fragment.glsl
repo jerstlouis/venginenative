@@ -2,6 +2,7 @@
 
 #include PostProcessEffectBase.glsl
 
+#define CLOUD_SAMPLES 96
 #include Atmosphere.glsl
 
 vec4 shade(){    

@@ -219,10 +219,18 @@ void Renderer::output()
     outputShader->setUniform("FrustumConeBottomLeftToBottomRight", cone->rightBottom - cone->leftBottom);
     outputShader->setUniform("FrustumConeBottomLeftToTopLeft", cone->leftTop - cone->leftBottom);
     outputShader->setUniform("Time", Game::instance->time);
-    outputShader->setUniform("SunDirection", sunDirection);
-    outputShader->setUniform("AtmosphereScale", atmosphereScale);
     outputShader->setUniform("CloudsFloor", cloudsFloor);
     outputShader->setUniform("CloudsCeil", cloudsCeil);
+    outputShader->setUniform("CloudsThresholdLow", cloudsThresholdLow);
+    outputShader->setUniform("CloudsThresholdHigh", cloudsThresholdHigh);
+    outputShader->setUniform("CloudsWindSpeed", cloudsWindSpeed);
+    outputShader->setUniform("CloudsScale", cloudsScale);
+    outputShader->setUniform("SunDirection", sunDirection);
+    outputShader->setUniform("AtmosphereScale", atmosphereScale);
+    outputShader->setUniform("CloudsDensityScale", cloudsDensityScale);
+    outputShader->setUniform("CloudsDensityThresholdLow", cloudsDensityThresholdLow);
+    outputShader->setUniform("CloudsDensityThresholdHigh", cloudsDensityThresholdHigh);
+
     quad3dInfo->draw();
 
     Game::instance->firstFullDrawFinished = true;
