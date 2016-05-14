@@ -17,6 +17,17 @@ public:
     bool useAmbientOcclusion;
     bool useGammaCorrection;
     float envProbesLightMultiplier;
+    float cloudsFloor;
+    float cloudsCeil;
+    float cloudsThresholdLow;
+    float cloudsThresholdHigh;
+    float cloudsDensityThresholdLow;
+    float cloudsDensityThresholdHigh;
+    float cloudsDensityScale;
+    float cloudsWindSpeed;
+    float atmosphereScale;
+    glm::vec3 cloudsScale;
+    glm::vec3 sunDirection;
     int width;
     int height;
 private:
@@ -56,6 +67,11 @@ private:
     Framebuffer *fogFbo;
     Texture *fogTexture;
     void fog();
+
+    ShaderProgram *cloudsShader;
+    Framebuffer *cloudsFbo;
+    Texture *cloudsTexture;
+    void clouds();
 
     ShaderProgram *motionBlurShader;
     Framebuffer *motionBlurFbo;
