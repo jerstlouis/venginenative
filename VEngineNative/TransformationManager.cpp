@@ -101,3 +101,8 @@ mat4 TransformationManager::getInverseWorldTransform()
     mat4 transmat = glm::translate(mat4(1), -position);
     return rotmat * transmat;
 }
+
+glm::mat4 TransformationManager::getRotationMatrix()
+{
+    return glm::mat4_cast(orientation);
+}

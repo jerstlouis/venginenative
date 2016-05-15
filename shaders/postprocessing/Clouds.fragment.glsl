@@ -2,7 +2,7 @@
 
 #include PostProcessEffectBase.glsl
 
-#define CLOUD_SAMPLES 96
+#define CLOUD_SAMPLES 140
 #define CLOUDCOVERAGE_DENSITY 90
 #include Atmosphere.glsl
 

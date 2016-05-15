@@ -24,7 +24,9 @@ void World::setUniforms(ShaderProgram * shader, Camera *camera)
     shader->use();
     glm::mat4 cameraViewMatrix = camera->transformation->getInverseWorldTransform();
     glm::mat4 vpmatrix = camera->projectionMatrix * cameraViewMatrix;
-    camera->cone->update(camera->transformation->position, vpmatrix);
+    glm::mat4 cameraRotMatrix = camera->transformation->getRotationMatrix();
+    glm::mat4 rpmatrix = camera->projectionMatrix * inverse(cameraRotMatrix);
+    camera->cone->update(inverse(rpmatrix));
     shader->setUniform("VPMatrix", vpmatrix);
     shader->setUniform("Resolution", glm::vec2(Game::instance->width, Game::instance->height));
     shader->setUniform("CameraPosition", camera->transformation->position);

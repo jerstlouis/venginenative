@@ -9,7 +9,7 @@ public:
     glm::vec3 leftTop;
     glm::vec3 rightBottom;
     glm::vec3 rightTop;
-    void update(glm::vec3 iorigin, glm::mat4 viewprojmatrix);
+    void update(glm::mat4 rotprojmatrix);
 private:
-    glm::vec3 getDir(glm::vec3 origin, glm::vec2 uv, glm::mat4 inv);
+    glm::vec3 getDir(glm::vec2 uv, glm::mat4 inv);
 };

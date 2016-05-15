@@ -11,18 +11,16 @@ FrustumCone::~FrustumCone()
 {
 }
 
-void FrustumCone::update(vec3 iorigin, mat4 viewprojmatrix)
+void FrustumCone::update(mat4 rotprojmatrix)
 {
-    origin = iorigin;
-    mat4 inv = inverse(viewprojmatrix);
-    leftBottom = getDir(origin, vec2(-1, -1), inv);
-    rightBottom = getDir(origin, vec2(1, -1), inv);
-    leftTop = getDir(origin, vec2(-1, 1), inv);
-    rightTop = getDir(origin, vec2(1, 1), inv);
+    leftBottom = getDir(vec2(-1, -1), rotprojmatrix);
+    rightBottom = getDir(vec2(1, -1), rotprojmatrix);
+    leftTop = getDir(vec2(-1, 1), rotprojmatrix);
+    rightTop = getDir(vec2(1, 1), rotprojmatrix);
 }
 
-vec3 FrustumCone::getDir(vec3 origin, vec2 uv, mat4 inv)
+vec3 FrustumCone::getDir(vec2 uv, mat4 inv)
 {
     vec4 clip = inv * vec4(uv.x, uv.y, 1.0, 1.0);
-    return normalize(vec3(clip.x, clip.y, clip.z) / clip.w - origin);
+    return normalize(vec3(clip.x, clip.y, clip.z) / clip.w);
 }

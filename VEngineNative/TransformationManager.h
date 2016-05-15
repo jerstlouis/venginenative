@@ -25,4 +25,5 @@ public:
 
     glm::mat4 getWorldTransform();
     glm::mat4 getInverseWorldTransform();
+    glm::mat4 getRotationMatrix();
 };

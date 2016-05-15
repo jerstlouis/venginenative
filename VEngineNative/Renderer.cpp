@@ -24,6 +24,7 @@ Renderer::Renderer(int iwidth, int iheight)
     cloudsScale = glm::vec3(1);
     sunDirection = glm::vec3(0, 1, 0);
     atmosphereScale = 1.0;
+    waterWavesScale = 1.0;
 
     vector<GLfloat> ppvertices = {
         -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
@@ -52,6 +53,7 @@ Renderer::Renderer(int iwidth, int iheight)
     motionBlurShader = new ShaderProgram("PostProcess.vertex.glsl", "MotionBlur.fragment.glsl");
     bloomShader = new ShaderProgram("PostProcess.vertex.glsl", "Bloom.fragment.glsl");
     combineShader = new ShaderProgram("PostProcess.vertex.glsl", "Combine.fragment.glsl");
+    fxaaTonemapShader = new ShaderProgram("PostProcess.vertex.glsl", "FxaaTonemap.fragment.glsl");
 
     skyboxTexture = new CubeMapTexture("posx.jpg", "posy.jpg", "posz.jpg", "negx.jpg", "negy.jpg", "negz.jpg");
     initializeFbos();
@@ -109,6 +111,7 @@ void Renderer::initializeFbos()
     combineTexture = new Texture(width, height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
     combineFbo = new Framebuffer();
     combineFbo->attachTexture(combineTexture, GL_COLOR_ATTACHMENT0);
+
 }
 
 void Renderer::destroyFbos()
@@ -165,7 +168,7 @@ void Renderer::renderToFramebuffer(glm::vec3 position, CubeMapFramebuffer * fboo
         cam->transformation->setPosition(position);
         draw(cam);
         fboout->use();
-        output();
+        fxaaTonemap();
     }
 }
 
@@ -174,7 +177,7 @@ void Renderer::renderToFramebuffer(Camera *camera, Framebuffer * fboout)
     currentCamera = camera;
     draw(camera);
     fboout->use(true);
-    output();
+    fxaaTonemap();
 }
 
 void Renderer::draw(Camera *camera)
@@ -190,6 +193,7 @@ void Renderer::draw(Camera *camera)
     deferred();
     ambientLight();
     clouds();
+    combine();
 }
 
 void Renderer::bloom()
@@ -198,11 +202,8 @@ void Renderer::bloom()
 
 void Renderer::combine()
 {
-}
-
-void Renderer::output()
-{
-    outputShader->use();
+    combineFbo->use(true);
+    combineShader->use();
     mrtDistanceTexture->use(2);
     skyboxTexture->use(3);
     deferredTexture->use(5);
@@ -210,30 +211,49 @@ void Renderer::output()
     ambientOcclusionTexture->use(16);
     cloudsTexture->use(18);
     FrustumCone *cone = currentCamera->cone;
- //   outputShader->setUniform("VPMatrix", vpmatrix);
-    outputShader->setUniform("UseAO", useAmbientOcclusion);
-    outputShader->setUniform("UseGamma", useGammaCorrection);
-    outputShader->setUniform("Resolution", glm::vec2(width, height));
-    outputShader->setUniform("CameraPosition", currentCamera->transformation->position);
-    outputShader->setUniform("FrustumConeLeftBottom", cone->leftBottom);
-    outputShader->setUniform("FrustumConeBottomLeftToBottomRight", cone->rightBottom - cone->leftBottom);
-    outputShader->setUniform("FrustumConeBottomLeftToTopLeft", cone->leftTop - cone->leftBottom);
-    outputShader->setUniform("Time", Game::instance->time);
-    outputShader->setUniform("CloudsFloor", cloudsFloor);
-    outputShader->setUniform("CloudsCeil", cloudsCeil);
-    outputShader->setUniform("CloudsThresholdLow", cloudsThresholdLow);
-    outputShader->setUniform("CloudsThresholdHigh", cloudsThresholdHigh);
-    outputShader->setUniform("CloudsWindSpeed", cloudsWindSpeed);
-    outputShader->setUniform("CloudsScale", cloudsScale);
-    outputShader->setUniform("SunDirection", sunDirection);
-    outputShader->setUniform("AtmosphereScale", atmosphereScale);
-    outputShader->setUniform("CloudsDensityScale", cloudsDensityScale);
-    outputShader->setUniform("CloudsDensityThresholdLow", cloudsDensityThresholdLow);
-    outputShader->setUniform("CloudsDensityThresholdHigh", cloudsDensityThresholdHigh);
+    //   outputShader->setUniform("VPMatrix", vpmatrix);
+    combineShader->setUniform("UseAO", useAmbientOcclusion);
+    combineShader->setUniform("UseGamma", useGammaCorrection);
+    combineShader->setUniform("Resolution", glm::vec2(width, height));
+    combineShader->setUniform("CameraPosition", currentCamera->transformation->position);
+    combineShader->setUniform("FrustumConeLeftBottom", cone->leftBottom);
+    combineShader->setUniform("FrustumConeBottomLeftToBottomRight", cone->rightBottom - cone->leftBottom);
+    combineShader->setUniform("FrustumConeBottomLeftToTopLeft", cone->leftTop - cone->leftBottom);
+    combineShader->setUniform("Time", Game::instance->time);
+    combineShader->setUniform("CloudsFloor", cloudsFloor);
+    combineShader->setUniform("CloudsCeil", cloudsCeil);
+    combineShader->setUniform("CloudsThresholdLow", cloudsThresholdLow);
+    combineShader->setUniform("CloudsThresholdHigh", cloudsThresholdHigh);
+    combineShader->setUniform("CloudsWindSpeed", cloudsWindSpeed);
+    combineShader->setUniform("CloudsScale", cloudsScale);
+    combineShader->setUniform("SunDirection", sunDirection);
+    combineShader->setUniform("AtmosphereScale", atmosphereScale);
+    combineShader->setUniform("CloudsDensityScale", cloudsDensityScale);
+    combineShader->setUniform("CloudsDensityThresholdLow", cloudsDensityThresholdLow);
+    combineShader->setUniform("CloudsDensityThresholdHigh", cloudsDensityThresholdHigh);
+    combineShader->setUniform("WaterWavesScale", waterWavesScale);
+    quad3dInfo->draw();
+}
+void Renderer::fxaaTonemap()
+{
+    fxaaTonemapShader->use();
+    combineTexture->use(16);
+    FrustumCone *cone = currentCamera->cone;
+    fxaaTonemapShader->setUniform("Resolution", glm::vec2(width, height));
+    fxaaTonemapShader->setUniform("CameraPosition", currentCamera->transformation->position);
+    fxaaTonemapShader->setUniform("FrustumConeLeftBottom", cone->leftBottom);
+    fxaaTonemapShader->setUniform("FrustumConeBottomLeftToBottomRight", cone->rightBottom - cone->leftBottom);
+    fxaaTonemapShader->setUniform("FrustumConeBottomLeftToTopLeft", cone->leftTop - cone->leftBottom);
+    fxaaTonemapShader->setUniform("Time", Game::instance->time);
 
     quad3dInfo->draw();
 
     Game::instance->firstFullDrawFinished = true;
+}
+
+void Renderer::output()
+{
+
 }
 
 void Renderer::recompileShaders()
@@ -243,7 +263,8 @@ void Renderer::recompileShaders()
     ambientOcclusionShader->recompile();
     envProbesShader->recompile();
     cloudsShader->recompile();
-    outputShader->recompile();
+    combineShader->recompile();
+    fxaaTonemapShader->recompile();
 }
 
 void Renderer::deferred()
@@ -379,6 +400,7 @@ void Renderer::clouds()
     cloudsShader->setUniform("CloudsDensityScale", cloudsDensityScale);
     cloudsShader->setUniform("CloudsDensityThresholdLow", cloudsDensityThresholdLow);
     cloudsShader->setUniform("CloudsDensityThresholdHigh", cloudsDensityThresholdHigh);
+    cloudsShader->setUniform("WaterWavesScale", waterWavesScale);
 
     cloudsFbo->use(true);
     quad3dInfo->draw();

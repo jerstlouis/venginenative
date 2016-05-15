@@ -26,6 +26,7 @@ public:
     float cloudsDensityScale;
     float cloudsWindSpeed;
     float atmosphereScale;
+    float waterWavesScale;
     glm::vec3 cloudsScale;
     glm::vec3 sunDirection;
     int width;
@@ -72,6 +73,11 @@ private:
     Framebuffer *cloudsFbo;
     Texture *cloudsTexture;
     void clouds();
+
+    ShaderProgram *fxaaTonemapShader;
+   // Framebuffer *fxaaTonemapFbo;
+    //Texture *fxaaTonemapTexture;
+    void fxaaTonemap();
 
     ShaderProgram *motionBlurShader;
     Framebuffer *motionBlurFbo;
