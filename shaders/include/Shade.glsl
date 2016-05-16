@@ -33,8 +33,8 @@ float EnvDFGPolynomial(float green, float roughness, float ndotv )
 }
 
 float fresnel_again(vec3 color, vec3 normal, vec3 cameraspace, float roughness){
-    vec3 dir = normalize(reflect(cameraspace, normal));
-    float fz = roughness;
+    vec3 dir = normalize(reflect(normalize(cameraspace), normal));
+    float fz = color.g;
     float base =  1.0 - abs(dot(normalize(normal), dir));
     float fresnel = (fz + (1-fz)*(pow(base, 5.0)));
     float angle = 1.0 - base;
