@@ -94,7 +94,7 @@ void Renderer::initializeFbos()
     fogFbo = new Framebuffer();
     fogFbo->attachTexture(fogTexture, GL_COLOR_ATTACHMENT0);
 
-    cloudsTexture = new Texture(width / 2, height / 2, GL_RG16F, GL_RG, GL_FLOAT);
+    cloudsTexture = new Texture(width / 1, height / 1, GL_RG16F, GL_RG, GL_FLOAT);
     cloudsFbo = new Framebuffer();
     cloudsFbo->attachTexture(cloudsTexture, GL_COLOR_ATTACHMENT0);
 

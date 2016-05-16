@@ -5,15 +5,42 @@ float CalculateFallof( float dist){
     return 1.0 / (dist * dist * 0.01 + 1.0);
 }
 
-float fresnel_again(vec3 normal, vec3 cameraspace, float roughness){
+float EnvDFGPolynomial(float green, float roughness, float ndotv )
+{
+    float x = pow(1.0 - roughness*0.7, 6.0);
+    float y = ndotv;
+ 
+    float b1 = -0.1688;
+    float b2 = 1.895;
+    float b3 = 0.9903;
+    float b4 = -4.853;
+    float b5 = 8.404;
+    float b6 = -5.069;
+    float bias = clamp( min( b1 * x + b2 * x * x, b3 + b4 * y + b5 * y * y + b6 * y * y * y ), 0.0, 1.0);
+ 
+    float d0 = 0.6045;
+    float d1 = 1.699;
+    float d2 = -0.5228;
+    float d3 = -3.603;
+    float d4 = 1.404;
+    float d5 = 0.1939;
+    float d6 = 2.661;
+    float delta = clamp( d0 + d1 * x + d2 * y + d3 * x * x + d4 * x * y + d5 * y * y + d6 * x * x * x, 0.0, 1.0);
+    float scale = delta - bias;
+ 
+    bias *= clamp( 50.0 * green, 0.0, 1.0);
+    return scale + bias;
+}
+
+float fresnel_again(vec3 color, vec3 normal, vec3 cameraspace, float roughness){
     vec3 dir = normalize(reflect(cameraspace, normal));
     float fz = roughness;
     float base =  1.0 - abs(dot(normalize(normal), dir));
     float fresnel = (fz + (1-fz)*(pow(base, 5.0)));
     float angle = 1.0 - base;
-    return fresnel;// + fresnel * pow(abs(angle - 0.62), 2);
+    return fresnel;
 }
-float fresnel_again2(float base, float roughness){
+float fresnel_again2x(float base, float roughness){
     float fz = roughness;
     float fresnel = (fz + (1-fz)*(pow(base, 5.0)));
     return fresnel;

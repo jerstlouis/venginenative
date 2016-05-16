@@ -14,6 +14,7 @@ uniform float Time;
 uniform float WaterWavesScale;
 
 #include Shade.glsl
+#include noise3D.glsl
 
 #define iSteps 16
 #define jSteps 8
@@ -114,7 +115,7 @@ float noise( in vec3 x ){
     mix(mix( hash(n+800.0), hash(n+801.0),f.x), mix( hash(n+857.0), hash(n+858.0),f.x),f.y),f.z);
     return res;
 }
-
+/*
 float fbm( vec3 p ){
     float f = 0.0;
     f += 0.50000*noise( p ); p = p*2.02;
@@ -124,6 +125,18 @@ float fbm( vec3 p ){
     f += 0.03500*noise( p ); p = p*4.01;
     f += 0.01250*noise( p+(Time * CloudsWindSpeed * 0.4) ); 
     return f/0.984375;
+}*/
+
+#define fbmsamples 4
+float fbm(vec3 p){
+	float a = 0.0;
+    float w = 1.0;
+	for(int i=0;i<fbmsamples;i++){
+		a += noise(p) * w;	
+		p *= 5.0;
+        w *= 0.3;
+	}
+	return a;
 }
 
 vec3 wtim =vec3(0);
@@ -198,8 +211,9 @@ vec2 internalmarchconservative(float scale, vec3 p1, vec3 p2){
     
     for(int i=0;i<stepcount;i++){
         vec3 pos = mix(p1, p2, iter + rd);
-        float clouds = cloudsDensity3D(pos * 0.01 * scale);
         float height = length(vec3(0,planetradius ,0) + pos);
+        float spx = (height - start) * invspan;
+        float clouds = cloudsDensity3D(pos * 0.01 * scale) * (1.0 - smoothstep( 0.3, 0.5, abs(spx - 0.5) ) );
         c += coverageinv * ((height - start) * invspan);
         w += coverageinv;
         //   outpointdst = min(outpointdst, mix(outpointdst, iter + rd, step(0.01, clouds)));
@@ -312,7 +326,7 @@ vec3 shadeWater(vec3 campos, vec3 normal, vec3 viewdir, vec3 worldPos){
     vec3 cmix = mix(vec3(1.0), atmcolor, 1.0 - max(0, dot(normalize(SunDirection), vec3(0,1,0))));
     vec3 cfla = mix(cmix, vec3(0.01),  1.0 - max(0, dot(normalize(SunDirection), vec3(0,1,0))));
   //  cmix *= cfla * smoothstep(0.0, 0.1, max(0, dot(normalize(SunDirection), vec3(0,1,0))));
-    float fresnel = mix(fresnel_again(normal, viewdir, 0.08), 0.0, 0.0);
+    float fresnel = mix(fresnel_again(vec3(0.04), normal, viewdir, 0.08), 0.0, 0.0);
     
     vec3 radiance = reflectionCoefficent * shade(campos, vec3(fresnel), normal, worldPos, worldPos + sundir * 10, cmix, 0.10, true);    
     
@@ -320,7 +334,6 @@ vec3 shadeWater(vec3 campos, vec3 normal, vec3 viewdir, vec3 worldPos){
     return radiance + difradiance ;
 }
 
-#include noise3D.glsl
 
 float sns(vec2 p, float scale, float tscale){
     return snoise(vec3(p.x*scale, p.y*scale, Time * tscale * 0.5));
@@ -391,16 +404,16 @@ vec3 ApplyAtmosphere(vec3 color, vec2 cloudsData){
         //newn.xz *= ;
         vec3 dreflected = reflect(viewdir, normalize(newn));
         if(dot(dreflected, vec3(0,1,0)) < 0) dreflected = normalize(reflect(dreflected, vec3(0,1,0)));
-        //if(height < planetradius) dreflected = refract(viewdir, normalize(-newn), 0.4);
+        if(height < planetradius) dreflected = refract(viewdir, normalize(-newn),  1.4);
         vec3 reflected = getAtmosphereForDirection(realhpos, normalize(dreflected), normalize(SunDirection));
         vec2 res2 = getCloudDensityForDirection(realhpos, normalize(dreflected), 1.0, CloudsFloor, CloudsCeil).rg;
         vec2 res1 = getCloudDensityForDirection(realhpos, normalize(SunDirection), 1.0, CloudsFloor, CloudsCeil).rg;
-        float cloudDiffuse = (1.0 - res1.r) ;
         // vec3 atmxaDiffuse = atmx2(normalize(SunDirection), res1.y);
+        float cloudDiffuse = (1.0 - res1.r) ;
         float cloudReflected = 1.0 - res2.r;
       //  atmcolor = reflected;
         vec3 atmxaReflected = atmx2(normalize(SunDirection), res2.y);
-        float fresnel = mix(fresnel_again(normalize(newn), viewdir, 0.04), 0.0, 0.0);
+        float fresnel = mix(fresnel_again(vec3(0.04), normalize(newn), viewdir, 0.04), 0.0, 0.0);
         if(height < planetradius) fresnel = 1.0 - fresnel;
         reflectionCoefficent = cloudReflected;
         vec3 shaded = shadeWater(campos, normalize(newn), viewdir, rposh)  * (1.0 - fresnel ) * cloudDiffuse + fresnel * mix(atmxaReflected, reflected, cloudReflected);

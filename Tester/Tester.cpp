@@ -180,7 +180,7 @@ int main()
             envRefresh = false;
         }
         if (!cursorFree) {
-            float speed = 10.1f;
+            float speed = 1.1f;
             if (game->getKeyStatus(GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
                 speed *= 0.1f;
             }

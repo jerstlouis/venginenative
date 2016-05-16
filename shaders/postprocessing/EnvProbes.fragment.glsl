@@ -39,10 +39,10 @@ float intersectPlane(vec3 origin, vec3 direction, vec3 point, vec3 normal)
 float currentFalloff = 1.0;
 vec3 ENVMMALMetallic(PostProceessingData data, vec3 dir){
     
-    float fresnelR = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.r);
-    float fresnelG = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.g);
-    float fresnelB = fresnel_again(data.normal, data.cameraPos, data.diffuseColor.b);
-    vec3 newBase = mix(vec3(fresnelR, fresnelG, fresnelB), data.diffuseColor, data.roughness);
+    float fresnelR = fresnel_again(vec3(data.diffuseColor.r), data.normal, data.cameraPos, data.roughness);
+    float fresnelG = fresnel_again(vec3(data.diffuseColor.g), data.normal, data.cameraPos, data.roughness);
+    float fresnelB = fresnel_again(vec3(data.diffuseColor.b), data.normal, data.cameraPos, data.roughness);
+    vec3 newBase = vec3(fresnelR, fresnelG, fresnelB);
     
     vec3 metallic = vec3(0);
     
@@ -51,14 +51,15 @@ vec3 ENVMMALMetallic(PostProceessingData data, vec3 dir){
     return metallic;
     
 }
+
 vec3 ENVMMALNonMetallic(PostProceessingData data, vec3 dir){
     
-    float fresnel = fresnel_again(data.normal, data.cameraPos, 0.04);
+    float fresnel = fresnel_again(vec3(0.04), data.normal, data.cameraPos, data.roughness);
     
     vec3 nonmetallic = vec3(0);
     
-    nonmetallic += MMALSkybox(dir, data.roughness) * mix(fresnel * 1, 0.04, data.roughness);
-    nonmetallic += MMALSkybox(dir, 1.0) *  data.diffuseColor;
+    nonmetallic += MMALSkybox(dir, data.roughness) * fresnel;
+    nonmetallic += MMALSkybox(dir, 1.0) *  data.diffuseColor * (1.0 - fresnel);
     
     return nonmetallic;
     
