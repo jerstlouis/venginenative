@@ -12,6 +12,7 @@ public:
     int components;
     int width, height;
     void use(int unit);
+    void Texture::bind(int unit, int level);
     void pregenerate();
     void generateMipMaps();
 private:

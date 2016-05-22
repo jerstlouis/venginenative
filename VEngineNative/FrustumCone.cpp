@@ -21,6 +21,6 @@ void FrustumCone::update(mat4 rotprojmatrix)
 
 vec3 FrustumCone::getDir(vec2 uv, mat4 inv)
 {
-    vec4 clip = inv * vec4(uv.x, uv.y, 1.0, 1.0);
+    vec4 clip = inv * vec4(uv.x, uv.y, 0.1, 1.0);
     return normalize(vec3(clip.x, clip.y, clip.z) / clip.w);
 }

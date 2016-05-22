@@ -13,11 +13,16 @@ uniform float CloudsDensityThresholdHigh;
 uniform float Time;
 uniform float WaterWavesScale;
 
+
+layout(binding = 18) uniform sampler2D cloudsCloudsTex;
+layout(binding = 19) uniform sampler2D atmScattTex;
+layout(binding = 20) uniform sampler2D cloudsRefShadowTex;
+
 #include Shade.glsl
 #include noise3D.glsl
 
-#define iSteps 16
-#define jSteps 8
+#define iSteps 12
+#define jSteps 6
 
 struct Ray { vec3 o; vec3 d; };
 struct Sphere { vec3 pos; float rad; };
@@ -122,14 +127,22 @@ vec3 atm(vec3 sunpos){
     float mult = 1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r);
     vec3 vdir = getViewDir();
     vec3 colorSky = getAtmosphereForDirection(CameraPosition * AtmosphereScale, vdir, sunpos);
-    atmcolor = getAtmosphereForDirection(vec3(0), normalize(sunpos) + vec3(0, 0.15, 0), sunpos);
+   // atmcolor = getAtmosphereForDirection(vec3(0), normalize(sunpos) + vec3(0, 0.15, 0), sunpos);
    // vec3 colorObjects = diffused * (1.0 - (1.0 / (textureLod(mrt_Distance_Bump_Tex, UV, 0).r * 0.001 + 1.0)));
     return colorSky;// + colorObjects * (1.0 - mult);
 }
 
+float iter = 1.03423;
+float hash2(float n){
+    iter += fract(n*124.972312);
+    return fract(iter);
+}
+
 float hash( float n ){
+   // return fract(mod(n, 6.2526)*758.5453);
     return fract(sin(n)*758.5453);
 }
+
 
 float noise( in vec3 x ){
     vec3 p = floor(x);
@@ -138,6 +151,14 @@ float noise( in vec3 x ){
     float res = mix(mix(mix( hash(n+  0.0), hash(n+  1.0),f.x), mix( hash(n+ 57.0), hash(n+ 58.0),f.x),f.y),
     mix(mix( hash(n+800.0), hash(n+801.0),f.x), mix( hash(n+857.0), hash(n+858.0),f.x),f.y),f.z);
     return res;
+}
+float pn(vec3 p) {
+   vec3 i = floor(p);
+   vec4 a = dot(i, vec3(1., 57., 21.)) + vec4(0., 57., 21., 78.);
+   vec3 f = cos((p-i)*3.1415)*(-.5) + .5;
+   a = mix(sin(cos(a)*a), sin(cos(1.+a)*(1.+a)), f.x);
+   a.xy = mix(a.xz, a.yw, f.y);
+   return mix(a.x, a.y, f.z);
 }
 /*
 float fbm( vec3 p ){
@@ -153,7 +174,11 @@ float fbm( vec3 p ){
 
 #define wind vec3(-1.0, 0.0, 0.0)
 #define fbmsamples 3
-float fbm(vec3 p){
+#define fbm fbm_alu2
+//#define fbm fbm_tex
+
+float fbm_alu(vec3 p){
+    p *= 0.1;
 	float a = 0.0;
     float w = 1.0;
     float w2 = 1.0;
@@ -165,7 +190,14 @@ float fbm(vec3 p){
 	}
 	return a;
 }
+float fbm_alu2(vec3 p){
+    //p *= 0.1;
+   return noise(p)*.5 + noise(p*7.0)*.25 + noise(p*25.0)*.125;
+}
 
+float fbm_new(vec3 p) {
+   return pn(p*.06125)*.5 + pn(p*.125)*.25 + pn(p*.25)*.125;
+}
 vec3 wtim =vec3(0);
 
 float cloudsDensity3D(vec3 pos){
@@ -190,6 +222,27 @@ vec3 viewdirglob = vec3(0,1,0);
 vec3 outpoint = vec3(0);
 float color = 0.0;
 
+float internalmarchconservativeCoverageOnly(float scale, vec3 p1, vec3 p2){
+    float iter = 0.0;
+    float span = CloudsCeil - CloudsFloor;
+    const float stepcount = CLOUD_SAMPLES;
+    const float stepsize = 1.0 / stepcount;
+    float rd = rand2s(UV + vec2(0, 0)) * stepsize;
+    float start = planetradius + CloudsFloor;
+    const float invspan = 1.0 / span;
+    float coverageinv = 1.0;
+    
+    for(int i=0;i<stepcount;i++){
+        vec3 pos = mix(p1, p2, iter + rd);
+        float height = length(vec3(0,planetradius ,0) + pos);
+        float spx = (height - start) * invspan;
+        float clouds = cloudsDensity3D(pos * 0.01 * scale) * (1.0 - smoothstep( 0.3, 0.5, abs(spx - 0.5) ) );
+        coverageinv *= 1.0 - clamp(clouds * stepsize * 11, 0.0, 1.0) * (1.0 - spx);
+        if(coverageinv < 0.04) return 1.0;
+        iter += stepsize;
+    }
+    return 1.0 - coverageinv;
+}
 vec2 internalmarchconservative(float scale, vec3 p1, vec3 p2){
     float iter = 0.0;
     float span = CloudsCeil - CloudsFloor;
@@ -205,8 +258,9 @@ vec2 internalmarchconservative(float scale, vec3 p1, vec3 p2){
     
     float c = 0.0;
     float coverageinv = 1.0;
-    
-    
+    float depth = 0.0;
+    float posc = 0.0;
+    float poscw = 0.0;
     for(int i=0;i<stepcount;i++){
         vec3 pos = mix(p1, p2, iter + rd);
         float height = length(vec3(0,planetradius ,0) + pos);
@@ -214,15 +268,25 @@ vec2 internalmarchconservative(float scale, vec3 p1, vec3 p2){
         float clouds = cloudsDensity3D(pos * 0.01 * scale) * (1.0 - smoothstep( 0.3, 0.5, abs(spx - 0.5) ) );
         c += coverageinv * ((height - start) * invspan);
         w += coverageinv;
+        posc += (iter + rd) * coverageinv;
+        poscw += coverageinv;
         //   outpointdst = min(outpointdst, mix(outpointdst, iter + rd, step(0.01, clouds)));
         coverageinv *= 1.0 - clamp(clouds * stepsize * CLOUDCOVERAGE_DENSITY, 0.0, 1.0);
+       // if(coverageinv < 0.04) break;
+        //depth += clouds;
         // if(coverageinv < 0.03)break;
         iter += stepsize;
     }
+    float iter1 = posc / (poscw + 0.01);
+    vec3 psc = mix(p1, p2, iter1);
+    
+    Ray r = Ray(vec3(0,planetradius ,0) +psc, normalize(SunDirection));
+    float hitceil = rsi2(r, sphere2);
+    float covershadw = 1.0 ;//- internalmarchconservativeCoverageOnly(scale, psc, psc + r.d * hitceil);
     if(w > 0.01) c /= w;
     // outpoint = mix(p1, p2, outpointdst);
     // if(distance(outpoint, p1) > 50000) outpoint = p1 + normalize(outpoint - p1) * 50000;
-    return vec2(1.0 - coverageinv, c);
+    return vec2(1.0 - coverageinv, c * covershadw);
 }
 #define intersects(a) (a >= 0.0)
 vec2 raymarchCloudsRay(vec3 campos, vec3 viewdir, float scale, float floord, float ceiling){
@@ -278,10 +342,24 @@ vec2 getCloudDensityForDirection(vec3 origin, vec3 dir, float scale, float floor
     wtim = wind * Time * CloudsWindSpeed;
     return raymarchCloudsRay(origin, dir, scale, floord, ceiling);
 }
+float outcloudsref = 0.0;
 vec2 raymarchCloudsConservative(float scale, float floord, float ceiling){
     vec3 campos = CameraPosition * AtmosphereScale;
     vec3 viewdir = getViewDir();
-    
+    vec3 atmorg = vec3(0, planetradius, 0) + campos;  
+    float height = length(atmorg);
+    Ray r = Ray(atmorg, viewdir);
+    float planethit = rsi2(r, planet);
+    vec3 hitpos = atmorg + viewdir * planethit;
+    vec3 realhpos = campos + viewdir * planethit;
+    vec3 rposh = realhpos;
+    realhpos.y = 4.1;
+    vec3 hitnorm = normalize(hitpos);
+    /*if(planethit >=0){
+        campos = realhpos;
+        viewdir = normalize(reflect(viewdir, hitnorm));
+        outcloudsref = 1.0;
+    }*/
     return getCloudDensityForDirection(campos, viewdir, scale, floord, ceiling);
 }
 
@@ -316,12 +394,13 @@ float stars(vec3 viewdir){
     return pow(smoothstep(0.997, 1.0, ns), 3.0) * fbm(vec3(a*100.0, b*100.0, Time*2.0));
 }
 
-vec2 CloudsGetCloudsCoverageShadow(){
-    return raymarchCloudsConservative(1, CloudsFloor, CloudsCeil);
+vec3 CloudsGetCloudsCoverageShadow(){
+    vec2 r = raymarchCloudsConservative(1, CloudsFloor, CloudsCeil);
+    return vec3(r.r * (1.0 - outcloudsref), r.g, r.r * outcloudsref);
 }
 float reflectionCoefficent = 1.0;
-vec3 shadeWater(vec3 campos, vec3 normal, vec3 viewdir, vec3 worldPos){
-    vec3 cmix = mix(vec3(1.0), atmcolor, 1.0 - max(0, dot(normalize(SunDirection), vec3(0,1,0))));
+vec3 shadeWater(vec3 campos, vec3 normal, vec3 viewdir, vec3 worldPos, vec3 atmcolorx){
+    vec3 cmix = mix(vec3(1.0), atmcolorx, 1.0 - max(0, dot(normalize(SunDirection), vec3(0,1,0))));
     vec3 cfla = mix(cmix, vec3(0.01),  1.0 - max(0, dot(normalize(SunDirection), vec3(0,1,0))));
   //  cmix *= cfla * smoothstep(0.0, 0.1, max(0, dot(normalize(SunDirection), vec3(0,1,0))));
     float fresnel = fresnel_again(vec3(0.04), normal, viewdir, 0.00);
@@ -329,7 +408,7 @@ vec3 shadeWater(vec3 campos, vec3 normal, vec3 viewdir, vec3 worldPos){
     vec3 radiance = reflectionCoefficent * shade(campos, vec3(fresnel), normal, worldPos, worldPos + sundir * 10, cmix, 0.10, true);    
     
     vec3 difradiance = shadeDiffuse(campos, vec3(0.0, 0.06, 0.1), normal, worldPos, worldPos + sundir * 10, cmix, 1, true);
-    return radiance * fresnel + difradiance * (1.0 - fresnel);
+    return difradiance * (1.0 - fresnel);
 }
 
 
@@ -368,8 +447,46 @@ vec3 getwaterna( vec2 position ) {
     float c = getwater(position - m.yx);
     return normalize(vec3(a - b,1,a-c));
 }
+vec2 distortUV(vec2 uv, vec2 displ){
+	return uv - vec2(displ) * 0.2;
+}
 
-vec3 ApplyAtmosphere(vec3 color, vec2 cloudsData){
+vec3 ApplyAtmosphereJustClouds(vec3 color, vec2 cloudsData){
+    return vec3(cloudsData.y * cloudsData.x);
+    color += atm(normalize(SunDirection));
+    vec3 atmcolor1 = atmx2(normalize(SunDirection), cloudsData.y);
+    color += stars(getViewDir());
+    color += sun(getViewDir(), normalize(SunDirection));
+    return mix(color, atmcolor1, cloudsData.r);
+}
+
+vec3 AtmScatt(){
+  //return mix(color, vec3(1), cloudsData.r);
+   // float mult = 1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r);
+    //if(mult < 0.5) return vec3(0);
+    vec3 campos = CameraPosition * AtmosphereScale;
+    vec3 viewdir = getViewDir();
+    vec3 atmorg = vec3(0, planetradius, 0) + campos;  
+    float height = length(atmorg);
+    Ray r = Ray(atmorg, viewdir);
+    float planethit = rsi2(r, planet);
+    vec3 hitpos = atmorg + viewdir * planethit;
+    vec3 realhpos = campos + viewdir * planethit;
+    vec3 rposh = realhpos;
+    vec3 hitnorm = normalize(hitpos);
+    vec3 color = vec3(0);
+    if(planethit > 0){
+        vec3 newn = normalize(hitnorm);
+        vec3 dreflected = reflect(viewdir, newn);
+        if(dot(dreflected, newn) < 0) dreflected = normalize(reflect(dreflected, newn));
+        color += getAtmosphereForDirection(rposh, normalize(dreflected), normalize(SunDirection));
+    } else {
+        color += getAtmosphereForDirection(CameraPosition * AtmosphereScale, viewdir, normalize(SunDirection));
+    }
+    return color;
+}
+
+vec4 CloudsRefShadow(){
     //return mix(color, vec3(1), cloudsData.r);
     vec3 campos = CameraPosition * AtmosphereScale;
     vec3 viewdir = getViewDir();
@@ -381,10 +498,36 @@ vec3 ApplyAtmosphere(vec3 color, vec2 cloudsData){
     vec3 realhpos = campos + viewdir * planethit;
     vec3 rposh = realhpos;
     realhpos.y = 4.1;
-    vec3 hitnorm = normalize(hitpos * vec3(1.0, 0.9, 1.0));
+    vec3 hitnorm = normalize(hitpos);
+    vec4 color = vec4(0);
+    if(planethit > 0){
+        vec3 newn = normalize(hitnorm);
+        vec3 dreflected = reflect(viewdir, newn);
+        if(dot(dreflected, newn) < 0) dreflected = normalize(reflect(dreflected, newn));
+        vec3 reflected = getAtmosphereForDirection(rposh, normalize(dreflected), normalize(SunDirection));
+        vec2 res2 = getCloudDensityForDirection(realhpos, normalize(dreflected), 1.0, CloudsFloor, CloudsCeil).rg;
+        vec2 res1 = getCloudDensityForDirection(realhpos, normalize(SunDirection), 1.0, CloudsFloor, CloudsCeil).rg;
+        color = vec4(res2.x, res2.y, res1.x, res1.y);
+    } 
+    return color;
+}
+
+vec3 ApplyAtmosphere(vec3 color, vec2 cloudsData){
+    //return texture(cloudsRefShadowTex, UV).rgg;
+    vec3 campos = CameraPosition * AtmosphereScale;
+    vec3 viewdir = getViewDir();
+    vec3 atmorg = vec3(0, planetradius, 0) + campos;  
+    float height = length(atmorg);
+    Ray r = Ray(atmorg, viewdir);
+    float planethit = rsi2(r, planet);
+    vec3 hitpos = atmorg + viewdir * planethit;
+    vec3 realhpos = campos + viewdir * planethit;
+    vec3 rposh = realhpos;
+    realhpos.y = 4.1;
+    vec3 hitnorm = normalize(hitpos);
     vec3 atmcolor1 = vec3(0);
     if(planethit > 0){
-        vec3 atmxa = atm(normalize(SunDirection));
+        vec3 atmxa = texture(atmScattTex, UV).rgb;
         atmcolor1 = atmx2(normalize(SunDirection), cloudsData.y);
         float precisionw = 0.03;
         float precisionsp = 0.16;
@@ -398,35 +541,41 @@ vec3 ApplyAtmosphere(vec3 color, vec2 cloudsData){
     //  newn.xz *= 0.0;*/
         float vmultiplier = height < planetradius ? max(0, dot(normalize(hitnorm), viewdir)) : max(0, dot(-normalize(hitnorm), viewdir));
         vec3 wn = getwatern(realhpos.xz * 0.001);
-        vec3 newn = hitnorm + wn * vec3(0.8,0,0.8) * vmultiplier * WaterWavesScale;
+        vec3 newn = normalize(hitnorm + wn * vec3(0.8,0,0.8) * vmultiplier * WaterWavesScale);
        // newn.xz *= 0.3;
         // newn = hitnorm;
         //newn.xz *= ;
-        vec3 dreflected = reflect(viewdir, normalize(newn));
-        viewdir = dreflected;
-        if(dot(dreflected, hitnorm) < 0) dreflected = normalize(reflect(dreflected, vec3(0,1,0)));
+        float rough = (1.0 - vmultiplier) * WaterWavesScale * 0.1;
+        vec3 dreflected = reflect(viewdir, newn);
+        if(dot(dreflected, newn) < 0) dreflected = normalize(reflect(dreflected, newn));
        // if(height < planetradius) dreflected = refract(viewdir, normalize(-newn),  1.4);
-        vec3 reflected = getAtmosphereForDirection(rposh, normalize(dreflected), normalize(SunDirection));
-        vec2 res2 = getCloudDensityForDirection(realhpos, normalize(dreflected), 1.0, CloudsFloor, CloudsCeil).rg;
-        vec2 res1 = getCloudDensityForDirection(realhpos, normalize(SunDirection), 1.0, CloudsFloor, CloudsCeil).rg;
+        vec3 reflected = texture(atmScattTex, UV).rgb;
+        vec2 res2 = textureLod(cloudsRefShadowTex, distortUV(UV, newn.xz), mix(0.0, 3.0, rough)).rg;
+        vec2 res1 = texture(cloudsRefShadowTex, UV).ba;
         // vec3 atmxaDiffuse = atmx2(normalize(SunDirection), res1.y);
         float cloudDiffuse = (1.0 - res1.r) ;
+        
+        //vec2 cloudReflectedA = texture(cloudsCloudsTex, distortUV(UV, newn.xz)).bg;
         float cloudReflected = 1.0 - res2.r;
       //  atmcolor = reflected;
-        vec3 atmxaReflected = atmx2(normalize(SunDirection), res2.y);
-        float fresnel = fresnel_again(vec3(0.04), normalize(newn), viewdir, 0.04);
+     // cloudsData.r = 0.0;
+        vec3 atmxaReflected = atmx2(normalize(SunDirection), res2.g);
+        float fresnel = fresnel_again(vec3(0.04), newn, viewdir, 0.04);
         if(height < planetradius) fresnel = 1.0 - fresnel;
         reflectionCoefficent = cloudReflected;
-        vec3 shaded = shadeWater(campos, normalize(newn), viewdir, realhpos)  * cloudDiffuse + fresnel * mix(atmxaReflected, reflected, cloudReflected);
+        vec3 shaded = shadeWater(campos, newn, viewdir, realhpos, atmxa)  * cloudDiffuse + fresnel * mix(atmxaReflected, reflected, cloudReflected);
+        shaded += sun(dreflected, normalize(SunDirection)) * cloudReflected ;
         //if(height < planetradius) shaded *= 1.0 - pow(clamp(planethit / 600.0, 0.0, 1.0), 2.0);
         color += shaded;
-        color += stars(normalize(dreflected)) * max(0.0, 1.0 - WaterWavesScale * 2.0);
+        color += stars(normalize(dreflected)) * max(0.0, 1.0 - WaterWavesScale * 2.0) * cloudReflected * (fresnel);
+        viewdir = dreflected;
     } else {
-        color += atm(normalize(SunDirection));
+        color += texture(atmScattTex, UV).rgb;
         atmcolor1 = atmx2(normalize(SunDirection), cloudsData.y);
         color += stars(getViewDir());
         color += sun(getViewDir(), normalize(SunDirection));
     }
     float mult = 1.0 ;//- smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r);
+  //  return viewdir * (UV.x < 0.5 && planethit > 0 ? 0.0 : 1.0);
     return mix(color, atmcolor1, cloudsData.r);
 }

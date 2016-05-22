@@ -69,6 +69,10 @@ void Texture::use(int unit)
     glBindTexture(GL_TEXTURE_2D, handle);
 }
 
+void Texture::bind(int unit, int level) {
+    glBindImageTexture(unit, handle, 0, false, 0, GL_WRITE_ONLY, GL_R16F);
+}
+
 void Texture::generate()
 {
     glGenTextures(1, &handle);

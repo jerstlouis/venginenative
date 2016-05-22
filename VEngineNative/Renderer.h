@@ -5,6 +5,7 @@
 #include "CubeMapFramebuffer.h";
 #include "ShaderProgram.h";
 #include "Object3dInfo.h";
+#include "Texture3d.h";
 class Renderer
 {
 public:
@@ -69,9 +70,18 @@ private:
     Texture *fogTexture;
     void fog();
 
+    ShaderProgram *cloudsReflectionsShadowsShader;
+    Framebuffer *cloudsReflectionsShadowsFbo;
+    Texture *cloudsReflectionsShadowsTexture;
+
     ShaderProgram *cloudsShader;
     Framebuffer *cloudsFbo;
     Texture *cloudsTexture;
+
+    ShaderProgram *atmosphereScatterShader;
+    Framebuffer *atmosphereScatterFbo;
+    Texture *atmosphereScatterTexture;
+
     void clouds();
 
     ShaderProgram *fxaaTonemapShader;

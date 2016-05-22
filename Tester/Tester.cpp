@@ -32,7 +32,7 @@ int main()
 {
     Media::loadFileMap("../../media");
     Media::loadFileMap("../../shaders");
-    Game *game = new Game(1200, 720);
+    Game *game = new Game(1280, 720);
     game->start();
     volatile bool ready = false;
     game->invoke([&ready]() {
@@ -41,7 +41,7 @@ int main()
     while (!ready);
 
     Camera *cam = new Camera();
-    cam->createProjectionPerspective(deg2rad(110.0f), (float)game->width / (float)game->height, 0.01f, 1000);
+    cam->createProjectionPerspective(deg2rad(55.0f), (float)game->width / (float)game->height, 0.01f, 1000);
     cam->transformation->translate(glm::vec3(0, 0, 4));
     glm::quat rot = glm::quat_cast(glm::lookAt(cam->transformation->position, glm::vec3(0), glm::vec3(0, 1, 0)));
     cam->transformation->setOrientation(rot);
@@ -55,9 +55,10 @@ int main()
   //  game->world->scene->addMesh(game->asset->loadMeshFile("treeground.mesh3d"));
   //  auto t = game->asset->loadMeshFile("terrain.mesh3d");
   //  game->world->scene->addMesh(t);
+    bool isOpened = true;
     game->onRenderUIFrame->add([&](int zero) {
         static float f = 0.0f;
-        ImGui::Begin("Test", (bool*)1, 0);
+        ImGui::Begin("Test", &isOpened, 0);
     //    ImGui::Text("Terrain roughness:");
    //     ImGui::SliderFloat("roughness", &t->getLodLevel(0)->material->roughness, 0.0f, 1.0f);
    //     ImGui::Text("Terrain metalness:");

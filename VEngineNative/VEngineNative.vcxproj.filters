@@ -147,6 +147,9 @@
     <ClInclude Include="imgui_impl_glfw_gl3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Texture3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -243,6 +246,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="imgui_impl_glfw_gl3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture3d.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

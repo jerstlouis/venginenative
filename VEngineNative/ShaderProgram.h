@@ -3,9 +3,11 @@ class ShaderProgram
 {
 public:
     ShaderProgram(string vertex, string fragment, string geometry = "", string tesscontrol = "", string tesseval = "");
+    ShaderProgram(string compute);
     ~ShaderProgram();
     void recompile();
     void use();
+    void dispatch(GLuint groups_x, GLuint groups_y, GLuint groups_z);
     void setUniform(const string &name, const GLint &value);
     void setUniform(const string &name, const GLuint &value);
 
@@ -44,6 +46,7 @@ private:
     string geometryFile;
     string tessControlFile;
     string tessEvalFile;
+    string computeFile;
     map<string, GLint> uniformLocationsMap;
 
     GLint getUniformLocation(const string &name);

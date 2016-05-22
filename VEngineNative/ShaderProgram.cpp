@@ -13,6 +13,11 @@ ShaderProgram::ShaderProgram(string vertex, string fragment, string geometry, st
     tessEvalFile = tesseval;
     generated = false;
 }
+ShaderProgram::ShaderProgram(string compute)
+{
+    computeFile = compute;
+    generated = false;
+}
 
 ShaderProgram::~ShaderProgram()
 {
@@ -30,6 +35,12 @@ void ShaderProgram::use()
         compile();
     current = this;
     glUseProgram(handle);
+}
+
+void ShaderProgram::dispatch(GLuint groups_x, GLuint groups_y, GLuint groups_z)
+{
+    if (current != this) use();
+    glDispatchCompute(groups_x, groups_y, groups_z);
 }
 
 void ShaderProgram::setUniform(const string &name, const GLint &value)
@@ -182,9 +193,14 @@ void ShaderProgram::compile()
 {
     uniformLocationsMap = {};
     handle = glCreateProgram();
-    GLuint vertexHandle = compileSingleShader(GL_VERTEX_SHADER, vertexFile, Media::readString(vertexFile));
-    glAttachShader(handle, vertexHandle);
-
+    if (computeFile != "") {
+        GLuint computeHandle = compileSingleShader(GL_COMPUTE_SHADER, computeFile, Media::readString(computeFile));
+        glAttachShader(handle, computeHandle);
+    }
+    if (vertexFile != "") {
+        GLuint vertexHandle = compileSingleShader(GL_VERTEX_SHADER, vertexFile, Media::readString(vertexFile));
+        glAttachShader(handle, vertexHandle);
+    }
     if (fragmentFile != "") {
         GLuint fragmentHandle = compileSingleShader(GL_FRAGMENT_SHADER, fragmentFile, Media::readString(fragmentFile));
         glAttachShader(handle, fragmentHandle);
