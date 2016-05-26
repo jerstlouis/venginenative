@@ -176,7 +176,15 @@ float fbm( vec3 p ){
 #define fbmsamples 3
 #define fbm fbm_alu2
 //#define fbm fbm_tex
-
+float noise2x(vec3 p) //Thx to Las^Mercury
+{
+	vec3 i = floor(p);
+	vec4 a = dot(i, vec3(1., 57., 21.)) + vec4(0., 57., 21., 78.);
+	vec3 f = cos((p-i)*acos(-1.))*(-.5)+.5;
+	a = mix(sin(cos(a)*a),sin(cos(1.+a)*(1.+a)), f.x);
+	a.xy = mix(a.xz, a.yw, f.y);
+	return mix(a.x, a.y, f.z) * 0.5 + 0.5;
+}
 float fbm_alu(vec3 p){
     p *= 0.1;
 	float a = 0.0;
@@ -192,7 +200,7 @@ float fbm_alu(vec3 p){
 }
 float fbm_alu2(vec3 p){
     //p *= 0.1;
-   return noise(p)*.5 + noise(p*7.0)*.25 + noise(p*25.0)*.125;
+   return noise(p * 0.06)*.75 + noise2x(p*3.0)*.25;// + noise2x(p*25.0)*.125;// + noise2x(p*100.0 + wind * Time * 0.01)*.125;
 }
 
 float fbm_new(vec3 p) {
@@ -416,19 +424,16 @@ float sns(vec2 p, float scale, float tscale){
     return snoise(vec3(p.x*scale, p.y*scale, Time * tscale * 0.5));
 }
 float getwater( vec2 position ) {
-
-    float color = 0.0;
-    float superweirdcoefficent = (snoise(vec3(position * 0.07 + wind.xz * Time * 0.1 * CloudsWindSpeed, Time * 0.1)) * 0.5 + 0.5) * 0.2 + 0.8;
-     color += sns(position + vec2(Time/3, Time/13), 0.1, 1.2) * 1;
-    // color += sns(position, 0.1, 1.2) * 25;
-    //color += sns(position, 0.25, 2.)*3;
-    //color += sns(position, 0.38, 3.)*1;
-   // color += sns(position * (wind.xz * CloudsWindSpeed * 2.0 + vec2(4.0)) + vec2(Time/3, Time/13), 1., 2.)*10.4;
-    color += sns(position, 1.0 * superweirdcoefficent, 6.)*0.2;
-    color += sns(position, 2.231 * superweirdcoefficent, 6.)*0.1;
-    //color += sns(position, 7., -2.)*0.07;
-    color += sns(position, 7., -2.) * 0.01;
-    return color * 0.33;
+    vec3 p = vec3(position, Time);
+    p *= 0.01;
+	float a = 0.0;
+    float w = 1.0;
+	for(int i=0;i<5;i++){
+        w *= 0.5;
+		a += snoise(p + wind * Time * w * 0.1) * w;	
+		p = p * 4.0;
+	}
+	return a;
 
 }
 vec3 getwatern( vec2 position ) {
@@ -448,7 +453,7 @@ vec3 getwaterna( vec2 position ) {
     return normalize(vec3(a - b,1,a-c));
 }
 vec2 distortUV(vec2 uv, vec2 displ){
-	return uv - vec2(displ) * 0.2;
+	return uv - vec2(displ) * 0.1;
 }
 
 vec3 ApplyAtmosphereJustClouds(vec3 color, vec2 cloudsData){
