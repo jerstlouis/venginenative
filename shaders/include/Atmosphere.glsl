@@ -13,6 +13,9 @@ uniform float CloudsDensityThresholdHigh;
 uniform float Time;
 uniform float WaterWavesScale;
 
+//#define swap_zero_cmp(a,b,c) a=a*(1.0-sign(c))+b*sign(c)
+#define logic_zero_cmp(a,b,c) mix(a,b,sign(c))
+
 
 layout(binding = 18) uniform sampler2D cloudsCloudsTex;
 layout(binding = 19) uniform sampler2D atmScattTex;
@@ -173,8 +176,8 @@ float fbm( vec3 p ){
 }*/
 
 #define wind vec3(-1.0, 0.0, 0.0)
-#define fbmsamples 3
-#define fbm fbm_alu2
+#define fbmsamples 4
+#define fbm fbm_alu
 //#define fbm fbm_tex
 float noise2x(vec3 p) //Thx to Las^Mercury
 {
@@ -192,8 +195,21 @@ float fbm_alu(vec3 p){
     float w2 = 1.0;
 	for(int i=0;i<fbmsamples;i++){
         w *= 0.5;
-		a += noise(p) * w;	
-		p = p * 7.0 - (1.0 + CloudsWindSpeed) * (1.0 - w2) * wind * Time;
+		a += noise2x(p) * w;	
+		p = p * 7.0;
+        w2 *= 0.7;
+	}
+	return a;
+}
+float fbm_alu_low(vec3 p){
+    p *= 0.1;
+	float a = 0.0;
+    float w = 1.0;
+    float w2 = 1.0;
+	for(int i=0;i<fbmsamples - 2;i++){
+        w *= 0.5;
+		a += noise2x(p) * w;	
+		p = p * 7.0;
         w2 *= 0.7;
 	}
 	return a;
@@ -204,13 +220,21 @@ float fbm_alu2(vec3 p){
 }
 
 float fbm_new(vec3 p) {
-   return pn(p*.06125)*.5 + pn(p*.125)*.25 + pn(p*.25)*.125;
+   return noise2x(p*.06125)*.5 + noise2x(p*.125)*.25 + noise2x(p*.25)*.125;
 }
 vec3 wtim =vec3(0);
 
 float cloudsDensity3D(vec3 pos){
     vec3 ps = pos * CloudsScale + wtim;
     float density = 1.0 - fbm(ps * 0.05);
+    density *= smoothstep(CloudsDensityThresholdLow, CloudsDensityThresholdHigh, 1.0 - fbm(ps * 0.005 * CloudsDensityScale));
+    
+    float init = smoothstep(CloudsThresholdLow, CloudsThresholdHigh,  density);
+    return  init;
+}
+float cloudsDensity3DLow(vec3 pos){
+    vec3 ps = pos * CloudsScale + wtim;
+    float density = 1.0 - fbm_alu_low(ps * 0.05);
     density *= smoothstep(CloudsDensityThresholdLow, CloudsDensityThresholdHigh, 1.0 - fbm(ps * 0.005 * CloudsDensityScale));
     
     float init = smoothstep(CloudsThresholdLow, CloudsThresholdHigh,  density);
@@ -234,29 +258,71 @@ float internalmarchconservativeCoverageOnly(float scale, vec3 p1, vec3 p2){
     float iter = 0.0;
     float span = CloudsCeil - CloudsFloor;
     const float stepcount = CLOUD_SAMPLES;
-    const float stepsize = 1.0 / stepcount;
+    const float stepsize = 190.0;
     float rd = rand2s(UV + vec2(0, 0)) * stepsize;
     float start = planetradius + CloudsFloor;
     const float invspan = 1.0 / span;
     float coverageinv = 1.0;
+    //int i = 0;
+    float dista = min(40000.0, distance(p1, p2));
+    vec3 dire = normalize(p2 - p1);
     
-    for(int i=0;i<stepcount;i++){
-        vec3 pos = mix(p1, p2, iter + rd);
+    while(iter < dista){
+        vec3 pos = p1 + dire * (iter + rd);
         float height = length(vec3(0,planetradius ,0) + pos);
         float spx = (height - start) * invspan;
         float clouds = cloudsDensity3D(pos * 0.01 * scale) * (1.0 - smoothstep( 0.3, 0.5, abs(spx - 0.5) ) );
         coverageinv *= 1.0 - clamp(clouds * stepsize * 11, 0.0, 1.0) * (1.0 - spx);
-        if(coverageinv < 0.04) return 1.0;
+        if(coverageinv < 0.02) return 1.0;
         iter += stepsize;
     }
     return 1.0 - coverageinv;
 }
+
+vec3 preciseStart = vec3(0), preciseEnd = vec3(0);
+bool primarySearch(float scale, vec3 p1, vec3 p2){
+ float iter = 0.0;
+    float span = CloudsCeil - CloudsFloor;
+    // float stepcount = mix(300, 64, span / distance(p1, p2));
+    const float stepcount = CLOUD_SAMPLES;
+    const float stepsize = 140.0;
+    float rd = rand2s(UV + vec2(0, 0)) * stepsize;
+    float shadow = 0.0;
+    //float outpointdst = 1.0;
+    float w = 0.0;
+    const float invspan = 1.0 / span;
+    float start = planetradius + CloudsFloor;
+    
+    float coverageinv = 1.0;
+    //int i = 0;
+    float dista = min(40000.0, distance(p1, p2));
+    vec3 dire = normalize(p2 - p1);
+    float powaflow = 0.5;
+    preciseStart = logic_zero_cmp(p1, preciseStart, 1.0 - coverageinv);
+    while(iter < dista){
+        vec3 pos = p1 + dire * (iter + rd);
+        float height = length(vec3(0,planetradius ,0) + pos);
+        float spx = (height - start) * invspan;
+        float clouds = cloudsDensity3D(pos * 0.01 * scale) * (1.0 - smoothstep( 0.3, 0.5, abs(spx - 0.5) ) );
+        coverageinv *= 1.0 - clamp(clouds * CLOUDCOVERAGE_DENSITY, 0.0, 1.0);
+        preciseStart = logic_zero_cmp(pos, preciseStart, 1.0 - coverageinv);
+        iter += stepsize;
+        if(coverageinv < 0.02) {preciseEnd = p1 + dire * (iter + rd); return true;}
+        powaflow = min(3.0, powaflow * 2.0);
+    }
+    return false;
+}
+
 vec2 internalmarchconservative(float scale, vec3 p1, vec3 p2){
+    bool resz = primarySearch(scale, p1, p2);
+    if(!resz) return vec2(0,1);
+    p1 = preciseStart;
+    p2 = preciseEnd;
     float iter = 0.0;
     float span = CloudsCeil - CloudsFloor;
     // float stepcount = mix(300, 64, span / distance(p1, p2));
     const float stepcount = CLOUD_SAMPLES;
-    const float stepsize = 1.0 / stepcount;
+    const float stepsize = 15.0;
     float rd = rand2s(UV + vec2(0, 0)) * stepsize;
     float shadow = 0.0;
     //float outpointdst = 1.0;
@@ -269,21 +335,27 @@ vec2 internalmarchconservative(float scale, vec3 p1, vec3 p2){
     float depth = 0.0;
     float posc = 0.0;
     float poscw = 0.0;
-    for(int i=0;i<stepcount;i++){
-        vec3 pos = mix(p1, p2, iter + rd);
+    //int i = 0;
+    float dista = min(4000.0, distance(p1, p2));
+    vec3 dire = normalize(p2 - p1);
+    float powaflow = 0.01;
+    while(iter < dista){
+        vec3 pos = p1 + dire * (iter + rd);
         float height = length(vec3(0,planetradius ,0) + pos);
         float spx = (height - start) * invspan;
         float clouds = cloudsDensity3D(pos * 0.01 * scale) * (1.0 - smoothstep( 0.3, 0.5, abs(spx - 0.5) ) );
-        c += coverageinv * ((height - start) * invspan);
-        w += coverageinv;
+        float clouds2 = cloudsDensity3DLow(pos * 0.01 * scale) * (1.0 - smoothstep( 0.3, 0.5, abs(spx - 0.5) ) );
+        c += spx * abs(clamp(clouds2 * CLOUDCOVERAGE_DENSITY, 0.0, 1.0)) * 1;
+        w += 1.0;
         posc += (iter + rd) * coverageinv;
         poscw += coverageinv;
         //   outpointdst = min(outpointdst, mix(outpointdst, iter + rd, step(0.01, clouds)));
-        coverageinv *= 1.0 - clamp(clouds * stepsize * CLOUDCOVERAGE_DENSITY, 0.0, 1.0);
-       // if(coverageinv < 0.04) break;
+        coverageinv *= 1.0 - clamp(clouds * CLOUDCOVERAGE_DENSITY, 0.0, 1.0);
+        if(coverageinv < 0.02) break;
         //depth += clouds;
         // if(coverageinv < 0.03)break;
-        iter += stepsize;
+        iter += stepsize * powaflow;
+        powaflow = min(3.0, powaflow * 2.0);
     }
     float iter1 = posc / (poscw + 0.01);
     vec3 psc = mix(p1, p2, iter1);
@@ -294,9 +366,13 @@ vec2 internalmarchconservative(float scale, vec3 p1, vec3 p2){
     if(w > 0.01) c /= w;
     // outpoint = mix(p1, p2, outpointdst);
     // if(distance(outpoint, p1) > 50000) outpoint = p1 + normalize(outpoint - p1) * 50000;
-    return vec2(1.0 - coverageinv, c * covershadw);
+    return vec2(1.0 - coverageinv, clamp(c * covershadw, 0.0, 1.0));
 }
+
+
 #define intersects(a) (a >= 0.0)
+
+
 vec2 raymarchCloudsRay(vec3 campos, vec3 viewdir, float scale, float floord, float ceiling){
     viewdirglob = viewdir;
     vec3 atmorg = vec3(0,planetradius ,0) + campos;  
