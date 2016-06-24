@@ -7,7 +7,7 @@
 #include Atmosphere.glsl
 
 vec4 shade(){    
-    vec4 val = CloudsRefShadow();
-    return val;
-    //return vec4(0);
+    //vec4 val = CloudsRefShadow();
+    //return val;
+    return vec4(0);
 }
