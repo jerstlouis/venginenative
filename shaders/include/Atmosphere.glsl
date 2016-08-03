@@ -13,9 +13,6 @@ uniform float CloudsDensityThresholdHigh;
 uniform float Time;
 uniform float WaterWavesScale;
 
-//#define swap_zero_cmp(a,b,c) a=a*(1.0-sign(c))+b*sign(c)
-#define logic_zero_cmp(a,b,c) mix(a,b,sign(c))
-
 
 layout(binding = 18) uniform sampler2D cloudsCloudsTex;
 layout(binding = 19) uniform sampler2D atmScattTex;
@@ -30,8 +27,30 @@ layout(binding = 20) uniform sampler2D cloudsRefShadowTex;
 struct Ray { vec3 o; vec3 d; };
 struct Sphere { vec3 pos; float rad; };
 
+bool shouldBreak(){
+   vec2 position = UV * 2.0 - 1.0;
+    if(length(position)> 1.0) return true;
+    else return false;    
+}
+
 vec3 getViewDir(){
-    return normalize(reconstructCameraSpaceDistance(UV, 1.0));
+    //return normalize(reconstructCameraSpaceDistance(UV, 1.0));
+    vec2 fdir = UV * 2.0 - 1.0;
+    if(length(fdir)<= 1.0){	
+		float mixer = sqrt(1.0 - fdir.x*fdir.x - fdir.y * fdir.y);
+		return vec3(fdir.x, mixer, fdir.y);
+	}
+    return vec3(0, -1, 0);
+}
+vec2 reverseViewDir(){
+ //   return UV;
+    vec3 dir = normalize(reconstructCameraSpaceDistance(UV, 1.0));
+    if(dir.y > 0){	
+		vec2 fdir = normalize(dir.xz);
+		float mixer = sqrt(1.0 - dot(dir, vec3(0,1,0)));
+		return mix(vec2(0,0), fdir, mixer) * 0.5 + 0.5;
+	}
+    return vec2(0, 0);
 }
 
 float planetradius = 6371e3;
@@ -135,10 +154,10 @@ vec3 atm(vec3 sunpos){
     return colorSky;// + colorObjects * (1.0 - mult);
 }
 
-float iter = 1.03423;
+//float iter = 1.03423;
 float hash2(float n){
-    iter += fract(n*124.972312);
-    return fract(iter);
+   // iter = fract(n*17.131783223);
+    return fract(abs((n+165.23123119)*17.131783223));
 }
 
 float hash( float n ){
@@ -176,7 +195,7 @@ float fbm( vec3 p ){
 }*/
 
 #define wind vec3(-1.0, 0.0, 0.0)
-#define fbmsamples 3
+#define fbmsamples 8
 #define fbm fbm_alu
 //#define fbm fbm_tex
 float noise2x(vec3 p) //Thx to Las^Mercury
@@ -189,30 +208,16 @@ float noise2x(vec3 p) //Thx to Las^Mercury
 	return mix(a.x, a.y, f.z) * 0.5 + 0.5;
 }
 float fbm_alu(vec3 p){
-    p *= 0.1;
+   // p *= 0.1;
 	float a = 0.0;
     float w = 1.0;
 	for(int i=0;i<fbmsamples;i++){
-        w *= 0.5;
+        //p += noise(vec3(a));
 		a += noise(p) * w;	
+        w *= 0.5;
 		p = p * 3.0;
 	}
-	return a;
-}
-
-
-float fbm_alu_low(vec3 p){
-    p *= 0.1;
-	float a = 0.0;
-    float w = 1.0;
-    float w2 = 1.0;
-	for(int i=0;i<fbmsamples - 2;i++){
-        w *= 0.5;
-		a += noise2x(p) * w;	
-		p = p * 7.0;
-        w2 *= 0.7;
-	}
-	return a;
+	return a;// + noise(p * 100.0) * 11;
 }
 float fbm_alu2(vec3 p){
     //p *= 0.1;
@@ -220,24 +225,14 @@ float fbm_alu2(vec3 p){
 }
 
 float fbm_new(vec3 p) {
-   return noise2x(p*.06125)*.5 + noise2x(p*.125)*.25 + noise2x(p*.25)*.125;
+   return pn(p*.06125)*.5 + pn(p*.125)*.25 + pn(p*.25)*.125;
 }
 vec3 wtim =vec3(0);
 
-float fbm_step_res = 0.0;
 float cloudsDensity3D(vec3 pos){
-    vec3 ps = pos * CloudsScale + wtim;
-    float density = 1.0 - fbm(ps * 0.05);
-    fbm_step_res = density;
-    density *= smoothstep(CloudsDensityThresholdLow, CloudsDensityThresholdHigh, 1.0 - fbm(ps * 0.005 * CloudsDensityScale));
-    
-    float init = smoothstep(CloudsThresholdLow, CloudsThresholdHigh,  density);
-    return  init;
-}
-float cloudsDensity3DLow(vec3 pos){
-    vec3 ps = pos * CloudsScale + wtim;
-    float density = 1.0 - fbm_alu_low(ps * 0.05);
-    density *= smoothstep(CloudsDensityThresholdLow, CloudsDensityThresholdHigh, 1.0 - fbm(ps * 0.005 * CloudsDensityScale));
+    vec3 ps = pos * CloudsScale;// + wtim;
+    float density = 1.0 - fbm(ps * 0.05 );
+   // density *= smoothstep(CloudsDensityThresholdLow, CloudsDensityThresholdHigh, 1.0 - fbm(ps * 0.005 * CloudsDensityScale));
     
     float init = smoothstep(CloudsThresholdLow, CloudsThresholdHigh,  density);
     return  init;
@@ -259,73 +254,63 @@ float color = 0.0;
 float internalmarchconservativeCoverageOnly(float scale, vec3 p1, vec3 p2){
     float iter = 0.0;
     float span = CloudsCeil - CloudsFloor;
-    const float stepcount = CLOUD_SAMPLES;
-    const float stepsize = 190.0;
-    float rd = rand2s(UV + vec2(0, 0)) * stepsize;
+    const float stepcount = 32;
+    const float stepsize = 1.0 / stepcount;
+    float rd = rand2s(UV * vec2(Time, Time)) * stepsize;
     float start = planetradius + CloudsFloor;
     const float invspan = 1.0 / span;
     float coverageinv = 1.0;
-    //int i = 0;
-    float dista = min(40000.0, distance(p1, p2));
-    vec3 dire = normalize(p2 - p1);
     
-    while(iter < dista){
-        vec3 pos = p1 + dire * (iter + rd);
+    for(int i=0;i<stepcount ;i++){
+        vec3 pos = mix(p1, p2, iter + rd);
         float height = length(vec3(0,planetradius ,0) + pos);
         float spx = (height - start) * invspan;
-        float clouds = cloudsDensity3D(pos * 0.01 * scale) * (1.0 - smoothstep( 0.3, 0.5, abs(spx - 0.5) ) );
-        coverageinv *= 1.0 - clamp(clouds * stepsize * 11, 0.0, 1.0) * (1.0 - spx);
-        if(coverageinv < 0.02) return 1.0;
+        float clouds = cloudsDensity3D(pos * 0.01 * scale);// * (1.0 - smoothstep( 0.3, 0.5, abs(spx - 0.5) ) );
+        coverageinv -= clamp(clouds, 0.0, 1.0)  * 0.2;
+        coverageinv = max(0.0, coverageinv);
+        if(coverageinv <= 0.01) break;
+       // if(coverageinv < 0.04) return 1.0;
         iter += stepsize;
     }
-    return 1.0 - coverageinv;
+    return clamp(coverageinv, 0.0, 1.0);
 }
 
-vec3 preciseStart = vec3(0), preciseEnd = vec3(0);
-bool primarySearch(float scale, vec3 p1, vec3 p2){
- float iter = 0.0;
-    float span = CloudsCeil - CloudsFloor;
-    // float stepcount = mix(300, 64, span / distance(p1, p2));
-    const float stepcount = CLOUD_SAMPLES;
-    const float stepsize = 140.0;
-    float rd = rand2s(UV + vec2(0, 0)) * stepsize;
-    float shadow = 0.0;
-    //float outpointdst = 1.0;
-    float w = 0.0;
-    const float invspan = 1.0 / span;
-    float start = planetradius + CloudsFloor;
-    
-    float coverageinv = 1.0;
-    //int i = 0;
-    float dista = min(40000.0, distance(p1, p2));
-    vec3 dire = normalize(p2 - p1);
-    float powaflow = 0.5;
-    preciseStart = logic_zero_cmp(p1, preciseStart, 1.0 - coverageinv);
-    while(iter < dista){
-        vec3 pos = p1 + dire * (iter );
-        float height = length(vec3(0,planetradius ,0) + pos);
-        float spx = (height - start) * invspan;
-        float clouds = cloudsDensity3D(pos * 0.01 * scale) * (1.0 - smoothstep( 0.3, 0.5, abs(spx - 0.5) ) );
-        coverageinv *= 1.0 - clamp(clouds * CLOUDCOVERAGE_DENSITY, 0.0, 1.0);
-        preciseStart = logic_zero_cmp(pos, preciseStart, 1.0 - coverageinv);
-        iter += stepsize;
-        if(coverageinv < 0.002) {preciseEnd = p1 + dire * (iter ); return true;}
-        powaflow = min(3.0, powaflow * 2.0);
-    }
-    return false;
+float hash1x = 0.0;
+vec3 randdir(){
+    float x = rand2s(UV * hash1x);
+    hash1x += 34.5451;
+    float y = rand2s(UV * hash1x);
+    hash1x += 3.62123;
+    float z = rand2s(UV * hash1x);
+    hash1x += 8.4652344;
+    return (vec3(
+        x, y, z
+    ) * 2.0 - 1.0);
 }
-/*
-vec2 internalmarchconservative(float scale, vec3 p1, vec3 p2){
-   // bool resz = primarySearch(scale, p1, p2);
-    //if(!resz) return vec2(0,1);
-    //p1 = preciseStart;
-   // p2 = preciseEnd;
+vec3 fukpos = vec3(0);
+float getAOPos(float scale, vec3 pos){
+    float a = 0;
+    for(int x=0;x<2;x++){
+        vec3 dir = normalize(randdir());
+        Ray r = Ray(vec3(0,planetradius ,0) +pos, dir);
+        float hitceil = rsi2(r, sphere2);
+        vec3 posceil = pos + dir * hitceil;
+        a +=internalmarchconservativeCoverageOnly(scale, pos, posceil);
+    }
+    return a ;
+}
+vec3 startpos; 
+vec3 ssdir;
+vec4 internalmarchconservative(float scale, vec3 p1, vec3 p2){ 
+    startpos = p1;
+    ssdir = normalize(p2 - p1);
     float iter = 0.0;
     float span = CloudsCeil - CloudsFloor;
     // float stepcount = mix(300, 64, span / distance(p1, p2));
-    const float stepcount = CLOUD_SAMPLES;
-    const float stepsize = 5.0;
-    float rd = rand2s(UV + vec2(0, 0)) * stepsize;
+    const float stepcount = 10;
+    const float stepsize = 1.0 / stepcount;
+    float rd = rand2s(UV * vec2(Time, Time)) * stepsize;
+    hash1x = rand2s(UV * vec2(Time, Time));
     float shadow = 0.0;
     //float outpointdst = 1.0;
     float w = 0.0;
@@ -337,23 +322,16 @@ vec2 internalmarchconservative(float scale, vec3 p1, vec3 p2){
     float depth = 0.0;
     float posc = 0.0;
     float poscw = 0.0;
-    //int i = 0;
-    float dista = min(4000.0, distance(p1, p2));
-  //  return vec2(1.0, dista * 0.0001);
-    vec3 dire = normalize(p2 - p1);
-    float powaflow = 0.01;
-    float steps = 0.0;
-    while(iter < dista){
-        vec3 pos = p1 + dire * (iter );
+    vec3 pos = vec3(0);
+    for(int i=0;i<stepcount;i++){
+        pos = mix(p1, p2, iter + rd);
         float height = length(vec3(0,planetradius ,0) + pos);
         float spx = (height - start) * invspan;
-        float clouds = cloudsDensity3D(pos * 0.01 * scale) * (1.0 - smoothstep( 0.3, 0.5, abs(spx - 0.5) ) );
-        
-        coverageinv *= 1.0 - clamp(clouds * CLOUDCOVERAGE_DENSITY, 0.0, 1.0);
-        //if(coverageinv < 0.02) break;
-        
-        iter += max(stepsize, (1.0 - fbm_step_res) * 45.0);
-        steps += 1.0;
+        float clouds = cloudsDensity3D(pos * 0.01 * scale);// * (1.0 - smoothstep( 0.3, 0.5, abs(spx - 0.5) ) );
+        coverageinv *= 1.0 - clamp(clouds, 0.0, 1.0) * 1;
+        coverageinv = max(0.0, coverageinv);
+        if(coverageinv <= 0.01) break;
+        iter += stepsize;
     }
     float iter1 = posc / (poscw + 0.01);
     vec3 psc = mix(p1, p2, iter1);
@@ -364,39 +342,11 @@ vec2 internalmarchconservative(float scale, vec3 p1, vec3 p2){
     if(w > 0.01) c /= w;
     // outpoint = mix(p1, p2, outpointdst);
     // if(distance(outpoint, p1) > 50000) outpoint = p1 + normalize(outpoint - p1) * 50000;
-    return vec2(1.0, steps * 0.001);
-}*/
-
-float cloud(vec3 p)
-{
-	p-=fbm(vec3(p.x,p.y,0.0)*0.5)*2.25;
-	return fbm(p);
+    float dst = coverageinv == 1.0 ? 999999999 : distance(CameraPosition, pos);
+    return vec4(1.0 - clamp(coverageinv, 0.0, 1.0), c, dst, 1.0);
 }
-
-float distanceField(vec3 pos){
-    return fbm(pos * 0.01) * 11.0;
-}
-
-vec2 internalmarchconservative(float scale, vec3 p1, vec3 p2){
-    vec3 dire = normalize(p2 - p1);
-    float dista = min(4000.0, distance(p1, p2));
-    float iter = 0.0;
-    while(iter < dista){
-        vec3 pos = p1 + dire * iter;
-        float dist = distanceField(pos);
-        if(dist < 0.2){
-            return vec2(1.0, iter * 0.0001);
-        }
-        iter += max(64.0, dist);
-    }
-    return vec2(0.0);
-}
-
-
 #define intersects(a) (a >= 0.0)
-
-
-vec2 raymarchCloudsRay(vec3 campos, vec3 viewdir, float scale, float floord, float ceiling){
+vec4 raymarchCloudsRay(vec3 campos, vec3 viewdir, float scale, float floord, float ceiling){
     viewdirglob = viewdir;
     vec3 atmorg = vec3(0,planetradius ,0) + campos;  
     Ray r = Ray(atmorg, viewdir);
@@ -417,7 +367,7 @@ vec2 raymarchCloudsRay(vec3 campos, vec3 viewdir, float scale, float floord, flo
     float dststart = 0.0;
     float dstend = 0.0;
     float coverageinv = 1.0;
-    vec2 res = vec2(0);
+    vec4 res = vec4(0);
     if(height < cloudslow){
         if(planethit < 0){
             res = internalmarchconservative(scale, campos + viewdir * hitfloor, campos + viewdir * hitceil);
@@ -426,8 +376,9 @@ vec2 raymarchCloudsRay(vec3 campos, vec3 viewdir, float scale, float floord, flo
         if(intersects(hitfloor)){
             res = internalmarchconservative(scale, campos, campos + viewdir * floorminhit);
             if(!intersects(planethit)){
-                vec2 r2 = internalmarchconservative(scale, campos + viewdir * floormaxhit, campos + viewdir * ceilmaxhit);
+                vec4 r2 = internalmarchconservative(scale, campos + viewdir * floormaxhit, campos + viewdir * ceilmaxhit);
                 res.g = mix(r2.g, res.g, res.r);
+                res.b = mix(r2.b, res.b, res.r);
                 res.r =1.0 - (1.0 - res.r) * (1.0 - r2.r);
             }
         } else {
@@ -435,7 +386,7 @@ vec2 raymarchCloudsRay(vec3 campos, vec3 viewdir, float scale, float floord, flo
         }
     } else if(height > cloudshigh){
         if(!intersects(hitfloor) && !intersects(hitceil)){
-            res = vec2(0);
+            res = vec4(0);
         } else if(!intersects(hitfloor)){
             res = internalmarchconservative(scale, campos + viewdir * minhit, campos + viewdir * maxhit);
         } else {
@@ -445,28 +396,14 @@ vec2 raymarchCloudsRay(vec3 campos, vec3 viewdir, float scale, float floord, flo
     
     return res;
 }
-vec2 getCloudDensityForDirection(vec3 origin, vec3 dir, float scale, float floord, float ceiling){
-    wtim = wind * Time * CloudsWindSpeed;
+vec4 getCloudDensityForDirection(vec3 origin, vec3 dir, float scale, float floord, float ceiling){
+    //wtim = wind * Time * CloudsWindSpeed;
     return raymarchCloudsRay(origin, dir, scale, floord, ceiling);
 }
 float outcloudsref = 0.0;
-vec2 raymarchCloudsConservative(float scale, float floord, float ceiling){
+vec4 raymarchCloudsConservative(float scale, float floord, float ceiling){
     vec3 campos = CameraPosition * AtmosphereScale;
     vec3 viewdir = getViewDir();
-    vec3 atmorg = vec3(0, planetradius, 0) + campos;  
-    float height = length(atmorg);
-    Ray r = Ray(atmorg, viewdir);
-    float planethit = rsi2(r, planet);
-    vec3 hitpos = atmorg + viewdir * planethit;
-    vec3 realhpos = campos + viewdir * planethit;
-    vec3 rposh = realhpos;
-    realhpos.y = 4.1;
-    vec3 hitnorm = normalize(hitpos);
-    /*if(planethit >=0){
-        campos = realhpos;
-        viewdir = normalize(reflect(viewdir, hitnorm));
-        outcloudsref = 1.0;
-    }*/
     return getCloudDensityForDirection(campos, viewdir, scale, floord, ceiling);
 }
 
@@ -482,15 +419,16 @@ float blurgray(sampler2D tex, int kernel){
     }
     return accum / (kernel * 2 * kernel * 2);
 }
+vec3 atmcolor1;
 vec3 atmx2(vec3 sunpos, float shadowvalue){
 
     //return mix(vec3(1.0), 1.0 * scatter2,1.0 - texture(cloudsCloudsTex, UV).y);
     //return mix(vec3(3.0), scatter2 * 3.0, 1.0 - texture(cloudsCloudsTex, UV).y);
     vec3 cmix = mix(vec3(1.0), atmcolor, 1.0 - max(0, dot(sunpos, vec3(0,1,0))));
-    vec3 cfla = mix(cmix, vec3(0.01),  1.0 - max(0, dot(sunpos, vec3(0,1,0))));
+    vec3 cfla = mix(atmcolor1, vec3(0.01),  1.0 - max(0, dot(sunpos, vec3(0,1,0))));
     cmix *= cfla;
     float shadowmult = 1000.0 / (CloudsCeil - CloudsFloor);
-    return mix(vec3(cmix * shadowmult), vec3(cmix * 3.0), shadowvalue);
+    return mix(atmcolor, vec3(0.01), shadowvalue);
 }
 
 float stars(vec3 viewdir){
@@ -501,9 +439,9 @@ float stars(vec3 viewdir){
     return pow(smoothstep(0.997, 1.0, ns), 3.0) * fbm(vec3(a*100.0, b*100.0, Time*2.0));
 }
 
-vec3 CloudsGetCloudsCoverageShadow(){
-    vec2 r = raymarchCloudsConservative(1, CloudsFloor, CloudsCeil);
-    return vec3(r.r * (1.0 - outcloudsref), r.g, r.r * outcloudsref);
+vec4 CloudsGetCloudsCoverageShadow(){
+    vec4 r = raymarchCloudsConservative(1, CloudsFloor, CloudsCeil);
+    return r;
 }
 float reflectionCoefficent = 1.0;
 vec3 shadeWater(vec3 campos, vec3 normal, vec3 viewdir, vec3 worldPos, vec3 atmcolorx){
@@ -569,7 +507,7 @@ vec3 AtmScatt(){
    // float mult = 1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r);
     //if(mult < 0.5) return vec3(0);
     vec3 campos = CameraPosition * AtmosphereScale;
-    vec3 viewdir = getViewDir();
+    vec3 viewdir = normalize(reconstructCameraSpaceDistance(UV, 1.0));
     vec3 atmorg = vec3(0, planetradius, 0) + campos;  
     float height = length(atmorg);
     Ray r = Ray(atmorg, viewdir);

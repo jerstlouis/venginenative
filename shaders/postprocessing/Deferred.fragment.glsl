@@ -93,7 +93,7 @@ vec3 shadingNonMetalic(PostProceessingData data){
     vec3 radiance = shade(CameraPosition, vec3(fresnel), data.normal, data.worldPos, LightPosition, abs(LightColor), max(MIN_ROUGHNESS_DIRECT, data.roughness), false);    
     
     vec3 difradiance = shadeDiffuse(CameraPosition, data.diffuseColor * (1.0 - fresnel), data.normal, data.worldPos, LightPosition, abs(LightColor), data.roughness, false);
-    return vec3(0);
+ //   return vec3(0);
     return radiance + difradiance ;
 }
 

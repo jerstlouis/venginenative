@@ -70,18 +70,13 @@ private:
     Texture *fogTexture;
     void fog();
 
-    ShaderProgram *cloudsReflectionsShadowsShader;
-    Framebuffer *cloudsReflectionsShadowsFbo;
-    Texture *cloudsReflectionsShadowsTexture;
-
     ShaderProgram *cloudsShader;
-    Framebuffer *cloudsFbo;
-    Texture *cloudsTexture;
+    Framebuffer *cloudsFboEven;
+    Texture *cloudsTextureEven;
+    Framebuffer *cloudsFboOdd;
+    Texture *cloudsTextureOdd;
 
-    ShaderProgram *atmosphereScatterShader;
-    Framebuffer *atmosphereScatterFbo;
-    Texture *atmosphereScatterTexture;
-
+    bool cloudCycleUseOdd = false;
     void clouds();
 
     ShaderProgram *fxaaTonemapShader;
