@@ -20,11 +20,11 @@ vec4 shade(){
     bufferedRes = mix(val, bufferedRes, 0.99);
     bufferedRes = mix(lastData, bufferedRes, 0.6);
     return bufferedRes;*/
-    vec4 data = val.b <= lastData.b ? val : lastData;
-    vec3 pos = startpos + ssdir * data.b;
+  //  vec4 data = val.b <= lastData.b ? val : lastData;
+  //  vec3 pos = startpos + ssdir * data.b;
    // data.g = getAOPos(1.0, pos);
-   // data.g = mix(data.g, lastData.g, 0.9);
-    ///data = mix(val, data, 0.6);
-    return data;
+    val = mix(val, lastData, 0.997);
+   // data = mix(val, data, 0.95);
+    return val;
   //  return vec4(0,1,999999999,0);
 }

@@ -39,10 +39,12 @@ vec4 shade(){
     vec3 color = texture(directTex, UV).rgb + texture(alTex, UV).rgb * (UseAO == 1 ? texture(aoxTex, UV).r : 1.0);
 
     vec4 cdata = texture(cloudsCloudsTex, reverseViewDir()).rgba;
-    vec3 scatt = AtmScatt();
+    vec3 scatt = AtmScatt() + sun(normalize(reconstructCameraSpaceDistance(UV, 1.0)), normalize(SunDirection));
+    vec3 skydaylightcolor = vec3(0.23, 0.33, 0.48);
     atmcolor = getAtmosphereForDirection(vec3(0), normalize(SunDirection), normalize(SunDirection));
     atmcolor1 = getAtmosphereForDirection(vec3(0), vec3(0,1,0), normalize(SunDirection));
-    vec3 colorcloud = mix(atmcolor, atmcolor1 , 1.0 - aaoo());
+    float diminisher = max(0, dot(normalize(SunDirection), vec3(0,1,0)));
+    vec3 colorcloud = mix(skydaylightcolor * diminisher, mix(skydaylightcolor, atmcolor, diminisher), cdata.g) * (diminisher * 0.3 + 0.7);
     color = mix(scatt, colorcloud, cdata.r);
     
     return vec4( color, 1.0);
