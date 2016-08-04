@@ -28,7 +28,7 @@ public:
     float cloudsWindSpeed;
     float atmosphereScale;
     float waterWavesScale;
-    glm::vec3 cloudsScale;
+    glm::vec3 cloudsOffset;
     glm::vec3 sunDirection;
     int width;
     int height;

@@ -10,7 +10,7 @@ Renderer::Renderer(int iwidth, int iheight)
     width = iwidth;
     height = iheight;
 
-    useAmbientOcclusion = true;
+    useAmbientOcclusion = false;
     useGammaCorrection = true;
 
     cloudsFloor = 2500;
@@ -21,7 +21,7 @@ Renderer::Renderer(int iwidth, int iheight)
     cloudsDensityThresholdHigh = 1.0;
     cloudsDensityScale = 1.0;
     cloudsWindSpeed = 0.4;
-    cloudsScale = glm::vec3(1);
+    cloudsOffset = glm::vec3(1);
     sunDirection = glm::vec3(0, 1, 0);
     atmosphereScale = 1.0;
     waterWavesScale = 1.0;
@@ -95,11 +95,11 @@ void Renderer::initializeFbos()
     fogFbo = new Framebuffer();
     fogFbo->attachTexture(fogTexture, GL_COLOR_ATTACHMENT0);
 
-    cloudsTextureEven = new Texture(2048, 2048, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
+    cloudsTextureEven = new Texture(1024, 1024, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
     cloudsFboEven = new Framebuffer();
     cloudsFboEven->attachTexture(cloudsTextureEven, GL_COLOR_ATTACHMENT0);
 
-    cloudsTextureOdd = new Texture(2048, 2048, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
+    cloudsTextureOdd = new Texture(1024, 1024, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
     cloudsFboOdd = new Framebuffer();
     cloudsFboOdd->attachTexture(cloudsTextureOdd, GL_COLOR_ATTACHMENT0);
 
@@ -233,7 +233,7 @@ void Renderer::combine()
     combineShader->setUniform("CloudsThresholdLow", cloudsThresholdLow);
     combineShader->setUniform("CloudsThresholdHigh", cloudsThresholdHigh);
     combineShader->setUniform("CloudsWindSpeed", cloudsWindSpeed);
-    combineShader->setUniform("CloudsScale", cloudsScale);
+    combineShader->setUniform("CloudsOffset", cloudsOffset);
     combineShader->setUniform("SunDirection", sunDirection);
     combineShader->setUniform("AtmosphereScale", atmosphereScale);
     combineShader->setUniform("CloudsDensityScale", cloudsDensityScale);
@@ -408,7 +408,7 @@ void Renderer::clouds()
     cloudsShader->setUniform("CloudsThresholdLow", cloudsThresholdLow);
     cloudsShader->setUniform("CloudsThresholdHigh", cloudsThresholdHigh);
     cloudsShader->setUniform("CloudsWindSpeed", cloudsWindSpeed);
-    cloudsShader->setUniform("CloudsScale", cloudsScale);
+    cloudsShader->setUniform("CloudsOffset", cloudsOffset);
     cloudsShader->setUniform("SunDirection", sunDirection);
     cloudsShader->setUniform("AtmosphereScale", atmosphereScale);
     cloudsShader->setUniform("CloudsDensityScale", cloudsDensityScale);

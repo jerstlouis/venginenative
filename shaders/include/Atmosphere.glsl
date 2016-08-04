@@ -4,7 +4,7 @@ uniform float CloudsCeil;
 uniform float CloudsThresholdLow;
 uniform float CloudsThresholdHigh;
 uniform float CloudsWindSpeed;
-uniform vec3 CloudsScale;
+uniform vec3 CloudsOffset;
 uniform vec3 SunDirection;
 uniform float AtmosphereScale;
 uniform float CloudsDensityScale;
@@ -51,6 +51,13 @@ vec2 reverseViewDir(){
 		return mix(vec2(0,0), fdir, mixer) * 0.5 + 0.5;
 	}
     return vec2(0, 0);
+}
+vec2 reverseDir(vec3 dir){
+ //   return UV;
+    if(dir.y < 0.0) dir.y = - dir.y;
+    vec2 fdir = normalize(dir.xz);
+    float mixer = sqrt(1.0 - dot(dir, vec3(0,1,0)));
+    return mix(vec2(0,0), fdir, mixer) * 0.5 + 0.5;
 }
 
 float planetradius = 6371e3;
@@ -148,7 +155,7 @@ vec3 atmcolor = vec3(0);
 vec3 atm(vec3 sunpos){
     float mult = 1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r);
     vec3 vdir = getViewDir();
-    vec3 colorSky = getAtmosphereForDirection(CameraPosition * AtmosphereScale, vdir, sunpos);
+    vec3 colorSky = getAtmosphereForDirection(vec3(0,1,0) * AtmosphereScale, vdir, sunpos);
    // atmcolor = getAtmosphereForDirection(vec3(0), normalize(sunpos) + vec3(0, 0.15, 0), sunpos);
    // vec3 colorObjects = diffused * (1.0 - (1.0 / (textureLod(mrt_Distance_Bump_Tex, UV, 0).r * 0.001 + 1.0)));
     return colorSky;// + colorObjects * (1.0 - mult);
@@ -214,7 +221,7 @@ float fbm_alu(vec3 p){
 	for(int i=0;i<fbmsamples;i++){
 		a += noise(p) * w;	
         w *= 0.5;
-		p = p * 3.0;
+		p = p * 4.0;
 	}
 	return a;
 }
@@ -230,14 +237,14 @@ vec3 wtim =vec3(0);
 
 float edgeclose = 0.0;
 float cloudsDensity3D(vec3 pos){
-    vec3 ps = pos * CloudsScale;// + wtim;
+    vec3 ps = pos +CloudsOffset;// + wtim;
     float density = 1.0 - fbm(ps * 0.05 + fbm(ps * 1.5));
    // density *= smoothstep(CloudsDensityThresholdLow, CloudsDensityThresholdHigh, 1.0 - fbm(ps * 0.005 * CloudsDensityScale));
     
     float init = smoothstep(CloudsThresholdLow, CloudsThresholdHigh,  density);
     //edgeclose = pow(1.0 - abs(CloudsThresholdLow - density), CloudsThresholdHigh * 113.0);
     float mid = (CloudsThresholdLow + CloudsThresholdHigh) * 0.5;
-    edgeclose = pow(1.0 - abs(mid - density), 6.0);
+    edgeclose = pow(1.0 - abs(mid - density), 16.0);
     return  init;
 }
 
@@ -269,7 +276,7 @@ float internalmarchconservativeCoverageOnly(float scale, vec3 p1, vec3 p2){
         float height = length(vec3(0,planetradius ,0) + pos);
         float spx = (height - start) * invspan;
         float clouds = cloudsDensity3D(pos * 0.01 * scale);// * (1.0 - smoothstep( 0.3, 0.5, abs(spx - 0.5) ) );
-        coverageinv -= clamp(clouds, 0.0, 1.0)  * 10.3;
+        coverageinv -= clamp(clouds, 0.0, 1.0)  * 0.5;
         coverageinv = max(0.0, coverageinv);
         if(coverageinv <= 0.01) break;
        // if(coverageinv < 0.04) return 1.0;
@@ -329,10 +336,10 @@ vec4 internalmarchconservative(float scale, vec3 p1, vec3 p2){
         float height = length(vec3(0,planetradius ,0) + pos);
         float spx = (height - start) * invspan;
         float clouds = cloudsDensity3D(pos * 0.01 * scale);// * (1.0 - smoothstep( 0.3, 0.5, abs(spx - 0.5) ) );
-        if(edgeclose > 0.02){
+       // if(edgeclose > 0.02){
             c += edgeclose * getAOPos(scale, pos);
             w += edgeclose;
-        } 
+       // } 
         coverageinv *= 1.0 - clamp(clouds, 0.0, 1.0) * 1;
         coverageinv = max(0.0, coverageinv);
         if(coverageinv <= 0.01) break;
@@ -347,7 +354,7 @@ vec4 internalmarchconservative(float scale, vec3 p1, vec3 p2){
     if(w > 0.01) c /= w; else c = 1.0;
     // outpoint = mix(p1, p2, outpointdst);
     // if(distance(outpoint, p1) > 50000) outpoint = p1 + normalize(outpoint - p1) * 50000;
-    float dst = coverageinv == 1.0 ? 999999999 : distance(p1, pos);
+    float dst =  length(p1);
     return vec4(1.0 - clamp(coverageinv, 0.0, 1.0), c, dst, 1.0);
 }
 #define intersects(a) (a >= 0.0)
@@ -407,7 +414,7 @@ vec4 getCloudDensityForDirection(vec3 origin, vec3 dir, float scale, float floor
 }
 float outcloudsref = 0.0;
 vec4 raymarchCloudsConservative(float scale, float floord, float ceiling){
-    vec3 campos = CameraPosition * AtmosphereScale;
+    vec3 campos = vec3(0,1,0) * AtmosphereScale;
     vec3 viewdir = getViewDir();
     return getCloudDensityForDirection(campos, viewdir, scale, floord, ceiling);
 }
@@ -507,12 +514,11 @@ vec3 ApplyAtmosphereJustClouds(vec3 color, vec2 cloudsData){
     return mix(color, atmcolor1, cloudsData.r);
 }
 
-vec3 AtmScatt(){
+vec3 AtmScatt(vec3 origin, vec3 viewdir){
   //return mix(color, vec3(1), cloudsData.r);
    // float mult = 1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r);
     //if(mult < 0.5) return vec3(0);
-    vec3 campos = CameraPosition * AtmosphereScale;
-    vec3 viewdir = normalize(reconstructCameraSpaceDistance(UV, 1.0));
+    vec3 campos = origin * AtmosphereScale;
     vec3 atmorg = vec3(0, planetradius, 0) + campos;  
     float height = length(atmorg);
     Ray r = Ray(atmorg, viewdir);
@@ -522,20 +528,15 @@ vec3 AtmScatt(){
     vec3 rposh = realhpos;
     vec3 hitnorm = normalize(hitpos);
     vec3 color = vec3(0);
-    if(planethit > 0){
-        vec3 newn = normalize(hitnorm);
-        vec3 dreflected = reflect(viewdir, newn);
-        if(dot(dreflected, newn) < 0) dreflected = normalize(reflect(dreflected, newn));
-        color += getAtmosphereForDirection(rposh, normalize(dreflected), normalize(SunDirection));
-    } else {
-        color += getAtmosphereForDirection(CameraPosition * AtmosphereScale, viewdir, normalize(SunDirection));
-    }
+    
+        color += getAtmosphereForDirection(origin * AtmosphereScale, viewdir, normalize(SunDirection));
+    
     return color;
 }
 
 vec4 CloudsRefShadow(){
     //return mix(color, vec3(1), cloudsData.r);
-    vec3 campos = CameraPosition * AtmosphereScale;
+    vec3 campos = vec3(0,1,0) * AtmosphereScale;
     vec3 viewdir = getViewDir();
     vec3 atmorg = vec3(0, planetradius, 0) + campos;  
     float height = length(atmorg);
@@ -561,7 +562,7 @@ vec4 CloudsRefShadow(){
 
 vec3 ApplyAtmosphere(vec3 color, vec2 cloudsData){
     //return texture(cloudsRefShadowTex, UV).rgg;
-    vec3 campos = CameraPosition * AtmosphereScale;
+    vec3 campos = vec3(0,1,0) * AtmosphereScale;
     vec3 viewdir = getViewDir();
     vec3 atmorg = vec3(0, planetradius, 0) + campos;  
     float height = length(atmorg);

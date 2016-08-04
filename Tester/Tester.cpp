@@ -49,7 +49,7 @@ int main()
 
     // mesh loading
 
-   // game->world->scene = game->asset->loadSceneFile("sponza.scene");  
+    //game->world->scene = game->asset->loadSceneFile("sponza.scene");  
     //game->world->scene->getMeshes()[0]->getInstance(0)->transformation->translate(glm::vec3(0, 2.5f, 0));
     //game->world->scene->getMeshes()[0]->getInstance(0)->transformation->rotate(glm::angleAxis(deg2rad(73.75f), glm::vec3(-0.006f, -0.005f, 1.0f)));
   //  game->world->scene->addMesh(game->asset->loadMeshFile("treeground.mesh3d"));
@@ -74,7 +74,7 @@ int main()
         ImGui::SliderFloat("CloudsDensityThresholdHigh", &Game::instance->renderer->cloudsDensityThresholdHigh, 0.0f, 1.0f);
         //ImGui::SliderFloat("AtmosphereScale", &Game::instance->renderer->atmosphereScale, 0.0f, 1000.0f);
         ImGui::SliderFloat("WaterWavesScale", &Game::instance->renderer->waterWavesScale, 0.0f, 10.0f);
-        ImGui::SliderFloat3("CloudsScale", (float*)&Game::instance->renderer->cloudsScale, 0.0f, 1.0f);
+        ImGui::SliderFloat3("CloudsOffset", (float*)&Game::instance->renderer->cloudsOffset, -1000.0f, 1000.0f);
         ImGui::SliderFloat3("SunDirection", (float*)&Game::instance->renderer->sunDirection, -1.0f, 1.0f);
         ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::End();
