@@ -187,16 +187,16 @@ void Renderer::renderToFramebuffer(Camera *camera, Framebuffer * fboout)
 
 void Renderer::draw(Camera *camera)
 {
-    mrtFbo->use(true);
+   // mrtFbo->use(true);
     Game::instance->world->setUniforms(Game::instance->shaders->materialGeometryShader, camera);
     Game::instance->world->setUniforms(Game::instance->shaders->materialShader, camera);
     Game::instance->world->setSceneUniforms();
-    Game::instance->world->draw(Game::instance->shaders->materialShader, camera);
+ //   Game::instance->world->draw(Game::instance->shaders->materialShader, camera);
     if (useAmbientOcclusion) {
-        ambientOcclusion();
+    //    ambientOcclusion();
     }
-    deferred();
-    ambientLight();
+  //  deferred();
+  //  ambientLight();
     clouds();
     combine();
 }

@@ -34,19 +34,19 @@ float aaoo(){
     }
     return pow(1.0 - aoc / 32.0, 16.0);
 }
-vec3 smartblur(vec3 dir){
+vec4 smartblur(vec3 dir){
     vec2 uv = reverseDir(dir);
-    vec3 centerval = vec3(0);
+    vec4 centerval = vec4(0);
     float center = texture(cloudsCloudsTex, uv).r;
     float aoc = 0;
     for(int i=0;i<32;i++){
         vec2 rdp = randpoint2() * 0.003;
         float there = texture(cloudsCloudsTex, uv + rdp).r;
         float w = pow( 1.0 - abs(there - center), 32.0);
-        centerval += w * texture(cloudsCloudsTex, uv + rdp).rgb;
+        centerval += w * texture(cloudsCloudsTex, uv + rdp).rgba;
         aoc += w;
     }
-    return aoc == 0 ? texture(cloudsCloudsTex, uv).rgb : centerval / aoc;
+    return aoc == 0 ? texture(cloudsCloudsTex, uv).rgba : centerval / aoc;
 }
 
 
@@ -95,25 +95,38 @@ vec3 cloudsbydir(vec3 dir){
           //  return dir.yyy;
         }
 
-        vec4 cdata = smartblur(dir).rgbb;
+        vec4 cdata = smartblur(dir).rgba;
         vec3 scatt = AtmScatt(vec3(0), dir) + sun(dir, normalize(SunDirection));
         vec3 skydaylightcolor = vec3(0.23, 0.33, 0.48);
         atmcolor = getAtmosphereForDirection(vec3(0), normalize(SunDirection), normalize(SunDirection)) + vec3(1);
         atmcolor1 = getAtmosphereForDirection(vec3(0), vec3(0,1,0), normalize(SunDirection));
         float diminisher = max(0, dot(normalize(SunDirection), vec3(0,1,0)));
-        vec3 colorcloud = mix(skydaylightcolor * diminisher, atmcolor, cdata.g) * (diminisher * 0.3 + 0.7);
-        cdata.r = mix(cdata.r, 0.0, fogatt(cdata.b));
-        cdata.r = mix(cdata.r, 0.0, min(1.0, dst * 0.000005));
-        return fresnel * mix(scatt, colorcloud, cdata.r);
+        vec3 shadowcolor = mix(skydaylightcolor, skydaylightcolor * 0.05, 1.0 - diminisher);
+        vec3 litcolor = mix(vec3(10.0), atmcolor * 0.2, 1.0 - diminisher);
+        vec3 colorcloud = mix(shadowcolor, litcolor, pow(cdata.g, 2.0)) ;//* (diminisher * 0.3 + 0.7);
+        //cdata.r = mix(cdata.r, 0.0, fogatt(cdata.b));
+     //   cdata.r = mix(cdata.r, 0.0, min(1.0, dst * 0.000005));
+        vec3 scatcolor = mix(vec3(1.0), atmcolor * 0.1, 1.0 - diminisher) * 0.2;
+        vec3 result = fresnel * mix(scatt, colorcloud, min(1.0, cdata.r * 1.1)) + scatcolor * pow(cdata.a, 12.0);
+        
+        return mix(result, vec3(1.0), pow(1.0 -  dir.y, 15.0));
+     //   return vec3(1) * cdata.a;
+}
+
+vec3 fisheye(){
+    vec2 fullsp = UV * 2.0 - 1.0;
+    fullsp = fullsp / sqrt(1.0 - length(fullsp) * 0.5);
+    vec3 dir = normalize(reconstructCameraSpaceDistance(fullsp * 0.5 + 0.5, 1.0));
+    return dir;
 }
 
 vec4 shade(){    
     vec3 color = texture(directTex, UV).rgb + texture(alTex, UV).rgb * (UseAO == 1 ? texture(aoxTex, UV).r : 1.0);
     
-    color += cloudsbydir(currentData.normal);
+    
 
     if(length(currentData.normal) < 0.1){
-        color = cloudsbydir(normalize(reconstructCameraSpaceDistance(UV, 1.0)));
-    }
+        color = cloudsbydir(fisheye());
+    } else color += cloudsbydir(currentData.normal);
     return vec4( color, 1.0);
 }

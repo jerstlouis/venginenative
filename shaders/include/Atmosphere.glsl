@@ -238,7 +238,7 @@ vec3 wtim =vec3(0);
 float edgeclose = 0.0;
 float cloudsDensity3D(vec3 pos){
     vec3 ps = pos +CloudsOffset;// + wtim;
-    float density = 1.0 - fbm(ps * 0.05 + fbm(ps * 1.5));
+    float density = 1.0 - fbm(ps * 0.05 + fbm(ps * 1.5 + Time * 0.01));
    // density *= smoothstep(CloudsDensityThresholdLow, CloudsDensityThresholdHigh, 1.0 - fbm(ps * 0.005 * CloudsDensityScale));
     
     float init = smoothstep(CloudsThresholdLow, CloudsThresholdHigh,  density);
@@ -261,10 +261,11 @@ vec3 viewdirglob = vec3(0,1,0);
 vec3 outpoint = vec3(0);
 float color = 0.0;
 
+float weightshadow = 0.5;
 float internalmarchconservativeCoverageOnly(float scale, vec3 p1, vec3 p2){
     float iter = 0.0;
     float span = CloudsCeil - CloudsFloor;
-    const float stepcount = 3;
+    const float stepcount = 2;
     const float stepsize = 1.0 / stepcount;
     float rd = rand2s(UV * vec2(Time, Time)) * stepsize;
     float start = planetradius + CloudsFloor;
@@ -275,14 +276,15 @@ float internalmarchconservativeCoverageOnly(float scale, vec3 p1, vec3 p2){
         vec3 pos = mix(p1, p2, iter + rd);
         float height = length(vec3(0,planetradius ,0) + pos);
         float spx = (height - start) * invspan;
+        //if(height < start) continue;
         float clouds = cloudsDensity3D(pos * 0.01 * scale);// * (1.0 - smoothstep( 0.3, 0.5, abs(spx - 0.5) ) );
-        coverageinv -= clamp(clouds, 0.0, 1.0)  * 0.5;
+        coverageinv -= clamp(clouds, 0.0, 1.0)  * weightshadow;
         coverageinv = max(0.0, coverageinv);
         if(coverageinv <= 0.01) break;
        // if(coverageinv < 0.04) return 1.0;
         iter += stepsize;
     }
-    return clamp(coverageinv, 0.0, 1.0);
+    return pow(clamp(coverageinv, 0.0, 1.0), 4.0);
 }
 
 float hash1x = 0.0;
@@ -307,6 +309,17 @@ float getAOPos(float scale, vec3 pos){
         a +=internalmarchconservativeCoverageOnly(scale, pos, posceil);
     return a ;
 }
+float godray(float scale, vec3 pos){
+    float a = 0;
+        vec3 dir = normalize(SunDirection);
+        Ray r = Ray(vec3(0,planetradius ,0) +pos, dir);
+        float hitceil = rsi2(r, sphere2);
+        vec3 posceil = pos + dir * hitceil;
+        float hitceil2 = rsi2(r, sphere1);
+        vec3 posceil2 = pos + dir * hitceil2;
+        a +=internalmarchconservativeCoverageOnly(scale, posceil2, posceil);
+    return a ;
+}
 vec3 startpos; 
 vec3 ssdir;
 vec4 internalmarchconservative(float scale, vec3 p1, vec3 p2){ 
@@ -318,6 +331,7 @@ vec4 internalmarchconservative(float scale, vec3 p1, vec3 p2){
     const float stepcount = 5;
     const float stepsize = 1.0 / stepcount;
     float rd = rand2s(UV * vec2(Time, Time)) * stepsize;
+    float rdx = rand2s(UV * vec2(Time, Time));
     hash1x = rand2s(UV * vec2(Time, Time));
     float shadow = 0.0;
     //float outpointdst = 1.0;
@@ -331,6 +345,8 @@ vec4 internalmarchconservative(float scale, vec3 p1, vec3 p2){
     float posc = 0.0;
     float poscw = 0.0;
     vec3 pos = vec3(0);
+    float godr = 0.0;
+    float godw = 0.0;
     for(int i=0;i<stepcount;i++){
         pos = mix(p1, p2, iter + rd);
         float height = length(vec3(0,planetradius ,0) + pos);
@@ -340,9 +356,12 @@ vec4 internalmarchconservative(float scale, vec3 p1, vec3 p2){
             c += edgeclose * getAOPos(scale, pos);
             w += edgeclose;
        // } 
-        coverageinv *= 1.0 - clamp(clouds, 0.0, 1.0) * 1;
+        coverageinv *= 1.0 - clamp(clouds, 0.0, 1.0) * 5;
         coverageinv = max(0.0, coverageinv);
         if(coverageinv <= 0.01) break;
+        
+      //  godr += godray(scale, pos) * 0.1;
+        
         iter += stepsize;
     }
     float iter1 = posc / (poscw + 0.01);
@@ -352,10 +371,26 @@ vec4 internalmarchconservative(float scale, vec3 p1, vec3 p2){
     float hitceil = rsi2(r, sphere2);
     float covershadw = 1.0 ;//- internalmarchconservativeCoverageOnly(scale, psc, psc + r.d * hitceil);
     if(w > 0.01) c /= w; else c = 1.0;
+    //if(godw > 0.01) godr /= godw; else godr = 0.0;
     // outpoint = mix(p1, p2, outpointdst);
     // if(distance(outpoint, p1) > 50000) outpoint = p1 + normalize(outpoint - p1) * 50000;
     float dst =  length(p1);
-    return vec4(1.0 - clamp(coverageinv, 0.0, 1.0), c, dst, 1.0);
+    
+    iter = 0.0;
+    weightshadow = 1.0;
+   // for(int i=0;i<stepcount;i++){
+    pos = mix(vec3(0,1,0), p2, rdx);
+    float cloudsx = cloudsDensity3D(pos * 0.01 * scale);
+    if(cloudsx == 0.0){
+        godr += godray(scale, pos) ;
+        iter += stepsize;
+    }
+   // }
+    //godr += dst * dst * 0.000001;
+    //godr = min(2.0, godr);
+    // time for godrays
+    
+    return vec4(1.0 - pow(clamp(coverageinv, 0.0, 1.0), 4.0), c, dst, pow(godr, 4.0));
 }
 #define intersects(a) (a >= 0.0)
 vec4 raymarchCloudsRay(vec3 campos, vec3 viewdir, float scale, float floord, float ceiling){

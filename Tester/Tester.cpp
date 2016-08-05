@@ -32,7 +32,7 @@ int main()
 {
     Media::loadFileMap("../../media");
     Media::loadFileMap("../../shaders");
-    Game *game = new Game(1920, 1010);
+    Game *game = new Game(3000, 1010);
     game->start();
     volatile bool ready = false;
     game->invoke([&ready]() {
@@ -58,7 +58,14 @@ int main()
     bool isOpened = true;
     game->onRenderUIFrame->add([&](int zero) {
         static float f = 0.0f;
-        ImGui::Begin("Test", &isOpened, 0);
+        if (Game::instance->renderer->cloudsThresholdLow > Game::instance->renderer->cloudsThresholdHigh) {
+            Game::instance->renderer->cloudsThresholdHigh = Game::instance->renderer->cloudsThresholdLow;
+            Game::instance->renderer->cloudsThresholdLow = Game::instance->renderer->cloudsThresholdHigh;
+        } else 
+        if (Game::instance->renderer->cloudsThresholdHigh < Game::instance->renderer->cloudsThresholdLow) {
+            Game::instance->renderer->cloudsThresholdLow = Game::instance->renderer->cloudsThresholdHigh;
+        }
+        ImGui::Begin("Clouds", &isOpened, 0);
     //    ImGui::Text("Terrain roughness:");
    //     ImGui::SliderFloat("roughness", &t->getLodLevel(0)->material->roughness, 0.0f, 1.0f);
    //     ImGui::Text("Terrain metalness:");
@@ -68,15 +75,15 @@ int main()
         ImGui::SliderFloat("CloudsThresholdLow", &Game::instance->renderer->cloudsThresholdLow, 0.0f, 1.0f);
         ImGui::SliderFloat("CloudsThresholdHigh", &Game::instance->renderer->cloudsThresholdHigh, 0.0f, 1.0f);
         //ImGui::SliderFloat("CloudsAtmosphereShaftsMultiplier", &Game::instance->renderer->cloudsAtmosphereShaftsMultiplier, 0.0f, 10.0f);
-        ImGui::SliderFloat("CloudsWindSpeed", &Game::instance->renderer->cloudsWindSpeed, 0.0f, 10.0f);
-        ImGui::SliderFloat("CloudsDensityScale", &Game::instance->renderer->cloudsDensityScale, 0.0f, 10.0f);
-        ImGui::SliderFloat("CloudsDensityThresholdLow", &Game::instance->renderer->cloudsDensityThresholdLow, 0.0f, 1.0f);
-        ImGui::SliderFloat("CloudsDensityThresholdHigh", &Game::instance->renderer->cloudsDensityThresholdHigh, 0.0f, 1.0f);
+        //ImGui::SliderFloat("CloudsWindSpeed", &Game::instance->renderer->cloudsWindSpeed, 0.0f, 10.0f);
+        //ImGui::SliderFloat("CloudsDensityScale", &Game::instance->renderer->cloudsDensityScale, 0.0f, 10.0f);
+        //ImGui::SliderFloat("CloudsDensityThresholdLow", &Game::instance->renderer->cloudsDensityThresholdLow, 0.0f, 1.0f);
+       // ImGui::SliderFloat("CloudsDensityThresholdHigh", &Game::instance->renderer->cloudsDensityThresholdHigh, 0.0f, 1.0f);
         //ImGui::SliderFloat("AtmosphereScale", &Game::instance->renderer->atmosphereScale, 0.0f, 1000.0f);
-        ImGui::SliderFloat("WaterWavesScale", &Game::instance->renderer->waterWavesScale, 0.0f, 10.0f);
+        //ImGui::SliderFloat("WaterWavesScale", &Game::instance->renderer->waterWavesScale, 0.0f, 10.0f);
         ImGui::SliderFloat3("CloudsOffset", (float*)&Game::instance->renderer->cloudsOffset, -1000.0f, 1000.0f);
         ImGui::SliderFloat3("SunDirection", (float*)&Game::instance->renderer->sunDirection, -1.0f, 1.0f);
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+        ImGui::Text("%.3f ms/frame %.1f FPS", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
         ImGui::End();
     });
     /*
