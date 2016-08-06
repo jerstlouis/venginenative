@@ -32,7 +32,7 @@ int main()
 {
     Media::loadFileMap("../../media");
     Media::loadFileMap("../../shaders");
-    Game *game = new Game(5000, 1010);
+    Game *game = new Game(1920, 1010);
     game->start();
     volatile bool ready = false;
     game->invoke([&ready]() {

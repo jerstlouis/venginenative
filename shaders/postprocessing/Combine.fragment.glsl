@@ -36,6 +36,7 @@ float aaoo(){
 }
 vec4 smartblur(vec3 dir){
     vec2 uv = reverseDir(dir);
+    //return texture(cloudsCloudsTex, uv).rgba;
     vec4 centerval = vec4(0);
     float center = texture(cloudsCloudsTex, uv).r;
     float aoc = 0;
@@ -64,8 +65,19 @@ vec3 octaveN(vec2 a, float esp){
     float h3 = snoise(vec3(zxpos + vec2(0.0, esp), Time * 0.9));
     return normalize(vec3((h2 - h1) * 1.0, 11.0, (h3 - h1)* 1.0));
 }
+vec3 octaveNX(vec2 a, float esp){
+    vec2 zxpos = a * 0.01;
+    //  zxpos += snoise(vec3(zxpos * 1.0 - Time * 0.1, 0));
+    // zxpos += Time;
+    float h1 = snoise(vec3(zxpos, -Time * 0.1));
+    float h2 = snoise(vec3(zxpos + vec2(esp, 0.0), -Time * 0.5));
+    float h3 = snoise(vec3(zxpos + vec2(0.0, esp), -Time * 0.9));
+    return normalize(vec3((h2 - h1) * 1.0, 11.0, (h3 - h1)* 1.0));
+}
 float intersectPlane(vec3 origin, vec3 direction, vec3 point, vec3 normal)
 { return dot(point - origin, normal) / dot(direction, normal); }
+
+
 vec3 cloudsbydir(vec3 dir){
     float fresnel = 1.0;
     float dst = 0;
@@ -79,13 +91,15 @@ vec3 cloudsbydir(vec3 dir){
         float w = 0;
         float w2 = 1.0;
         float mult = 0.1;
-        for(int i=0;i<8;i++){
+        for(int i=0;i<2;i++){
             n = normalize(n + w2 * octaveN((atmorg + dir * planethit).xz * mult, w2));
+            w += w2;
+            n = normalize(n + w2 * octaveNX((atmorg + dir * planethit).xz * mult, w2));
             w += w2;
             mult *= 2.5;
             w2 *= 0.6;
         }
-        n = mix(n, vec3(0,1,0), min(1.0, planethit * 0.00001));
+      //  n = mix(n, vec3(0,1,0), min(1.0, planethit * 0.00001));
         fresnel = fresnel_again(vec3(0.04), n, dir, 0.04);
         dir = normalize(reflect(dir, n));
         if(dir.y < 0.0){
@@ -96,7 +110,7 @@ vec3 cloudsbydir(vec3 dir){
     }
 
     vec4 cdata = smartblur(dir).rgba;
-    vec3 scatt = AtmScatt(vec3(0), dir) + sun(dir, normalize(SunDirection));
+    vec3 scatt = texture(atmScattTex, reverseDir(dir)).rgb + sun(dir, normalize(SunDirection));
     vec3 skydaylightcolor = vec3(0.23, 0.33, 0.48);
     atmcolor = getAtmosphereForDirection(vec3(0), normalize(SunDirection), normalize(SunDirection)) + vec3(1);
     atmcolor1 = getAtmosphereForDirection(vec3(0), vec3(0,1,0), normalize(SunDirection));
@@ -107,9 +121,12 @@ vec3 cloudsbydir(vec3 dir){
     //cdata.r = mix(cdata.r, 0.0, fogatt(cdata.b));
     //   cdata.r = mix(cdata.r, 0.0, min(1.0, dst * 0.000005));
     vec3 scatcolor = mix(vec3(1.0), atmcolor * 0.1, 1.0 - diminisher) * 0.2;
-    vec3 result = fresnel * mix(scatt, colorcloud, min(1.0, cdata.r * 1.1)) + scatcolor * pow(cdata.a, 12.0);
+    vec3 result = fresnel * mix(scatt, colorcloud, min(1.0, cdata.r * 1.1));// + scatcolor * pow(cdata.a, 12.0);
     
     return result;
+   //return texture(atmScattTex, UV).rgb;
+  // return texture(atmScattTex, UV).rgb;
+  // eturn getatscatter(dir, normalize(SunDirection))+ sun(dir, normalize(SunDirection));
     //   return vec3(1) * cdata.a;
 }
 

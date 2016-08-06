@@ -70,6 +70,11 @@ private:
     Texture *fogTexture;
     void fog();
 
+    ShaderProgram *atmScattShader;
+    Framebuffer *atmScattFbo;
+    Texture *atmScattTexture;
+    void atmScatt();
+
     ShaderProgram *cloudsShader;
     Framebuffer *cloudsFboEven;
     Texture *cloudsTextureEven;

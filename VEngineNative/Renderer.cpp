@@ -50,6 +50,7 @@ Renderer::Renderer(int iwidth, int iheight)
     ambientOcclusionShader = new ShaderProgram("PostProcess.vertex.glsl", "AmbientOcclusion.fragment.glsl");
     fogShader = new ShaderProgram("PostProcess.vertex.glsl", "Fog.fragment.glsl");
     cloudsShader = new ShaderProgram("PostProcess.vertex.glsl", "Clouds.fragment.glsl");
+    atmScattShader = new ShaderProgram("PostProcess.vertex.glsl", "AtmScatt.fragment.glsl");
     motionBlurShader = new ShaderProgram("PostProcess.vertex.glsl", "MotionBlur.fragment.glsl");
     bloomShader = new ShaderProgram("PostProcess.vertex.glsl", "Bloom.fragment.glsl");
     combineShader = new ShaderProgram("PostProcess.vertex.glsl", "Combine.fragment.glsl");
@@ -102,6 +103,10 @@ void Renderer::initializeFbos()
     cloudsTextureOdd = new Texture(1024, 1024, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
     cloudsFboOdd = new Framebuffer();
     cloudsFboOdd->attachTexture(cloudsTextureOdd, GL_COLOR_ATTACHMENT0);
+
+    atmScattTexture = new Texture(1024, 1024, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
+    atmScattFbo = new Framebuffer();
+    atmScattFbo->attachTexture(atmScattTexture, GL_COLOR_ATTACHMENT0);
 
     motionBlurTexture = new Texture(width, height, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
     motionBlurFbo = new Framebuffer();
@@ -197,6 +202,7 @@ void Renderer::draw(Camera *camera)
     }
   //  deferred();
   //  ambientLight();
+    atmScatt();
     clouds();
     combine();
 }
@@ -218,6 +224,7 @@ void Renderer::combine()
         cloudsTextureOdd->use(18);
     else
         cloudsTextureEven->use(18);
+    atmScattTexture->use(22);
     FrustumCone *cone = currentCamera->cone;
     //   outputShader->setUniform("VPMatrix", vpmatrix);
     combineShader->setUniform("UseAO", useAmbientOcclusion);
@@ -271,6 +278,7 @@ void Renderer::recompileShaders()
     ambientOcclusionShader->recompile();
     envProbesShader->recompile();
     cloudsShader->recompile();
+    atmScattShader->recompile();
     combineShader->recompile();
     fxaaTonemapShader->recompile();
 }
@@ -379,6 +387,39 @@ void Renderer::fog()
 {
 }
 
+void Renderer::atmScatt()
+{
+    glDisable(GL_BLEND);
+    FrustumCone *cone = currentCamera->cone;
+    glm::mat4 vpmatrix = currentCamera->projectionMatrix * currentCamera->transformation->getInverseWorldTransform();
+
+
+    atmScattShader->use();
+    atmScattShader->setUniform("VPMatrix", vpmatrix);
+    atmScattShader->setUniform("Resolution", glm::vec2(width, height));
+    atmScattShader->setUniform("CameraPosition", currentCamera->transformation->position);
+    atmScattShader->setUniform("FrustumConeLeftBottom", cone->leftBottom);
+    atmScattShader->setUniform("FrustumConeBottomLeftToBottomRight", cone->rightBottom - cone->leftBottom);
+    atmScattShader->setUniform("FrustumConeBottomLeftToTopLeft", cone->leftTop - cone->leftBottom);
+    atmScattShader->setUniform("Time", Game::instance->time);
+    atmScattShader->setUniform("CloudsFloor", cloudsFloor);
+    atmScattShader->setUniform("CloudsCeil", cloudsCeil);
+    atmScattShader->setUniform("CloudsThresholdLow", cloudsThresholdLow);
+    atmScattShader->setUniform("CloudsThresholdHigh", cloudsThresholdHigh);
+    atmScattShader->setUniform("CloudsWindSpeed", cloudsWindSpeed);
+    atmScattShader->setUniform("CloudsOffset", cloudsOffset);
+    atmScattShader->setUniform("SunDirection", sunDirection);
+    atmScattShader->setUniform("AtmosphereScale", atmosphereScale);
+    atmScattShader->setUniform("CloudsDensityScale", cloudsDensityScale);
+    atmScattShader->setUniform("CloudsDensityThresholdLow", cloudsDensityThresholdLow);
+    atmScattShader->setUniform("CloudsDensityThresholdHigh", cloudsDensityThresholdHigh);
+    atmScattShader->setUniform("WaterWavesScale", waterWavesScale);
+
+    atmScattFbo->use(true);
+
+    quad3dInfo->draw();
+}
+
 void Renderer::clouds()
 {
     cloudCycleUseOdd = !cloudCycleUseOdd;
@@ -394,6 +435,7 @@ void Renderer::clouds()
         cloudsTextureEven->use(22);
     else 
         cloudsTextureOdd->use(22);
+
 
     cloudsShader->use();
     cloudsShader->setUniform("VPMatrix", vpmatrix);

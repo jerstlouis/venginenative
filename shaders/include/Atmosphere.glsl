@@ -15,7 +15,7 @@ uniform float WaterWavesScale;
 
 
 layout(binding = 18) uniform sampler2D cloudsCloudsTex;
-layout(binding = 19) uniform sampler2D atmScattTex;
+layout(binding = 22) uniform sampler2D atmScattTex;
 layout(binding = 20) uniform sampler2D cloudsRefShadowTex;
 
 #include Shade.glsl
@@ -36,11 +36,18 @@ bool shouldBreak(){
 vec3 getViewDir(){
     //return normalize(reconstructCameraSpaceDistance(UV, 1.0));
     vec2 fdir = UV * 2.0 - 1.0;
-    if(length(fdir)<= 1.0){	
-		float mixer = sqrt(1.0 - fdir.x*fdir.x - fdir.y * fdir.y);
-		return vec3(fdir.x, mixer, fdir.y);
-	}
-    return vec3(0, -1, 0);
+    //if(length(fdir)> 0.99) fdir = normalize(fdir) * 0.99;
+    float mixer = sqrt(1.0 - fdir.x*fdir.x - fdir.y * fdir.y);
+    return vec3(fdir.x, mixer, fdir.y);
+	
+}
+vec3 getViewDir2(){
+    //return normalize(reconstructCameraSpaceDistance(UV, 1.0));
+    vec2 fdir = UV * 2.0 - 1.0;
+   // if(length(fdir)> 0.99) {fdir = normalize(fdir) * 0.99;}
+    float mixer = sqrt(max(0.001, 1.0 - fdir.x*fdir.x - fdir.y * fdir.y));
+    return vec3(fdir.x, mixer, fdir.y);
+	
 }
 vec2 reverseViewDir(){
  //   return UV;
@@ -135,6 +142,10 @@ vec3 sun(vec3 camdir, vec3 sundir){
 }
 
 vec3 getAtmosphereForDirection(vec3 origin, vec3 dir, vec3 sunpos){
+    return texture(atmScattTex, reverseDir(dir)).rgb;
+}
+
+vec3 getAtmosphereForDirectionReal(vec3 origin, vec3 dir, vec3 sunpos){
     return atmosphere(
         dir,           // normalized ray direction
         vec3(0,planetradius  ,0)+ origin,               // ray origin
@@ -149,8 +160,6 @@ vec3 getAtmosphereForDirection(vec3 origin, vec3 dir, vec3 sunpos){
         0.758                           // Mie preferred scattering direction
     );
 }
-
-
 vec3 atmcolor = vec3(0);
 vec3 atm(vec3 sunpos){
     float mult = 1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r);
@@ -238,7 +247,7 @@ vec3 wtim =vec3(0);
 float edgeclose = 0.0;
 float cloudsDensity3D(vec3 pos){
     vec3 ps = pos +CloudsOffset;// + wtim;
-    float density = 1.0 - fbm(ps * 0.05 + fbm(ps * 1.5 + Time * 0.01));
+    float density = 1.0 - fbm(ps * 0.05 + fbm(ps * 1.5 + Time * 0.01) + Time * 0.02);
    // density *= smoothstep(CloudsDensityThresholdLow, CloudsDensityThresholdHigh, 1.0 - fbm(ps * 0.005 * CloudsDensityScale));
     
     float init = smoothstep(CloudsThresholdLow, CloudsThresholdHigh,  density);
@@ -379,18 +388,18 @@ vec4 internalmarchconservative(float scale, vec3 p1, vec3 p2){
     iter = 0.0;
     weightshadow = 1.0;
    // for(int i=0;i<stepcount;i++){
-    pos = mix(vec3(0,1,0), p2, rdx);
-    float cloudsx = cloudsDensity3D(pos * 0.01 * scale);
-    if(cloudsx == 0.0){
-        godr += godray(scale, pos) ;
-        iter += stepsize;
-    }
+   // pos = mix(vec3(0,1,0), p2, rdx);
+   // float cloudsx = cloudsDensity3D(pos * 0.01 * scale);
+   // if(cloudsx == 0.0){
+  //      godr += godray(scale, pos) ;
+   //     iter += stepsize;
+   // }
    // }
     //godr += dst * dst * 0.000001;
     //godr = min(2.0, godr);
     // time for godrays
     
-    return vec4(1.0 - pow(clamp(coverageinv, 0.0, 1.0), 4.0), c, dst, pow(godr, 4.0));
+    return vec4(1.0 - pow(clamp(coverageinv, 0.0, 1.0), 4.0), c, dst, 0.0);
 }
 #define intersects(a) (a >= 0.0)
 vec4 raymarchCloudsRay(vec3 campos, vec3 viewdir, float scale, float floord, float ceiling){
@@ -564,7 +573,7 @@ vec3 AtmScatt(vec3 origin, vec3 viewdir){
     vec3 hitnorm = normalize(hitpos);
     vec3 color = vec3(0);
     
-        color += getAtmosphereForDirection(origin * AtmosphereScale, viewdir, normalize(SunDirection));
+        color += getAtmosphereForDirectionReal(origin * AtmosphereScale, viewdir, normalize(SunDirection));
     
     return color;
 }
