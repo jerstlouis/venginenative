@@ -9,7 +9,7 @@
 vec4 shade(){    
     if(shouldBreak()) return vec4(0);
     vec4 lastData = texture(cloudsCloudsTex, UV).rgba;
-   vec4 val = CloudsGetCloudsCoverageShadow();
+   vec4 val = raymarchCloudsRay();
    /*
    //val.g = min(val.g, lastData.a);
     //return mix(lastData, vec4(mix(vec3(val.g), scatt, val.r), 1.0), 0.3);
@@ -24,8 +24,8 @@ vec4 shade(){
   //  vec3 pos = startpos + ssdir * data.b;
    // data.g = getAOPos(1.0, pos);
    val.g = mix(min(val.g, lastData.g), val.g, 0.1);
-   val.a = mix(min(val.a, lastData.a), val.a, 0.4);
-    val = mix(val, lastData, 0.98);
+   val.a = mix(min(val.a, lastData.a), val.a, 0.1);
+    val = mix(val, lastData, 0.99);
    // data = mix(val, data, 0.95);
    
     return val;

@@ -104,7 +104,7 @@ void Renderer::initializeFbos()
     cloudsFboOdd = new Framebuffer();
     cloudsFboOdd->attachTexture(cloudsTextureOdd, GL_COLOR_ATTACHMENT0);
 
-    atmScattTexture = new Texture(1024, 1024, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
+    atmScattTexture = new Texture(768, 768, GL_RGBA16F, GL_RGBA, GL_HALF_FLOAT);
     atmScattFbo = new Framebuffer();
     atmScattFbo->attachTexture(atmScattTexture, GL_COLOR_ATTACHMENT0);
 
@@ -463,6 +463,10 @@ void Renderer::clouds()
     else
         cloudsFboEven->use(true);
     quad3dInfo->draw();
+    if (cloudCycleUseOdd)
+        cloudsTextureOdd->generateMipMaps();
+    else
+        cloudsTextureEven->generateMipMaps();
 }
 
 void Renderer::motionBlur()
