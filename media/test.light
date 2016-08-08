@@ -1,6 +1,6 @@
 # generic cone light
 type cone
-color 2.0
+color 22.0
 shadowmap TRUE
 resolution 4096 4096
 angle 90

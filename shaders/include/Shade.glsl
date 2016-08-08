@@ -2,7 +2,7 @@
 #define PI 3.14159265
 bool ignoreFalloff = false;
 float CalculateFallof( float dist){
-    return 1.0 / (dist * dist * 0.01 + 1.0);
+    return 1.0 / (dist * dist * 0.001 + 1.0);
 }
 
 float EnvDFGPolynomial(float green, float roughness, float ndotv )
@@ -135,7 +135,7 @@ bool ignoreAtt
     
     
     
-    return  specularComponent * albedo;// * CalculateFallof(distance(lightPosition, fragmentPosition));
+    return  specularComponent * albedo * att;// * CalculateFallof(distance(lightPosition, fragmentPosition));
 }
 
 vec3 shadeDiffuse(
@@ -156,5 +156,5 @@ bool ignoreAtt
     cameraRelativeToVPos,
     normal,
     roughness,
-    albedo);
+    albedo) * att;
 }

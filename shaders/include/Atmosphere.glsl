@@ -239,7 +239,7 @@ float rand2s(vec2 co){
 Sphere sphere1;
 Sphere sphere2;
 
-float weightshadow = 0.4;
+float weightshadow = 0.7;
 float internalmarchconservativeCoverageOnly(float scale, vec3 p1, vec3 p2){
     float iter = 0.0;
     float span = CloudsCeil - CloudsFloor;
@@ -278,7 +278,7 @@ float intersectplanet(vec3 pos){
 }
 float getAOPos(float scale, vec3 pos){
     float a = 0;
-        vec3 dir = normalize(SunDirection + randdir() * 0.01);
+        vec3 dir = normalize(SunDirection + randdir() * 0.1);
         Ray r = Ray(vec3(0,planetradius ,0) +pos, dir);
         float hitceil = rsi2(r, sphere1);
         vec3 posceil = pos + dir * hitceil;

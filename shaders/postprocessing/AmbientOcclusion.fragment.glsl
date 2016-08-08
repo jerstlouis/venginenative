@@ -294,10 +294,48 @@ float fastAO(float hemisphereSize, int quality){
     }
     return outc / (float(xsamples.length()) / (float(quality)));
 }
+uniform float Time;
+uniform vec3 SunDirection;
+float rdhash = 0.453451 + Time;
+vec2 randpoint2(){
+    float x = rand2s(UV * rdhash);
+    rdhash += 2.1231255;
+    float y = rand2s(UV * rdhash);
+    rdhash += 1.6271255;
+    return vec2(x, y) * 2.0 - 1.0;
+}
+vec3 randpoint3(){
+    float x = rand2s(UV * rdhash);
+    rdhash += 2.1231255;
+    float y = rand2s(UV * rdhash);
+    rdhash += 1.6271255;
+    float z = rand2s(UV * rdhash);
+    rdhash += 1.6271255;
+    return (vec3(x, y, z) * 2.0 - 1.0);
+}
+float slowao(float mult){
+    float ao = 0.0;
+    float w = 0.001;
+    for(int i=0;i<64;i++){
+        vec3 p = randpoint3();
+        p *= sign(dot(currentData.normal, p));
+       // p = normalize(mix(normalize(SunDirection), p, 0.7));
+        p *= mult;
+        float nw = max(0, dot(p, normalize(SunDirection)));
+        vec2 nuv = projectvdao(currentData.worldPos + p );
+        float d = textureLod(mrt_Distance_Bump_Tex, nuv, 0).r;
+        d = max(0, distance(currentData.worldPos + p, CameraPosition) - d);
+        nw *= 1.0 - smoothstep(mult*0.5, mult, d);
+        w += nw;
+        ao += nw * smoothstep(0.0, 1.0, d);
+    }
+    return 1.0 - ao / w;
+}
 
 float AmbientOcclusion(){
     //float ao = AO(currentData.worldPos, currentData.cameraPos, currentData.normal, currentData.roughness, 8.4,3));
-    float ao = fastAO(18.0, 3);
+    float ao = slowao(18.0);
+    return ao;
     ao = 1.0 - pow(1.0 - ao, 2.0);
    // ao += AO(currentData.worldPos, currentData.cameraPos, currentData.normal, currentData.roughness, 2.4,4);
     //ao *= 0.5;

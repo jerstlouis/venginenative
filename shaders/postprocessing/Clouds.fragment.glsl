@@ -25,7 +25,7 @@ vec4 shade(){
    // data.g = getAOPos(1.0, pos);
    val.g = mix(min(val.g, lastData.g), val.g, 0.3);
   // val.a = mix(min(val.a, lastData.a), val.a, 0.1);
-   val.r = mix(max(val.r, lastData.r), val.r, 0.5);
+   val.r = mix(max(val.r, lastData.r), val.r, 0.4);
     val = mix(val, lastData, 0.98);
    // data = mix(val, data, 0.95);
    

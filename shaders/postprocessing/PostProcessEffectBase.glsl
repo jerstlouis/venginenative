@@ -21,6 +21,7 @@ struct PostProceessingData
 {
     vec3 diffuseColor;
     vec3 normal;
+    vec3 originalNormal;
     vec3 worldPos;
     vec3 cameraPos;
     float cameraDistance;
@@ -33,6 +34,11 @@ PostProceessingData currentData;
 vec3 reconstructCameraSpaceDistance(vec2 uv, float dist){
     vec3 dir = normalize((FrustumConeLeftBottom + FrustumConeBottomLeftToBottomRight * uv.x + FrustumConeBottomLeftToTopLeft * uv.y));
     return dir * dist;
+}
+
+vec3 reconstructCameraSpaceAuto(vec2 uv){
+    vec3 dir = normalize((FrustumConeLeftBottom + FrustumConeBottomLeftToBottomRight * uv.x + FrustumConeBottomLeftToTopLeft * uv.y));
+    return dir * textureLod(mrt_Distance_Bump_Tex, uv, 0).r;
 }
 
 vec3 ToCameraSpace(vec3 position){
@@ -57,6 +63,10 @@ void createData(){
     currentData = PostProceessingData(
     albedo_roughness.rgb,
     normal_metalness.rgb,
+    normalize(cross(
+        dFdx(worldSpace), 
+        dFdy(worldSpace)
+    )).xyz,
     worldSpace,
     cameraSpace,
     dist,

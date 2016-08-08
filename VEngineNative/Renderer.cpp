@@ -206,7 +206,7 @@ void Renderer::draw(Camera *camera)
     Game::instance->world->setSceneUniforms();
     Game::instance->world->draw(Game::instance->shaders->materialShader, camera);
     if (useAmbientOcclusion) {
-    //    ambientOcclusion();
+        ambientOcclusion();
     }
     deferred();
     ambientLight();
@@ -235,6 +235,8 @@ void Renderer::combine()
     atmScattTexture->use(22);
     FrustumCone *cone = currentCamera->cone;
     //   outputShader->setUniform("VPMatrix", vpmatrix);
+    glm::mat4 vpmatrix = currentCamera->projectionMatrix * currentCamera->transformation->getInverseWorldTransform();
+    combineShader->setUniform("VPMatrix", vpmatrix);
     combineShader->setUniform("UseAO", useAmbientOcclusion);
     combineShader->setUniform("UseGamma", useGammaCorrection);
     combineShader->setUniform("Resolution", glm::vec2(width, height));
@@ -376,6 +378,7 @@ void Renderer::ambientLight()
     ambientLightShader->setUniform("FrustumConeBottomLeftToBottomRight", cone->rightBottom - cone->leftBottom);
     ambientLightShader->setUniform("FrustumConeBottomLeftToTopLeft", cone->leftTop - cone->leftBottom);
     ambientLightShader->setUniform("Time", Game::instance->time);
+    ambientLightShader->setUniform("SunDirection", sunDirection);
     quad3dInfo->draw();
 }
 
@@ -390,10 +393,12 @@ void Renderer::ambientOcclusion()
     glm::mat4 vpmatrix = currentCamera->projectionMatrix * currentCamera->transformation->getInverseWorldTransform();
     ambientOcclusionShader->setUniform("VPMatrix", vpmatrix);
     ambientOcclusionShader->setUniform("Resolution", glm::vec2(width, height));
+    ambientOcclusionShader->setUniform("SunDirection", sunDirection);
     ambientOcclusionShader->setUniform("CameraPosition", currentCamera->transformation->position);
     ambientOcclusionShader->setUniform("FrustumConeLeftBottom", cone->leftBottom);
     ambientOcclusionShader->setUniform("FrustumConeBottomLeftToBottomRight", cone->rightBottom - cone->leftBottom);
     ambientOcclusionShader->setUniform("FrustumConeBottomLeftToTopLeft", cone->leftTop - cone->leftBottom);
+    ambientOcclusionShader->setUniform("Time", Game::instance->time);
     quad3dInfo->draw();
 }
 

@@ -1,11 +1,11 @@
 #version 430 core
 
 #include PostProcessEffectBase.glsl
-#include Shade.glsl
 
 layout(binding = 3) uniform samplerCube skyboxTex;
+#include Atmosphere.glsl
 
-float rand2s(vec2 co){
+float rand2sx(vec2 co){
         return fract(sin(dot(co.xy,vec2(12.9898,78.233))) * 43758.5453);
 }
 
@@ -39,7 +39,33 @@ vec3 MMALSkybox(vec3 dir, float roughness){
     return result;
 }
 
+vec3 atmc = getAtmosphereForDirection(currentData.worldPos, currentData.normal, normalize(SunDirection), currentData.roughness);
 
+vec3 shadingMetalic(PostProceessingData data){
+    float fresnelR = fresnel_again(vec3(data.diffuseColor.r), data.normal, data.cameraPos, data.roughness);
+    float fresnelG = fresnel_again(vec3(data.diffuseColor.g), data.normal, data.cameraPos, data.roughness);
+    float fresnelB = fresnel_again(vec3(data.diffuseColor.b), data.normal, data.cameraPos, data.roughness);
+    float fresnel = fresnel_again(vec3(0.04), data.normal, normalize(data.cameraPos), data.roughness);
+    vec3 newBase = vec3(fresnelR, fresnelG, fresnelB);
+ //   return vec3(fresnel);
+    float x = 1.0 - max(0, -dot(normalize(SunDirection), currentData.originalNormal));
+    return shade(CameraPosition, newBase, data.normal, data.worldPos, data.worldPos + normalize(SunDirection) * 40.0, vec3(atmc),  max(0.004, data.roughness), false) * mix(x, pow(x, 8.0), 1.0 - currentData.roughness);
+}
+
+vec3 shadingNonMetalic(PostProceessingData data){
+    float fresnel = fresnel_again(vec3(data.diffuseColor.g), data.normal, normalize(data.cameraPos), data.roughness);
+    float x = 1.0 - max(0, -dot(normalize(SunDirection), currentData.originalNormal));
+    
+    vec3 radiance = shade(CameraPosition, vec3(fresnel), data.normal, data.worldPos, data.worldPos + normalize(SunDirection) * 40.0, vec3(atmc), max(0.004, data.roughness), false) * mix(x, pow(x, 8.0), 1.0 - currentData.roughness);    
+    
+    vec3 difradiance = shadeDiffuse(CameraPosition, data.diffuseColor * (1.0 - fresnel), data.normal, data.worldPos, data.worldPos + normalize(SunDirection) * 40.0, vec3(atmc), 0.0, false) * x;
+ //   return vec3(0);
+    return radiance + difradiance ;
+}
+
+vec3 MakeShading(PostProceessingData data){
+    return mix(shadingNonMetalic(data), shadingMetalic(data), data.metalness);
+}
 vec3 MMAL(PostProceessingData data){
     vec3 reflected = normalize(reflect(data.cameraPos, data.normal));
     vec3 dir = normalize(mix(reflected, data.normal, data.roughness));
@@ -58,16 +84,17 @@ vec3 MMAL(PostProceessingData data){
     nonmetallic += MMALSkybox(dir, data.roughness) * fresnel;
     nonmetallic += MMALSkybox(dir, 1.0) *  data.diffuseColor * (1.0 - fresnel);
     
-    return mix(nonmetallic, metallic, data.metalness);
+    return  MakeShading(currentData);
     
 }
 
-uniform float Time;
 
 vec4 shade(){
     vec4 color = vec4(0);
     if(currentData.cameraDistance > 0){
-      //  color.rgb += MMAL(currentData) *0.03;
+        //color.rgb += MMAL(currentData) *0.63;
+        atmc = mix(vec3(1.0), getAtmosphereForDirection(currentData.worldPos, normalize(SunDirection), normalize(SunDirection), 0.0), 1.0 - normalize(SunDirection).y);
+        color.rgb += getAtmosphereForDirection(currentData.worldPos, currentData.normal, normalize(SunDirection), currentData.roughness) * 0.0 * currentData.diffuseColor + MakeShading(currentData);
     }
     //color.rgb += (1.0 - smoothstep(0.0, 0.001, textureLod(mrt_Distance_Bump_Tex, UV, 0).r)) * pow(textureLod(skyboxTex, reconstructCameraSpaceDistance(UV, 1.0), 0.0).rgb, vec3(2.4)) * 5.0;
     return clamp(color, 0.0, 1.0);

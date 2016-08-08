@@ -84,15 +84,17 @@ vec3 shadingMetalic(PostProceessingData data){
     float fresnel = fresnel_again(vec3(0.04), data.normal, normalize(data.cameraPos), data.roughness);
     vec3 newBase = vec3(fresnelR, fresnelG, fresnelB);
  //   return vec3(fresnel);
-    return shade(CameraPosition, newBase, data.normal, data.worldPos, LightPosition, abs(LightColor),  max(MIN_ROUGHNESS_DIRECT, data.roughness), false);
+    float x = 1.0 - max(0, -dot(normalize(LightPosition), currentData.originalNormal));
+    return shade(CameraPosition, newBase, data.normal, data.worldPos, LightPosition, abs(LightColor),  max(MIN_ROUGHNESS_DIRECT, data.roughness), false) * mix(x, pow(x, 8.0), 1.0 - currentData.roughness);
 }
 
 vec3 shadingNonMetalic(PostProceessingData data){
     float fresnel = fresnel_again(vec3(0.04), data.normal, normalize(data.cameraPos), data.roughness);
     
-    vec3 radiance = shade(CameraPosition, vec3(fresnel), data.normal, data.worldPos, LightPosition, abs(LightColor), max(MIN_ROUGHNESS_DIRECT, data.roughness), false);    
+    float x = 1.0 - max(0, -dot(normalize(LightPosition), currentData.originalNormal));
+    vec3 radiance = shade(CameraPosition, vec3(fresnel), data.normal, data.worldPos, LightPosition, abs(LightColor), max(MIN_ROUGHNESS_DIRECT, data.roughness), false) * mix(x, pow(x, 8.0), 1.0 - currentData.roughness);    
     
-    vec3 difradiance = shadeDiffuse(CameraPosition, data.diffuseColor * (1.0 - fresnel), data.normal, data.worldPos, LightPosition, abs(LightColor), data.roughness, false);
+    vec3 difradiance = shadeDiffuse(CameraPosition, data.diffuseColor * (1.0 - fresnel), data.normal, data.worldPos, LightPosition, abs(LightColor), data.roughness, false) * x;
  //   return vec3(0);
     return radiance + difradiance ;
 }
