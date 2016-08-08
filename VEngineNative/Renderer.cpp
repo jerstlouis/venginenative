@@ -21,6 +21,14 @@ Renderer::Renderer(int iwidth, int iheight)
     cloudsDensityThresholdHigh = 1.0;
     cloudsDensityScale = 1.0;
     cloudsWindSpeed = 0.4;
+
+    noiseOctave1 = 0.5;
+    noiseOctave2 = 2.02;
+    noiseOctave3 = 3.03;
+    noiseOctave4 = 4.01;
+    noiseOctave5 = 4.04;
+    noiseOctave6 = 5.01;
+
     cloudsOffset = glm::vec3(1);
     sunDirection = glm::vec3(0, 1, 0);
     atmosphereScale = 1.0;
@@ -192,16 +200,16 @@ void Renderer::renderToFramebuffer(Camera *camera, Framebuffer * fboout)
 
 void Renderer::draw(Camera *camera)
 {
-   // mrtFbo->use(true);
+    mrtFbo->use(true);
     Game::instance->world->setUniforms(Game::instance->shaders->materialGeometryShader, camera);
     Game::instance->world->setUniforms(Game::instance->shaders->materialShader, camera);
     Game::instance->world->setSceneUniforms();
- //   Game::instance->world->draw(Game::instance->shaders->materialShader, camera);
+    Game::instance->world->draw(Game::instance->shaders->materialShader, camera);
     if (useAmbientOcclusion) {
     //    ambientOcclusion();
     }
-  //  deferred();
-  //  ambientLight();
+    deferred();
+    ambientLight();
     atmScatt();
     clouds();
     combine();
@@ -234,7 +242,13 @@ void Renderer::combine()
     combineShader->setUniform("FrustumConeLeftBottom", cone->leftBottom);
     combineShader->setUniform("FrustumConeBottomLeftToBottomRight", cone->rightBottom - cone->leftBottom);
     combineShader->setUniform("FrustumConeBottomLeftToTopLeft", cone->leftTop - cone->leftBottom);
-    combineShader->setUniform("Time", Game::instance->time);
+    double t = glfwGetTime();
+    double t100 = t * 100.0;
+    double t001 = t * 0.001;
+    combineShader->setUniform("Time", (float)t);
+    combineShader->setUniform("T100", (float)t100);
+    combineShader->setUniform("T001", (float)t001);
+
     combineShader->setUniform("CloudsFloor", cloudsFloor);
     combineShader->setUniform("CloudsCeil", cloudsCeil);
     combineShader->setUniform("CloudsThresholdLow", cloudsThresholdLow);
@@ -418,6 +432,8 @@ void Renderer::atmScatt()
     atmScattFbo->use(true);
 
     quad3dInfo->draw();
+
+    atmScattTexture->generateMipMaps();
 }
 
 void Renderer::clouds()
@@ -457,6 +473,12 @@ void Renderer::clouds()
     cloudsShader->setUniform("CloudsDensityThresholdLow", cloudsDensityThresholdLow);
     cloudsShader->setUniform("CloudsDensityThresholdHigh", cloudsDensityThresholdHigh);
     cloudsShader->setUniform("WaterWavesScale", waterWavesScale);
+    cloudsShader->setUniform("NoiseOctave1", noiseOctave1);
+    cloudsShader->setUniform("NoiseOctave2", noiseOctave2);
+    cloudsShader->setUniform("NoiseOctave3", noiseOctave3);
+    cloudsShader->setUniform("NoiseOctave4", noiseOctave4);
+    cloudsShader->setUniform("NoiseOctave5", noiseOctave5);
+    cloudsShader->setUniform("NoiseOctave6", noiseOctave6);
 
     if (cloudCycleUseOdd)
         cloudsFboOdd->use(true);

@@ -28,6 +28,12 @@ public:
     float cloudsWindSpeed;
     float atmosphereScale;
     float waterWavesScale;
+    float noiseOctave1;
+    float noiseOctave2;
+    float noiseOctave3;
+    float noiseOctave4;
+    float noiseOctave5;
+    float noiseOctave6;
     glm::vec3 cloudsOffset;
     glm::vec3 sunDirection;
     int width;

@@ -129,4 +129,6 @@ void main(){
     outNormalsMetalness = vec4(normal, metalness);
 
     outDistance = max(0.01, distance(CameraPosition, Input.WorldPos));
+    
+    gl_FragDepth = toLogDepth(outDistance, 20000.0);
 }

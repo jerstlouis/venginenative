@@ -32,7 +32,7 @@ int main()
 {
     Media::loadFileMap("../../media");
     Media::loadFileMap("../../shaders");
-    Game *game = new Game(1920, 1030);
+    Game *game = new Game(1920, 1020);
     game->start();
     volatile bool ready = false;
     game->invoke([&ready]() {
@@ -49,7 +49,7 @@ int main()
 
     // mesh loading
 
-    //game->world->scene = game->asset->loadSceneFile("sponza.scene");  
+    game->world->scene = game->asset->loadSceneFile("terrain.scene");
     //game->world->scene->getMeshes()[0]->getInstance(0)->transformation->translate(glm::vec3(0, 2.5f, 0));
     //game->world->scene->getMeshes()[0]->getInstance(0)->transformation->rotate(glm::angleAxis(deg2rad(73.75f), glm::vec3(-0.006f, -0.005f, 1.0f)));
   //  game->world->scene->addMesh(game->asset->loadMeshFile("treeground.mesh3d"));
@@ -61,26 +61,33 @@ int main()
         if (Game::instance->renderer->cloudsThresholdLow > Game::instance->renderer->cloudsThresholdHigh) {
             Game::instance->renderer->cloudsThresholdHigh = Game::instance->renderer->cloudsThresholdLow;
             Game::instance->renderer->cloudsThresholdLow = Game::instance->renderer->cloudsThresholdHigh;
-        } else 
-        if (Game::instance->renderer->cloudsThresholdHigh < Game::instance->renderer->cloudsThresholdLow) {
-            Game::instance->renderer->cloudsThresholdLow = Game::instance->renderer->cloudsThresholdHigh;
         }
+        else
+            if (Game::instance->renderer->cloudsThresholdHigh < Game::instance->renderer->cloudsThresholdLow) {
+                Game::instance->renderer->cloudsThresholdLow = Game::instance->renderer->cloudsThresholdHigh;
+            }
         ImGui::Begin("Clouds", &isOpened, 0);
-    //    ImGui::Text("Terrain roughness:");
-   //     ImGui::SliderFloat("roughness", &t->getLodLevel(0)->material->roughness, 0.0f, 1.0f);
-   //     ImGui::Text("Terrain metalness:");
-   //     ImGui::SliderFloat("metalness", &t->getLodLevel(0)->material->metalness, 0.0f, 1.0f);
+        //    ImGui::Text("Terrain roughness:");
+       //     ImGui::SliderFloat("roughness", &t->getLodLevel(0)->material->roughness, 0.0f, 1.0f);
+       //     ImGui::Text("Terrain metalness:");
+       //     ImGui::SliderFloat("metalness", &t->getLodLevel(0)->material->metalness, 0.0f, 1.0f);
         ImGui::SliderFloat("CloudsFloor", &Game::instance->renderer->cloudsFloor, 100.0f, 30000.0f);
         ImGui::SliderFloat("CloudsCeil", &Game::instance->renderer->cloudsCeil, 100.0f, 30000.0f);
-        ImGui::SliderFloat("CloudsThresholdLow", &Game::instance->renderer->cloudsThresholdLow, 0.0f, 1.0f);
-        ImGui::SliderFloat("CloudsThresholdHigh", &Game::instance->renderer->cloudsThresholdHigh, 0.0f, 1.0f);
+        ImGui::SliderFloat("CloudsThresholdLow", &Game::instance->renderer->cloudsThresholdLow, -1.0f, 1.0f);
+        ImGui::SliderFloat("CloudsThresholdHigh", &Game::instance->renderer->cloudsThresholdHigh, -1.0f, 1.0f);
         //ImGui::SliderFloat("CloudsAtmosphereShaftsMultiplier", &Game::instance->renderer->cloudsAtmosphereShaftsMultiplier, 0.0f, 10.0f);
         //ImGui::SliderFloat("CloudsWindSpeed", &Game::instance->renderer->cloudsWindSpeed, 0.0f, 10.0f);
-        //ImGui::SliderFloat("CloudsDensityScale", &Game::instance->renderer->cloudsDensityScale, 0.0f, 10.0f);
+        ImGui::SliderFloat("CloudsDensityScale", &Game::instance->renderer->cloudsDensityScale, 0.0f, 5.0f);
         //ImGui::SliderFloat("CloudsDensityThresholdLow", &Game::instance->renderer->cloudsDensityThresholdLow, 0.0f, 1.0f);
        // ImGui::SliderFloat("CloudsDensityThresholdHigh", &Game::instance->renderer->cloudsDensityThresholdHigh, 0.0f, 1.0f);
         //ImGui::SliderFloat("AtmosphereScale", &Game::instance->renderer->atmosphereScale, 0.0f, 1000.0f);
-        //ImGui::SliderFloat("WaterWavesScale", &Game::instance->renderer->waterWavesScale, 0.0f, 10.0f);
+        ImGui::SliderFloat("WaterWavesScale", &Game::instance->renderer->waterWavesScale, 0.0f, 10.0f);
+        ImGui::SliderFloat("Noise1", &Game::instance->renderer->noiseOctave1, 0.01f, 10.0f);
+        ImGui::SliderFloat("Noise2", &Game::instance->renderer->noiseOctave2, 0.01f, 10.0f);
+        ImGui::SliderFloat("Noise3", &Game::instance->renderer->noiseOctave3, 0.01f, 10.0f);
+        ImGui::SliderFloat("Noise4", &Game::instance->renderer->noiseOctave4, 0.01f, 10.0f);
+        ImGui::SliderFloat("Noise5", &Game::instance->renderer->noiseOctave5, 0.01f, 10.0f);
+        ImGui::SliderFloat("Noise6", &Game::instance->renderer->noiseOctave6, 0.01f, 10.0f);
         ImGui::SliderFloat3("CloudsOffset", (float*)&Game::instance->renderer->cloudsOffset, -1000.0f, 1000.0f);
         ImGui::SliderFloat3("SunDirection", (float*)&Game::instance->renderer->sunDirection, -1.0f, 1.0f);
         ImGui::Text("%.3f ms/frame %.1f FPS", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
@@ -116,11 +123,11 @@ int main()
     planes.push_back(new EnvPlane(glm::vec3(0, 0, 6), glm::vec3(0, 0, -1)));
     planes.push_back(new EnvPlane(glm::vec3(-39, 0, 0), glm::vec3(1, 0, 0)));
     planes.push_back(new EnvPlane(glm::vec3(40, 0, 0), glm::vec3(-1, 0, 0)));*/
-    
+
     EnvProbe* probe1 = new EnvProbe(envRenderer, planes);
     probe1->transformation->translate(glm::vec3(15, 6, 15));
     game->world->scene->addEnvProbe(probe1);
-    
+
     EnvProbe* probe2 = new EnvProbe(envRenderer, planes);
     probe2->transformation->translate(glm::vec3(15, 6, -15));
     game->world->scene->addEnvProbe(probe2);
@@ -128,11 +135,11 @@ int main()
     EnvProbe* probe3 = new EnvProbe(envRenderer, planes);
     probe3->transformation->translate(glm::vec3(-15, 6, 15));
     game->world->scene->addEnvProbe(probe3);
-    
+
     EnvProbe* probe4 = new EnvProbe(envRenderer, planes);
     probe4->transformation->translate(glm::vec3(-15, 6, -15));
     game->world->scene->addEnvProbe(probe4);
-    
+
     bool cursorFree = false;
     bool envRefresh = true;
     game->onKeyPress->add([&game, &cursorFree, &cam, &envRefresh](int key) {
