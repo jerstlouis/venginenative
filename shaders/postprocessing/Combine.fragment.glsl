@@ -40,7 +40,7 @@ float aaoo(){
     for(int i=0;i<32;i++){
         vec2 rdp = randpoint2() * 0.01;
         float there = texture(cloudsCloudsTex, uv + rdp).b;
-        float w = 1.0 - smoothstep(1000.0, 10000, center - there);
+        float w = 1.0 - smoothstep(1000.0, 10000.0, center - there);
         aoc += w * clamp(center - there, 0.0, 1000.0) * 0.001;
     }
     return pow(1.0 - aoc / 32.0, 16.0);
@@ -123,7 +123,7 @@ float noise2X( in vec2 x ){
         );
     return res;
 }
-#define ssin(a) (smoothstep(0,3.1415,a*3.1415) * 2.0 - 1.0) 
+#define ssin(a) (smoothstep(0.0,3.1415,a*3.1415) * 2.0 - 1.0) 
 #define snoisesin(a) pow(1.0 - (abs(noise2X(a) - 0.5) * 2.0), 6.0)
 #define snoisesinpow(a,b) pow(1.0 - (abs(noise2X(a) - 0.5) * 2.0), b)
 #define snoisesinpowXF(a,b) (1.0 - pow((abs(snoise(a))), b))
@@ -237,7 +237,7 @@ vec3 cloudsbydir(vec3 dir){
         roughness = 1.0 - pow(roughness, 164.0);
         roughness = mix(roughness, 1.0, 1.0 - pow(abs(dir.y), 1.0));
         dst = planethit;
-        float lodz = pow(1.0 - smoothstep(0, LOD3, planethit), 4.0);
+        float lodz = pow(1.0 - smoothstep(0.0, LOD3, planethit), 4.0);
         vec3 n = vec3(0,1,0);
         float waveheight = 0.0;
         if(WaterWavesScale > 0.0){
@@ -245,7 +245,7 @@ vec3 cloudsbydir(vec3 dir){
                 n = raymarchwaterLOW3(newpos, newpos2);
             }
             else {
-                n = mix(raymarchwaterLOW3(newpos, newpos2), raymarchwater(newpos, newpos2, int(2.0 + 6.0 * lodz * WaterWavesScale), int(2.0 + 8.0 * lodz * WaterWavesScale)), 1.0 - smoothstep(0, LOD3, planethit));
+                n = mix(raymarchwaterLOW3(newpos, newpos2), raymarchwater(newpos, newpos2, int(2.0 + 6.0 * lodz * WaterWavesScale), int(2.0 + 8.0 * lodz * WaterWavesScale)), 1.0 - smoothstep(0.0, LOD3, planethit));
             }
             float freq = 1.0;
             float h0 = heightwater(hitpos.xz, WATER_SAMPLES_HIGH-3);
@@ -256,7 +256,7 @@ vec3 cloudsbydir(vec3 dir){
             float h4 = heightwater(hitpos.xz - vec2(0.0, freq), WATER_SAMPLES_HIGH-3);
             whites = max(0, h0 - (h1 + h2 + h3 + h4)*0.25) * 122.0 * pow(h0, 3.0);
             whites = min(1.0, pow(whites, 3.0));
-            whites *= (1.0 - smoothstep(0, LOD3, planethit)) * WaterWavesScale;
+            whites *= (1.0 - smoothstep(0.0, LOD3, planethit)) * WaterWavesScale;
             //return vec3(whites);
             float lodzx =  1.0 - clamp(hitdistx / LOD3, 0.0, 1.0);
             //roughness = roughness * 0.8 + 0.2;

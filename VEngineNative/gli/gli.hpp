@@ -30,6 +30,10 @@
 #define GLI_VERSION_PATCH			1
 #define GLI_VERSION_REVISION		0
 
+#if !defined(_MSC_VER)
+#define fopen_s(a, b, c) (*(a) = fopen(b, c), *(a) != 0)
+#endif
+
 /// Namespace where all the classes and functions provided by GLI are exposed
 namespace gli
 {

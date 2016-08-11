@@ -1,0 +1,61 @@
+{
+   "Version" : 0.2,
+   "ModuleName" : "Tester",
+   "Options" : {
+      "Warnings" : "All",
+      "PreprocessorDefinitions" : [
+         "GLM_FORCE_PURE"
+      ],
+      "IncludeDirs" : [
+         "../VEngineNative"
+      ],
+      "TargetType" : "Executable",
+      "TargetFileName" : "Tester",
+      "Libraries" : [
+         "VEngineNative",
+         "glfw3"
+      ],
+      "LibraryDirs" : [
+         "../glfw-3.2/obj/release.$(PLATFORM)",
+         "../VEngineNative/obj/release.$(PLATFORM)"
+      ]
+   },
+   "Platforms" : [
+      {
+         "Name" : "win32",
+         "Options" : {
+            "Libraries" : [
+               "imm32"
+            ]
+         }
+      }
+   ],
+   "Configurations" : [
+      {
+         "Name" : "Debug",
+         "Options" : {
+            "Debug" : true,
+            "Optimization" : "None",
+            "PreprocessorDefinitions" : [
+               "_DEBUG"
+            ],
+            "FastMath" : false
+         }
+      },
+      {
+         "Name" : "Release",
+         "Options" : {
+            "Debug" : false,
+            "Optimization" : "Speed",
+            "FastMath" : true
+         }
+      }
+   ],
+   "Files" : [
+      "Tester.cpp"
+   ],
+   "ResourcesPath" : "",
+   "Resources" : [
+
+   ]
+}

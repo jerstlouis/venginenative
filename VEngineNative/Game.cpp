@@ -1,6 +1,21 @@
+#if !defined(_MSC_VER)
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#endif
+
 #include "stdafx.h"
+
+#if defined(_MSC_VER)
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#endif
+
 #include "Game.h"
 #include "imgui_impl_glfw_gl3.h"
+
+#if !defined(_MSC_VER)
+#define strcpy_s strcpy
+#endif
 
 Game * Game::instance = nullptr;
 
@@ -9,7 +24,7 @@ Game::Game(int windowwidth, int windowheight)
     instance = this;
     width = windowwidth;
     height = windowheight;
-    invokeQueue = {};
+    invokeQueue = std::queue<std::function<void()> > {};
     onRenderFrame = {};
     asset = new AssetLoader();
     world = new World();

@@ -1,0 +1,148 @@
+{
+   "Version" : 0.2,
+   "ModuleName" : "VEngineNative",
+   "Options" : {
+      "Warnings" : "All",
+      "PreprocessorDefinitions" : [
+         "GLM_FORCE_PURE"
+      ],
+      "IncludeDirs" : [
+         "."
+      ],
+      "TargetType" : "StaticLibrary",
+      "TargetFileName" : "VEngineNative"
+   },
+   "Platforms" : [
+      {
+         "Name" : "win32",
+         "Options" : {
+            "Libraries" : [
+               "imm32"
+            ]
+         }
+      }
+   ],
+   "Configurations" : [
+      {
+         "Name" : "Debug",
+         "Options" : {
+            "Debug" : true,
+            "Optimization" : "None",
+            "PreprocessorDefinitions" : [
+               "_DEBUG"
+            ],
+            "FastMath" : false
+         },
+         "Platforms" : [
+            {
+               "Name" : "win32",
+               "Options" : {
+                  "Libraries" : [
+                     "imm32",
+                     "gdi32"
+                  ]
+               }
+            }
+         ]
+      },
+      {
+         "Name" : "Release",
+         "Options" : {
+            "Debug" : false,
+            "Optimization" : "Speed",
+            "FastMath" : true
+         }
+      }
+   ],
+   "Files" : [
+      {
+         "Folder" : "src",
+         "Files" : [
+            "./AbsTransformable.cpp",
+            "./AbsTransformable.h",
+            "./AssetLoader.cpp",
+            "./AssetLoader.h",
+            "./Camera.cpp",
+            "./Camera.h",
+            "./CubeMapFramebuffer.cpp",
+            "./CubeMapFramebuffer.h",
+            "./CubeMapTexture.cpp",
+            "./CubeMapTexture.h",
+            "./EnvProbe.cpp",
+            "./EnvProbe.h",
+            "./EventHandler.h",
+            "./Framebuffer.cpp",
+            "./Framebuffer.h",
+            "./FrustumCone.cpp",
+            "./FrustumCone.h",
+            "./Game.cpp",
+            "./Game.h",
+            "./GenericShaders.cpp",
+            "./GenericShaders.h",
+            "./glad.cpp",
+            "./glad.h",
+            "./glfw.h",
+            "./imgui_impl_glfw_gl3.cpp",
+            "./imgui_impl_glfw_gl3.h",
+            "./khrplatform.h",
+            "./Light.cpp",
+            "./Light.h",
+            "./Material.cpp",
+            "./Material.h",
+            "./MaterialNode.cpp",
+            "./MaterialNode.h",
+            "./Media.cpp",
+            "./Media.h",
+            "./Mesh3d.cpp",
+            "./Mesh3d.h",
+            "./Mesh3dInstance.cpp",
+            "./Mesh3dInstance.h",
+            "./Mesh3dLodLevel.cpp",
+            "./Mesh3dLodLevel.h",
+            "./Object3dInfo.cpp",
+            "./Object3dInfo.h",
+            "./Object3dManager.cpp",
+            "./Object3dManager.h",
+            "./Renderer.cpp",
+            "./Renderer.h",
+            "./Scene.cpp",
+            "./Scene.h",
+            "./ShaderProgram.cpp",
+            "./ShaderProgram.h",
+            "./ShaderStorageBuffer.cpp",
+            "./ShaderStorageBuffer.h",
+            "./stb_image.h",
+            "./stdafx.cpp",
+            "./stdafx.h",
+            "./targetver.h",
+            "./Texture.cpp",
+            "./Texture.h",
+            "./Texture3d.cpp",
+            "./Texture3d.h",
+            "./tinydir.h",
+            "./TransformationManager.cpp",
+            "./TransformationManager.h",
+            "./World.cpp",
+            "./World.h"
+         ]
+      },
+      {
+         "Folder" : "imgui",
+         "Files" : [
+            "imconfig.h",
+            "imgui.cpp",
+            "imgui.h",
+            "imgui_demo.cpp",
+            "imgui_draw.cpp",
+            "imgui_internal.h",
+            "stb_rect_pack.h",
+            "stb_textedit.h",
+            "stb_truetype.h"
+         ]
+      }
+   ],
+   "ResourcesPath" : "",
+   "Resources" : [
+
+   ]
+}
