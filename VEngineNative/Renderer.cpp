@@ -263,6 +263,12 @@ void Renderer::combine()
     combineShader->setUniform("CloudsDensityThresholdLow", cloudsDensityThresholdLow);
     combineShader->setUniform("CloudsDensityThresholdHigh", cloudsDensityThresholdHigh);
     combineShader->setUniform("WaterWavesScale", waterWavesScale);
+    combineShader->setUniform("NoiseOctave1", noiseOctave1);
+    combineShader->setUniform("NoiseOctave2", noiseOctave2);
+    combineShader->setUniform("NoiseOctave3", noiseOctave3);
+    combineShader->setUniform("NoiseOctave4", noiseOctave4);
+    combineShader->setUniform("NoiseOctave5", noiseOctave5);
+    combineShader->setUniform("NoiseOctave6", noiseOctave6);
     quad3dInfo->draw();
 }
 void Renderer::fxaaTonemap()
@@ -484,6 +490,9 @@ void Renderer::clouds()
     cloudsShader->setUniform("NoiseOctave4", noiseOctave4);
     cloudsShader->setUniform("NoiseOctave5", noiseOctave5);
     cloudsShader->setUniform("NoiseOctave6", noiseOctave6);
+    srand(static_cast <unsigned> (Game::instance->time * 1000.0));
+    cloudsShader->setUniform("Rand1", static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
+    cloudsShader->setUniform("Rand2", static_cast <float> (rand()) / static_cast <float> (RAND_MAX));
 
     if (cloudCycleUseOdd)
         cloudsFboOdd->use(true);
